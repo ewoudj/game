@@ -1,0 +1,72 @@
+<!doctype html> 
+<html>
+	<head>
+	    <link rel="stylesheet" href="chatclient/style.css" type="text/css"/>
+	    <script src="chatclient/jquery-1.2.6.min.js" type="text/javascript"></script>
+	    <script src="chatclient/client.js" type="text/javascript"></script>
+	   	<title>Laser War</title> 
+		<meta charset="utf-8" />
+		<style type="text/css">
+			@font-face {
+				font-family: 'CBM64';
+				src: url('laserwar/resources/fonts/cbm-64-webfont.eot');
+				src: local('☺'), url('laserwar/resources/fonts/cbm-64-webfont.woff') format('woff'), url('laserwar/resources/fonts/cbm-64-webfont.ttf') format('truetype'), url('laserwar/resources/fonts/cbm-64-webfont.svg#webfontf6naK8pD') format('svg');
+				font-weight: normal;
+				font-style: normal;
+			}
+			
+			#c {
+				position: absolute;
+				left: 200px;
+			}
+		</style>
+	</head>
+  	<body>
+  	  		<div id="connect">
+				  <form action="#">
+				    <fieldset> 
+				      <h1>
+				        Welcome. Please enter your name to start playing.
+				      </h1>
+				
+				      <label for="nick">Name:</label>
+				      <input id="nickInput" class="text"type="text" name="nick" value=""/>
+				      <input id="connectButton" class="button" type="submit" name="" value="Join"/>
+				
+				    </fieldset>
+				  </form>
+				</div>
+				<div id="loading"><h1>loading...</h1></div>
+  		<div class="chatcontainer">
+		    <div id="app" class="logcontainer">
+				<div id="log">
+				</div>
+		    </div>
+			<div id="toolbar">
+			  <ul id="status">
+			    <li><a id="usersLink" href="#">5 users</a></li>
+			    <li class="status">(<span id="uptime">?</span></li>
+			    <li class="status">/<span id="rss">?</span>MB)</li>
+			  </ul>
+			  <input type="text" id="entry"/>
+			</div>
+		</div>
+		<div>
+      	<canvas id="c" ></canvas>
+      	</div>
+      	<script type="text/javascript" src="soundmanager/script/soundmanager2.js"></script>
+		<script src="laserwar/audio.js" type="text/javascript"></script>
+		<script src="laserwar/helpers.js" type="text/javascript"></script>
+		<script src="laserwar/entity.js" type="text/javascript"></script>
+		<script src="laserwar/explosion.js" type="text/javascript"></script>
+		<script src="laserwar/ship.js" type="text/javascript"></script>
+		<script src="laserwar/crosshair.js" type="text/javascript"></script>
+		<script src="laserwar/ufo.js" type="text/javascript"></script>
+		<script src="laserwar/star.js" type="text/javascript"></script>
+		<script src="laserwar/laserbeam.js" type="text/javascript"></script>
+		<script src="laserwar/rules.js" type="text/javascript"></script>
+		<script src="laserwar/engine.js" type="text/javascript"></script>
+		<script src="laserwar/game.js" type="text/javascript"></script>
+		<script src="laserwar/menu.js" type="text/javascript"></script>
+  </body>
+</html>
