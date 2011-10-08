@@ -143,6 +143,8 @@ engine.prototype.onmouseup = function(){
 	this.buttonDown = false;
 };
 
+engine.ai = {};
+
 if(typeof(exports) !== 'undefined'){
 	exports.engine = engine;
 }

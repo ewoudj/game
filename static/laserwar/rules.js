@@ -65,7 +65,7 @@ rules.prototype.initialize = function(){
 	}
 	this.engine.add( this.engine.gameState.player1Ship = new ship({
 		name        : 'Player 1',
-		type		: this.engine.mode == 'standalone' ? 'player' : (this.engine.player1 ? 'player' : 'computer'),
+		type		: this.engine.mode == 'standalone' ? (this.engine.playerCount === 0 ? 'computer' : 'player') : (this.engine.player1 ? 'player' : 'computer'),
 		direction   : 1,
 		colorIndex  : 0,
 		position    : { x: 10, y : 10 }
@@ -73,7 +73,7 @@ rules.prototype.initialize = function(){
 	// Player 2
 	this.engine.add( this.engine.gameState.player2Ship = new ship({
 		name        : 'Player 2',
-		type        : this.engine.mode == 'standalone' ? 'computer' : (this.engine.player2 ? 'player' : 'computer'),
+		type        : this.engine.mode == 'standalone' ? (this.engine.playerCount !== 2 ? 'computer' : 'player') : (this.engine.player2 ? 'player' : 'computer'),
 		colorIndex  : 3,
 		direction   : -1,
 		position    : { x: this.engine.width - 40, y : (this.engine.height - 50 - this.barHeight) }
@@ -98,17 +98,18 @@ rules.prototype.initialize = function(){
 };
 
 rules.prototype.keyboardHandler = function(evt){
-	// F1: Restart game single player mode
+	// F1: Restart game single player mode, standalone (all runs on the client)
 	if(event.keyCode == 112){
 		this.engine.mode = 'standalone';
+		this.engine.playerCount = 1;
 		if(this.engine.entities.length == 0){
 			this.engine.add(this);
 		}
 		this.initialized = false;
 	}
-	// F2: restart game multi player mode
+	// F2: restart game multi player mode, 'client' only renders on the client, game logic runs on the server
 	if(event.keyCode == 113){
-		send('::rg');
+		send('::rg'); // Sends request game message to the server (the server will start an engine on the server in 'server' mode)
 		this.engine.mode = 'client';
 		this.engine.entities = [];
 	}
@@ -123,6 +124,15 @@ rules.prototype.keyboardHandler = function(evt){
 	// F5: Mute
 	if(event.keyCode == 116){
 		audio.mute();
+	}
+	// F6: Restart game in zero player mode
+	if(event.keyCode == 117){
+		this.engine.mode = 'standalone';
+		this.engine.playerCount = 0;
+		if(this.engine.entities.length == 0){
+			this.engine.add(this);
+		}
+		this.initialized = false;
 	}
 };
 
@@ -168,6 +178,39 @@ rules.prototype.parseControlString = function(s, buttonName, positionName){
 	this.engine[buttonName] = (parts[3] == 1);
 };
 
+rules.prototype.ensureUserRespawn = function(ship, mousePosition, buttonDown, playerName, direction, color){
+	var result = ship;
+	if(ship && ship.finished){
+		var position = { x: mousePosition.x, y : mousePosition.y };
+		var playerstar;
+		// If the player is a computer (AI) help it start a new ship.
+		// This should be replaced by the AI doing a proper mouseposition and button click
+		if(ship.type === 'computer'){
+			// See if there is a star in the ship's color
+			playerstar = this.getStar(ship, false);
+			if(playerstar){
+				// If so set the ship's spawn position to the center of the star
+				position = helpers.ceilPoint({ 
+					x: playerstar.position.x , 
+					y: playerstar.position.y 
+				});
+			}
+		}
+		if(ship.type === 'player' || ( ship.type === 'computer' && playerstar )){
+			result = this.spawnPlayerShip(
+					ship, 
+					buttonDown,
+					playerName,
+					ship.type,
+					direction,
+					color,
+					position
+			);
+		}
+	}
+	return result;
+};
+
 rules.prototype.update = function(time){
 	if(!this.initialized){
 		this.initialize();
@@ -180,46 +223,15 @@ rules.prototype.update = function(time){
 //		this.parseControlString(this.engine.player2Controls, "buttonDown2", "mousePosition2");
 //		this.engine.player2Controls = "";
 //	}
-	if(this.engine.gameState.player1Ship && this.engine.gameState.player1Ship.finished){
-		this.engine.gameState.player1Ship = this.spawnPlayerShip(
-				this.engine.gameState.player1Ship, 
-				this.engine.buttonDown,
-				'Player 1',
-				this.engine.mode == 'standalone' ? 'player' : (this.engine.player1 ? 'player' : 'computer'),
-				1,
-				0,
-				{ x: this.engine.mousePosition.x, y : this.engine.mousePosition.y }				
-		);
-	}
-	if(this.engine.gameState.player2Ship && this.engine.gameState.player2Ship.finished){
-		var mode = this.engine.mode == 'standalone' ? 'computer' : (this.engine.player2 ? 'player' : 'computer');
-		var position = { x: this.engine.mousePosition2.x, y : this.engine.mousePosition2.y };
-		var playerstar;
-		// If the player is a computer (AI) help it start a new ship.
-		// This should be replaced by the AI doing a proper mouseposition and button click
-		if(mode === 'computer'){
-			// See if there is a star in the ship's color
-			playerstar = this.getStar(this.engine.gameState.player2Ship, false);
-			if(playerstar){
-				// If so set the ship's spawn position to the center of the star
-				position = helpers.ceilPoint({ 
-					x: playerstar.position.x , 
-					y: playerstar.position.y 
-				});
-			}
-		}
-		if(mode === 'player' || ( mode === 'computer' && playerstar )){
-			this.engine.gameState.player2Ship = this.spawnPlayerShip(
-					this.engine.gameState.player2Ship, 
-					this.engine.buttonDown2,
-					'Player 2',
-					mode,
-					-1,
-					3,
-					position
-			);
-		}
-	}
+
+	this.engine.gameState.player1Ship = this.ensureUserRespawn(
+			this.engine.gameState.player1Ship, 
+			this.engine.mousePosition, this.engine.buttonDown, 'Player 1', 1, 0);
+	
+	this.engine.gameState.player2Ship = this.ensureUserRespawn(
+			this.engine.gameState.player2Ship, 
+			this.engine.mousePosition2, this.engine.buttonDown2, 'Player 2', -1, 3);
+	
 	// Randomly create UFOs when they does not exist
 	if((!(this.engine.gameState.player3) || (this.engine.gameState.player3 && this.engine.gameState.player3.finished)) && 6 == Math.floor(Math.random()*200)){
 		this.engine.add( this.engine.gameState.player3 = new ufo({
