@@ -16,14 +16,28 @@ The winner is the first player that destroys 10 opponent spaceships.
 If your spaceship is destroyed click a asteroid of your color and drag to spawn a new spaceship.
 
 Controls:
-Mouse movement guides your spaceship (it flies to the pointer).
-Left click fires your laser
-F1: start single player game
-F2: initiate multi player game
+
+Move: Mouse movement guides your spaceship (the ship will fly in the direction of your mouse pointer).
+Shoot Left click fires your laser
+
+F1: Start single player game
+F2: Start multi player game 
+F3: Volume down
+F4: Volume up
+F5: Toggle mute
+F6: Start AI versus AI game
+F7: Toggle chat
+
+Adding your own AI
+
+The example AI (heuristic and prioritizing) shows you how to implement the AI. Essentially it is a function that gets called in the context of the spaceship ('this' will be the player ship).
+
+To register the AI: make sure it gets 'required' in the ship.js file, add an appropriate script element to index.html. (Eventually this will be replaced with a plugin system.)
 
 Credits:
 
 Code:
+All the contributors to this project
 Node (chat) team: https://github.com/ry/node_chat
 SoundManager2 team: http://www.schillmania.com/projects/soundmanager2/
 JQuery team: http://jquery.com/
@@ -32,7 +46,7 @@ Font:
 CBMTTF team: http://kofler.dot.at/c64/
 Font Squirrel fontface generator team: http://www.fontsquirrel.com/fontface/generator
 
-Audio:
+Sound effects:
 HardPCM team: http://hardpcmtechnologies.blogspot.com/
 HardPCM freesound team: http://www.freesound.org/people/HardPCM/
 
