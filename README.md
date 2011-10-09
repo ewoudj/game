@@ -28,7 +28,7 @@ F5: Toggle mute
 F6: Start AI versus AI game
 F7: Toggle chat
 
-Adding your own AI
+Adding your AI
 
 The example AI (heuristic and prioritizing) shows you how to implement the AI. Essentially it is a function that gets called in the context of the spaceship ('this' will be the player ship).
 
