@@ -11,7 +11,7 @@ var engine = function(config){
 		this.canvas = document.getElementById('c');
 		// Disable selection of text/elements in the browser
 		document.onselectstart = function() {return false;}; // ie
-		document.onmousedown = function() {return false;}; // mozilla
+		// document.onmousedown = function() {return false;}; // mozilla
 		// Various client side init
 		window.onmousemove = this.onmousemove.bind(this);
 		this.canvas.onmousedown = this.onmousedown.bind(this);
@@ -51,26 +51,29 @@ engine.prototype.update = function(time){
 	if(this.mode == 'standalone' || this.mode == 'server'){
 		var newList = [];
 		// Calculate collisions
-		for(var i = 0; i < this.entities.length; i++){
-			this.entities[i].collisions = [];
-			for(var j = 0; j < this.entities.length; j++){
-				if(this.entities[i] != this.entities[j] && this.entities[i].collidesWith(this.entities[j])){
-					this.entities[i].collisions.push(this.entities[j]);
-					if(!this.entities[j].collisions){
-						this.entities[j].collisions = [];
+		for(var i = 0, l = this.entities.length; i < l; i++){
+			var e1 = this.entities[i];
+			e1.collisions = [];
+			for(var j = 0; j < l; j++){
+				var e2 = this.entities[j];
+				if(e1 != e2 && e1.collidesWith(e2)){
+					e1.collisions.push(e2);
+					if(!e2.collisions){
+						e2.collisions = [];
 					}
-					this.entities[j].collisions.push(this.entities[i]);
+					e2.collisions.push(e1);
 				}
 			}
 		}
 		// Update
-		for(var i = 0; i < this.entities.length; i++){
+		for(var i = 0, l = this.entities.length; i < l; i++){
 			this.entities[i].update(0);
 		}
 		// Filter out the objects that indicate they are finished
-		for(var i = 0; i < this.entities.length; i++){
-			if(!this.entities[i].finished){
-				newList.push(this.entities[i]);
+		for(var i = 0, l = this.entities.length; i < l; i++){
+			var e1 = this.entities[i];
+			if(!e1.finished){
+				newList.push(e1);
 			}
 		}
 		this.entities = newList;
@@ -80,16 +83,15 @@ engine.prototype.update = function(time){
 	}
 	if(this.mode == 'server'){
 		var remoteData = ""; //[];
-		for(var i = 0; i < this.entities.length; i++){
-			if(this.entities[i].getRemoteData){
+		for(var i = 0, l = this.entities.length; i < l; i++){
+			var e = this.entities[i];
+			if(e.getRemoteData){
 				if(remoteData != ""){
 					remoteData = remoteData + ",";
 				}
-				//remoteData.push(this.entities[i].getRemoteData());
-				remoteData = remoteData + this.entities[i].getRemoteData();
+				remoteData = remoteData + e.getRemoteData();
 			}
 		}
-//		this.channel.appendMessage('game','msg', '::' + JSON.stringify(remoteData));
 		this.channel.appendMessage('game','msg', '::' + remoteData);
 	}
 };
@@ -100,15 +102,16 @@ engine.prototype.render = function(){
 	this.renderer.context.fillRect(0, 0, this.width, this.height);
 	// Render
 	if(this.mode == 'standalone'){
-		for(var i = 0; i < this.entities.length; i++){
-			this.entities[i].render();
-			if(this.debug && this.entities[i].collisionRect){
-				this.renderer.drawRect(this.entities[i].position, this.entities[i].collisionRect, "#F00", false);
-				if(this.entities[i].target){
-					this.renderer.drawLine(this.entities[i].position, this.entities[i].target.position, "#0f0");
+		for(var i = 0, l = this.entities.length; i < l; i++){
+			var e = this.entities[i];
+			e.render();
+			if(this.debug && e.collisionRect){
+				this.renderer.drawRect(e.position, e.collisionRect, "#F00", false);
+				if(e.target){
+					this.renderer.drawLine(e.position, e.target.position, "#0f0");
 				}
-				if(this.entities[i].evading){
-					this.renderer.drawLine(this.entities[i].position, this.entities[i].nearestEntity.position, "#f00");
+				if(e.evading){
+					this.renderer.drawLine(e.position, e.nearestEntity.position, "#f00");
 				}
 			}
 		}
@@ -116,12 +119,10 @@ engine.prototype.render = function(){
 	else if(this.mode == 'client'){
 		this.remoteData = this.remoteDataString.split(",");
 		var offset = 0;
-		while(offset < this.remoteData.length){
+		var l = this.remoteData.length;
+		while(offset < l){
 			offset = this.remoteRenderer[this.remoteData[offset]].renderRemoteData(this.remoteData,offset);
 		}
-//		for(var i = 0; i < this.remoteData.length; i++){
-//			this.remoteRenderer[this.remoteData[i][0]].renderRemoteData(this.remoteData[i]);			
-//		}
 	}
 };
 
@@ -144,6 +145,8 @@ engine.prototype.onmouseup = function(){
 };
 
 engine.ai = {};
+engine.player1ai = 'heuristic';
+engine.player2ai = 'prioritizing';
 
 if(typeof(exports) !== 'undefined'){
 	exports.engine = engine;

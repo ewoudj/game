@@ -87,8 +87,10 @@ var renderer = function(config){
 };
 
 renderer.prototype.drawRects = function(offset, rects, color, fill){
-	for(var i = 0; i < rects.length; i++){
-		this.drawRect(offset, rects[i], color, fill);
+	if(rects){
+		for(var i = 0, l = rects.length; i < l; i++){
+			this.drawRect(offset, rects[i], color, fill);
+		}
 	}
 };
 

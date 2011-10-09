@@ -5,7 +5,7 @@ if(typeof(require) !== 'undefined'){
 	var helpers = require("./helpers").helpers;
 	var entity = require("./entity").entity;
 	var explosion = require("./explosion").explosion;
-	var colors; //require("./rules").colors;
+	var colors;
 	var sys = require("sys");
 	for(var s in colors){
 		sys.puts(s);
@@ -19,7 +19,8 @@ if(typeof(require) !== 'undefined'){
 
 var ship = function(config){
 	helpers.apply(config, this);
-	this.type = this.type || 'localplayer'; // localplayer, remoteplayer, computer
+	this.type = this.type || 'player'; // player, computer
+	console.log(this.type);
 	this.laserState = 10; // 10 = ready, 0 = charging
 	this.direction = this.direction || 1;
 	this.colors = colors ? colors : require("./rules").colors;
@@ -90,7 +91,12 @@ ship.prototype.update = function(time){
 		}
 	}
 	else if(this.type == 'computer'){
-		engine.ai.prioritizing.call(this);
+		if(this.name === 'Player 1'){
+			engine.ai[engine.player1ai].call(this);
+		}
+		else {
+			engine.ai[engine.player2ai].call(this);
+		}
 	}
 	if(this.shoot && this.laserState == 10){
 		this.laserState = 0;	
@@ -129,160 +135,6 @@ ship.prototype.calculateMovement = function(currentPosition, mousePosition, spee
 		y: this.position.y + (deltaY * f)
 	};
 };
-
-//ship.prototype.newShipAI = function(){
-//	
-//	var myStars = 0;
-//	var maxDistance = Math.sqrt(Math.pow(this.engine.width,2) + Math.pow(this.engine.width,2));
-//	var highestValue = 0;
-//	var mousePosition = null;
-//	this.shoot = false;
-//	var shootable = false;
-//	if(!this.responseDelay){
-//		this.responseDelay = 0;
-//	}
-//	else{
-//		this.responseDelay--;
-//	}
-//	if(this.starShootDelay){
-//		this.starShootDelay--;
-//	}
-//	// Calculate the number of stars in the ship's color
-//	for(var i = 0; i < this.engine.entities.length; i++){
-//		if(this.engine.entities[i].type == 'star' && this.engine.entities[i].colorIndex == this.colorIndex){ 
-//			myStars++;
-//		}
-//	}
-//	for(var i = 0, l = this.engine.entities.length; i < l; i++){
-//		shootable = false;
-//		// Ignore self, entities owned by self (laserbeams) and entities without a position
-//		if(this.engine.entities[i] != this && this.engine.entities[i].owner != this && this.engine.entities[i].position){
-//			var value = 0;
-//			// Enemy ship has highest value
-//			if(this.engine.entities[i].type === 'player' || this.engine.entities[i].type === 'computer'){
-//				value = 30;
-//				shootable = true;
-//			}
-//			else if(this.engine.entities[i].type == 'star' && this.engine.entities[i].colorIndex != this.colorIndex){
-//				// Values of stars is higher when there are only a few in the ships color
-//				value = 10;
-//				if(myStars == 0){
-//					value += 20;
-//				}
-//				if(myStars == 1){
-//					value += 10;
-//				}
-//				if(!this.starShootDelay){
-//					shootable = true;
-//					this.starShootDelay = 10;
-//				}
-//			}
-//			// Ufo have lowest value
-//			else if(this.engine.entities[i].type == 'ufo'){
-//				value = 5;
-//				shootable = true;
-//			}
-//			// Distance decreases the value
-//			var distance = helpers.distance(this.position, this.engine.entities[i].position);
-//			var avoidCollision = (distance < 50);
-//			if( avoidCollision ){
-//				value = 100;
-//				console.log('avoiding');
-//			}
-//			var f = maxDistance / distance;
-//			//value = value + (2 * f);
-//			if(value > highestValue){
-//				highestValue = value;
-//				//if(this.responseDelay == 0){
-//					this.responseDelay = 1;
-//					this.mousePosition = {
-//						x: this.engine.entities[i].position.x + 110,
-//						y: this.engine.entities[i].position.y
-//					};
-//					if(avoidCollision){
-//						this.mousePosition.x = (this.mousePosition.x - this.position.x) * -100000;
-//						this.mousePosition.y = (this.mousePosition.y - this.position.y) * -100000;
-//					}
-//				//}
-//				var deltay = Math.abs(this.position.y - this.engine.entities[i].position.y);
-//				if(shootable && deltay < 30){
-//					this.shoot = shootable;
-//				}
-//			}
-//		}
-//	}
-//	this.position = this.calculateMovement(this.position, this.mousePosition, 10);
-//};
-
-//ship.prototype.shipAI = function(){
-//	var previousPosition = this.position;
-//	// AI
-//	// Priority 1: staying alive
-//	// Avoid collisions
-//	var nearestEntityDistance = Infinity;
-//	this.nearestEntity = null;
-//	var nearestStarDistance = Infinity;
-//	var nearestStar = null;
-//	this.evading = false;
-//	// Determine the nearest object  
-//	for(var i = 0; i < this.engine.entities.length; i++){
-//		if(this.engine.entities[i] != this && this.engine.entities[i].owner != this && this.engine.entities[i].position){
-//			var d = helpers.distance(this.position, this.engine.entities[i].position);
-//			if(d < nearestEntityDistance){ 
-//				nearestEntityDistance = d;
-//				this.nearestEntity = this.engine.entities[i];
-//			}
-//			if(this.engine.entities[i].type == 'star' && this.engine.entities[i].colorIndex != this.colorIndex && d < nearestStarDistance){ 
-//				nearestStarDistance = d;
-//				nearestStar = this.engine.entities[i];
-//			}
-//		}
-//	}
-//	if(( this.position && this.nearestEntity) && nearestEntityDistance < 50 || this.evadingTime > 0){
-//		var deltax = this.nearestEntity.position.x - this.position.x;
-//		var deltay = this.nearestEntity.position.y - this.position.y;
-//		this.targetVector = { 
-//			y: (deltay) < 0 ? 1 : 1,
-//			x: (deltax) < 0 ? 1 : 1
-//		};
-//		if(!this.evadingTime){
-//			this.evadingTime = 3;
-//		}
-//		this.evadingTime--;
-//		this.position = helpers.rotate(this.position, this.nearestEntity.position, -25);
-//		this.evading = true;
-//	}
-//	// Priority 2: 
-//	// Select target
-//	this.target = this.engine.gameState.player1Ship.finished ? null : this.engine.gameState.player1Ship;
-//	if(!this.target){
-//		this.target = nearestStar;
-//	}
-//	if(this.target){                    
-//		var deltax = this.target.position.x - this.position.x;
-//		var deltay = this.target.position.y - this.position.y;
-//		this.targetVector = { 
-//			y: (deltay) < 0 ? -1 : 1,
-//			x: (deltax) < 0 ? -1 : 1
-//		};
-//		if(!this.evading){
-//			var movey = !(deltay < 10 && deltay > -10);
-//			var movex = !(deltax < 80 && deltax > -80);
-//			var reversex = (deltax < 60 && deltax > -60);
-//			this.position = {
-//				x: this.position.x + ( this.targetVector.x * (movex ? this.speed : (reversex ? -this.speed : 0 ) ) ),
-//				y: this.position.y + ( this.targetVector.y * (movey ? this.speed : 0) )
-//			};
-//		}
-//		if(this.position.x == previousPosition.x && this.direction != this.targetVector.x){
-//			this.direction = this.targetVector.x;
-//		}
-//		// Only shoot when
-//		// - the target is near (y)
-//		// - the ship is pointed in the right direction
-//		this.shoot = ((deltay < 40 && deltay > -40) && (this.direction == this.targetVector.x));
-//	}
-//};
 
 ship.prototype.render = function(){
 	if(!this.audioDone){

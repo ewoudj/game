@@ -2,6 +2,7 @@
  *   Heuristic AI
  */
 if(typeof(require) !== 'undefined'){
+	var helpers = require("./../helpers").helpers;
 	var engine = require("./../engine").engine;
 }
 
@@ -14,18 +15,23 @@ engine.ai.heuristic = function(){
 	this.nearestEntity = null;
 	var nearestStarDistance = Infinity;
 	var nearestStar = null;
+	var otherShip = null;
 	this.evading = false;
 	// Determine the nearest object  
-	for(var i = 0; i < this.engine.entities.length; i++){
-		if(this.engine.entities[i] != this && this.engine.entities[i].owner != this && this.engine.entities[i].position){
-			var d = helpers.distance(this.position, this.engine.entities[i].position);
+	for(var i = 0, l = this.engine.entities.length; i < l; i++){
+		var e = this.engine.entities[i];
+		if(e !== this && e.owner !== this && e.position){
+			var d = helpers.distance(this.position, e.position);
 			if(d < nearestEntityDistance){ 
 				nearestEntityDistance = d;
-				this.nearestEntity = this.engine.entities[i];
+				this.nearestEntity = e;
 			}
-			if(this.engine.entities[i].type == 'star' && this.engine.entities[i].colorIndex != this.colorIndex && d < nearestStarDistance){ 
+			if(e.type === 'star' && e.colorIndex !== this.colorIndex && d < nearestStarDistance){ 
 				nearestStarDistance = d;
-				nearestStar = this.engine.entities[i];
+				nearestStar = e;
+			}
+			if(e.type === 'player' || e.type === 'computer'){
+				otherShip = e;
 			}
 		}
 	}
@@ -45,7 +51,10 @@ engine.ai.heuristic = function(){
 	}
 	// Priority 2: 
 	// Select target
-	this.target = this.engine.gameState.player1Ship.finished ? null : this.engine.gameState.player1Ship;
+	this.target = null;
+	if(otherShip && !otherShip.finished){
+		this.target = otherShip;
+	}
 	if(!this.target){
 		this.target = nearestStar;
 	}

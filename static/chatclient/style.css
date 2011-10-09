@@ -128,3 +128,7 @@ a:hover { text-decoration: underline; color: #aaa; }
 	z-index: 1000000;
 	background: rgba(0, 0, 0, 0.5);
 }
+
+#aiconfig{
+	display: none;
+}

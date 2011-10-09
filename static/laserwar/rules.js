@@ -4,6 +4,7 @@ if(typeof(require) !== 'undefined'){
 	var ship = require("./ship").ship;
 	var star = require("./star").star;
 	var ufo = require("./ufo").ufo;
+	var engine = require("./engine").engine;
 }
 
 var colors = [
@@ -133,6 +134,31 @@ rules.prototype.keyboardHandler = function(evt){
 			this.engine.add(this);
 		}
 		this.initialized = false;
+		$("#aiconfig").show();
+		if(!engine.initializedAIConfigCombos){
+			engine.initializedAIConfigCombos = true;
+			for(var s in engine.ai){
+				$('#player1ai').append("<option value='" + s + "'>" + s + "</option>");
+				$('#player1ai').val(engine.player1ai);
+			}
+			$('#player1ai').change(function() {
+				engine.player1ai = $(this).val();
+			});
+			for(var s in engine.ai){
+				$("#player2ai").append("<option value='" + s + "'>" + s + "</option>");
+				$('#player2ai').val(engine.player2ai);
+			}
+			$('#player2ai').change(function() {
+				engine.player2ai = $(this).val();
+			});
+		}
+	}
+	else{
+		$("#aiconfig").hide();
+	}
+	// F7: Toggle Chat
+	if(event.keyCode == 118){
+		$(".chatcontainer").toggle();
 	}
 };
 

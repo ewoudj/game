@@ -2,6 +2,7 @@
  *   Prioritizing AI
  */
 if(typeof(require) !== 'undefined'){
+	var helpers = require("./../helpers").helpers;
 	var engine = require("./../engine").engine;
 }
 
@@ -63,7 +64,6 @@ engine.ai.prioritizing = function(){
 			var avoidCollision = (distance < 50);
 			if( avoidCollision ){
 				value = 100;
-				console.log('avoiding');
 			}
 			var f = maxDistance / distance;
 			//value = value + (2 * f);
