@@ -1,0 +1,118 @@
+<html>
+	<head>
+		<title>Three.js test</title>
+		<script src="Three.js"></script>
+		<script type="text/javascript" src="RequestAnimationFrame.js"></script>
+		<script type="text/javascript" src="ship.js"></script>
+		<style>
+			body {
+				background:#000;
+				color:#aaa;
+				padding:0;
+				margin:0;
+				font-weight: bold;
+				overflow:hidden;
+			}
+
+			a {	color: #eee;	}
+
+			#info {
+				position: absolute;
+				top: 0px; width: 100%;
+				color: #eee;
+				padding: 5px;
+				font-family:Monospace;
+				font-size:13px;
+				text-align:center;
+				z-index:1000;
+			}
+
+			#oldie {
+				background:rgb(200,100,0) !important;
+				color:#fff;
+			}
+
+		</style>
+	</head>
+	<body>
+	</body>
+		<script>
+
+		    var camera, scene, renderer, loader, 
+		    geometry, material, mesh;
+		
+		    init();
+		    
+		
+		    function init() {
+		        camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
+		        camera.position.z = 1000;
+		
+		        scene = new THREE.Scene();
+		
+		        var particleLight = new THREE.Mesh( new THREE.SphereGeometry( 4, 8, 8 ), new THREE.MeshBasicMaterial( { color: 0xffffff } ) );
+				scene.add( particleLight );
+
+				// Lights
+
+				scene.add( new THREE.AmbientLight( 0x202020 ) );
+
+				var directionalLight = new THREE.DirectionalLight( Math.random() * 0xffffff );
+
+				directionalLight.position.x = Math.random() - 0.5;
+				directionalLight.position.y = Math.random() - 0.5;
+				directionalLight.position.z = Math.random() - 0.5;
+
+				directionalLight.position.normalize();
+
+				scene.add( directionalLight );
+
+				var pointLight = new THREE.PointLight( 0xffffff, 1 );
+				scene.add( pointLight );
+				
+		        material = new THREE.MeshNormalMaterial( { shading: THREE.SmoothShading } );//new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: false } );
+		     	
+		        loader = new THREE.JSONLoader( true );
+				document.body.appendChild( loader.statusDomElement );
+				loader.load( { 
+					model: "ship.js", 
+					callback: function( geometry ) { 
+						createScene( geometry, 20, material ) 
+					}
+				} );
+		
+		        renderer = new THREE.CanvasRenderer();
+		        renderer.setSize( window.innerWidth, window.innerHeight );
+		        
+		        document.body.appendChild( renderer.domElement );
+		    }
+		    
+
+			function createScene( geometry, scale, material ) {
+
+				//geometry.computeTangents();
+
+				mesh = new THREE.Mesh( geometry, material );
+				scene.add( mesh );
+				mesh.scale.set( scale, scale, scale );
+				mesh.doubleSided = true;
+				mesh.rotation.y = Math.PI * 1.5;
+				loader.statusDomElement.style.display = "none";
+				animate();
+
+			}
+		
+		    function animate() {
+		        // Include examples/js/RequestAnimationFrame.js for cross-browser compatibility.
+		        requestAnimationFrame( animate );
+		        render();
+		    }
+		
+		    function render() {
+		        mesh.rotation.x += 0.01;
+		        mesh.rotation.y += 0.02;
+		        renderer.render( scene, camera );
+		    }
+		
+		</script>
+</html>
