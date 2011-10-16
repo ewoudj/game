@@ -15,7 +15,7 @@ var ufo = function(config){
 	this.direction = this.direction || 1;
 	this.audioDone = false;
 	this.colors = colors ? colors : require("./rules").colors;
-	this.color = this.colors[this.colorIndex] || this.color || "#fff";
+	this.color = this.colors[this.colorIndex] || this.color || "#FFF";
 	this.speed = 3;
 	this.invulerability = 20;
 	this.nextFrame = false;
@@ -55,7 +55,7 @@ var ufo = function(config){
 ufo.prototype = new entity();
 
 ufo.prototype.render = function(){
-	this.engine.renderer.drawRects(helpers.ceilPoint(this.position), this.rects, this.color, true);
+	this.classicModel = this.rects;
 };
 
 ufo.prototype.update = function(time){
@@ -194,12 +194,9 @@ ufo.prototype.renderRemoteData = function(remoteData, offset){
 	if(!(!!(parseFloat(remoteData[offset + 5])))){
 		audio.appearAudio.play();
 	}
-	this.engine.renderer.drawRects(
-			{x:parseFloat(remoteData[offset + 1]), y:parseFloat(remoteData[offset + 2])}, 
-			this.ufoFrames[parseFloat(remoteData[offset + 3])], 
-			remoteData[offset + 4], 
-			true
-	);
+	this.classicModel = this.ufoFrames[parseFloat(remoteData[offset + 3])];
+	this.position = {x:parseFloat(remoteData[offset + 1]), y:parseFloat(remoteData[offset + 2])};
+	this.color = remoteData[offset + 4];
 	return offset + 6;
 };
 

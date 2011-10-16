@@ -24,7 +24,7 @@ var ship = function(config){
 	this.laserState = 10; // 10 = ready, 0 = charging
 	this.direction = this.direction || 1;
 	this.colors = colors ? colors : require("./rules").colors;
-	this.color = this.colors[this.colorIndex] || this.color || "#fff";
+	this.color = this.colors[this.colorIndex] || this.color || "#FFF";
 	this.speed = 3;
 	this.colorLoop = 0;
 	this.invulerability = 20;
@@ -141,7 +141,7 @@ ship.prototype.render = function(){
 		this.audioDone = true;
 		audio.appearAudio.play();
 	}
-	this.engine.renderer.drawRects(helpers.ceilPoint(this.position), this.rects, this.color, true);
+	this.classicModel = this.rects;
 };
 
 ship.prototype.getRemoteData = function(){
@@ -158,12 +158,9 @@ ship.prototype.renderRemoteData = function(remoteData, offset){
 	if(!(!!(parseFloat(remoteData[offset + 5])))){
 		audio.appearAudio.play();
 	}
-	this.engine.renderer.drawRects(
-			{x:parseFloat(remoteData[offset + 1]), y: parseFloat(remoteData[offset + 2])}, 
-			remoteData[offset + 3] === "1"  ? this.rectsRight : this.rectsLeft, 
-			remoteData[offset + 4], 
-			true
-	);
+	this.classicModel = remoteData[offset + 3] === "1"  ? this.rectsRight : this.rectsLeft;
+	this.position = {x:parseFloat(remoteData[offset + 1]), y: parseFloat(remoteData[offset + 2])};
+	this.color = remoteData[offset + 4];
 	return offset + 6;
 };
 

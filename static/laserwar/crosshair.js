@@ -8,7 +8,7 @@ if(typeof(require) !== 'undefined'){
 var crosshair = function(config){
 	helpers.apply(config, this);
 	this.name = 'crosshair';	
-	this.color = colors[this.colorIndex] || this.color || "#fff";
+	this.color = colors[this.colorIndex] || this.color || "#FFF";
 	this.position = this.position || {x:0, y:0};
 	this.rects = [
 		{x: -10, y: -1, w: 20, h: 2},
@@ -20,7 +20,8 @@ crosshair.prototype = new entity();
 
 crosshair.prototype.render = function(){
 	if(this.engine.gameState.player1Ship && this.engine.gameState.player1Ship.finished){
-		this.engine.renderer.drawRects(this.engine.mousePosition, this.rects, this.color, true);
+		this.position = this.mousePosition;
+		this.classicModel = this.rects;
 	}
 };
 

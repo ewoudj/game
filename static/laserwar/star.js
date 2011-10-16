@@ -11,7 +11,7 @@ var star = function(config){
 	helpers.apply(config, this);
 	this.type = 'star';
 	this.colors = colors ? colors : require("./rules").colors;
-	this.color = this.colors[this.colorIndex] || this.color || "#fff";
+	this.color = this.colors[this.colorIndex] || this.color || "#FFF";
 	this.position = this.position || {x:0, y:0};
 	this.originalPosition = this.position;
 	this.angle = this.angle || 0;
@@ -31,7 +31,7 @@ star.prototype.render = function(){
 		audio.changeColorAudio.play();
 		this.makeSound = false;
 	}
-	this.engine.renderer.drawRects( helpers.ceilPoint( this.position ), this.rects, this.color, true);
+	this.classicModel = this.rects;
 };
 
 star.prototype.update = function(time){
@@ -92,12 +92,9 @@ star.prototype.renderRemoteData = function(remoteData, offset){
 	if(!!parseFloat(remoteData[offset + 4])){
 		audio.changeColorAudio.play();		
 	}
-	this.engine.renderer.drawRects(
-			{x:parseFloat(remoteData[offset + 1]), y:parseFloat(remoteData[offset + 2])}, 
-			this.rects, 
-			remoteData[offset + 3], 
-			true
-	);
+	this.classicModel = this.rects;
+	this.position = {x:parseFloat(remoteData[offset + 1]), y:parseFloat(remoteData[offset + 2])};
+	this.color = remoteData[offset + 3];
 	return offset + 5;
 };
 

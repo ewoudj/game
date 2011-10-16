@@ -10,7 +10,7 @@ var laserbeam = function(config){
 	helpers.apply(config, this);
 	this.name = 'laserbeam';	
 	this.direction = this.direction || 1;
-	this.color = "#fff";
+	this.color = "#FFF";
 	this.position = this.position || {x:0, y:0};
 	this.rects = [
 		{x: -20, y: -5, w: 40, h: 10}
@@ -22,7 +22,7 @@ var laserbeam = function(config){
 laserbeam.prototype = new entity();
 
 laserbeam.prototype.render = function(){
-	this.engine.renderer.drawRects(helpers.ceilPoint(this.position), this.rects, this.color, true);
+	this.classicModel = this.rects;
 	if(!this.audioDone){
 		this.audioDone = true;
 		audio.laserAudio.play();
@@ -58,12 +58,9 @@ laserbeam.prototype.getRemoteData = function(){
 };
 
 laserbeam.prototype.renderRemoteData = function(remoteData, offset){
-	this.engine.renderer.drawRects(
-			{x:parseFloat(remoteData[offset + 1]), y:parseFloat(remoteData[offset + 2])}, 
-			this.rects, 
-			'#fff', 
-			true
-	);
+	this.classicModel = this.rects;
+	this.position = {x:parseFloat(remoteData[offset + 1]), y:parseFloat(remoteData[offset + 2])};
+	this.color = '#FFF';
 	if(!(!!(parseFloat(remoteData[offset + 3])))){
 		audio.laserAudio.play();
 	}

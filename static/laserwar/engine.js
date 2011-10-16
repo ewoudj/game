@@ -16,9 +16,6 @@ var engine = function(config){
 		window.onmousemove = this.onmousemove.bind(this);
 		this.canvas.onmousedown = this.onmousedown.bind(this);
 		this.canvas.onmouseup = this.onmouseup.bind(this);
-		this.renderer = new renderer({
-			context: document.getElementById('c').getContext('2d')
-		});
 		document.body.style.background = this.pageColor;
 		this.canvas.width = this.width;
 		this.canvas.height = this.height;
@@ -38,7 +35,7 @@ var engine = function(config){
 	setInterval(this.update.bind(this), 38);
 	
 	if(this.mode == 'standalone' || this.mode == 'client'){
-		setInterval(this.render.bind(this), 38);
+		setInterval(engine.rendering[engine.configuredRendering].bind(this), 38);
 	}
 };
 
@@ -96,36 +93,6 @@ engine.prototype.update = function(time){
 	}
 };
 
-
-engine.prototype.render = function(){
-	this.renderer.context.fillStyle = this.canvasColor;
-	this.renderer.context.fillRect(0, 0, this.width, this.height);
-	// Render
-	if(this.mode == 'standalone'){
-		for(var i = 0, l = this.entities.length; i < l; i++){
-			var e = this.entities[i];
-			e.render();
-			if(this.debug && e.collisionRect){
-				this.renderer.drawRect(e.position, e.collisionRect, "#F00", false);
-				if(e.target){
-					this.renderer.drawLine(e.position, e.target.position, "#0f0");
-				}
-				if(e.evading){
-					this.renderer.drawLine(e.position, e.nearestEntity.position, "#f00");
-				}
-			}
-		}
-	}
-	else if(this.mode == 'client'){
-		this.remoteData = this.remoteDataString.split(",");
-		var offset = 0;
-		var l = this.remoteData.length;
-		while(offset < l){
-			offset = this.remoteRenderer[this.remoteData[offset]].renderRemoteData(this.remoteData,offset);
-		}
-	}
-};
-
 engine.prototype.resize = function(){
 	this.canvas.style.top = Math.ceil((window.innerHeight - this.height) / 2) + 'px';
 	this.canvas.style.left = Math.ceil((window.innerWidth - this.width) / 2) + 'px';
@@ -147,6 +114,8 @@ engine.prototype.onmouseup = function(){
 engine.ai = {};
 engine.player1ai = 'heuristic';
 engine.player2ai = 'prioritizing';
+engine.rendering = {};
+engine.configuredRendering = 'classic';
 
 if(typeof(exports) !== 'undefined'){
 	exports.engine = engine;

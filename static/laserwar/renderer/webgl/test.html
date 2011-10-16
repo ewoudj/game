@@ -50,18 +50,18 @@
 		
 		        scene = new THREE.Scene();
 		
-		        var particleLight = new THREE.Mesh( new THREE.SphereGeometry( 4, 8, 8 ), new THREE.MeshBasicMaterial( { color: 0xffffff } ) );
-				scene.add( particleLight );
+// 		        var particleLight = new THREE.Mesh( new THREE.SphereGeometry( 4, 8, 8 ), new THREE.MeshBasicMaterial( { color: 0xffffff } ) );
+// 				scene.add( particleLight );
 
 				// Lights
 
 				scene.add( new THREE.AmbientLight( 0x202020 ) );
 
-				var directionalLight = new THREE.DirectionalLight( Math.random() * 0xffffff );
-
-				directionalLight.position.x = Math.random() - 0.5;
-				directionalLight.position.y = Math.random() - 0.5;
-				directionalLight.position.z = Math.random() - 0.5;
+				var directionalLight = new THREE.DirectionalLight( 0xffffff );
+				directionalLight.position.x = 0;
+				directionalLight.position.y = 0;
+				directionalLight.position.z = 1000;
+				directionalLight.lookAt({x:0, y:0, z:0});
 
 				directionalLight.position.normalize();
 
@@ -70,18 +70,18 @@
 				var pointLight = new THREE.PointLight( 0xffffff, 1 );
 				scene.add( pointLight );
 				
-		        material = new THREE.MeshNormalMaterial( { shading: THREE.SmoothShading } );//new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: false } );
+		        material = new THREE.MeshPhongMaterial( { ambient: 0x060606, color: 0xff0000, shininess: 30, shading: THREE.FlatShading } );
 		     	
 		        loader = new THREE.JSONLoader( true );
 				document.body.appendChild( loader.statusDomElement );
 				loader.load( { 
-					model: "ship.js", 
+					model: "ship2.js", 
 					callback: function( geometry ) { 
-						createScene( geometry, 20, material ) 
+						createScene( geometry, 80, material ) 
 					}
 				} );
 		
-		        renderer = new THREE.CanvasRenderer();
+		        renderer = new THREE.WebGLRenderer();
 		        renderer.setSize( window.innerWidth, window.innerHeight );
 		        
 		        document.body.appendChild( renderer.domElement );
@@ -89,9 +89,6 @@
 		    
 
 			function createScene( geometry, scale, material ) {
-
-				//geometry.computeTangents();
-
 				mesh = new THREE.Mesh( geometry, material );
 				scene.add( mesh );
 				mesh.scale.set( scale, scale, scale );

@@ -81,34 +81,3 @@ function $A(iterable) {
     return results;
   }
 }
-
-var renderer = function(config){
-	helpers.apply(config, this);
-};
-
-renderer.prototype.drawRects = function(offset, rects, color, fill){
-	if(rects){
-		for(var i = 0, l = rects.length; i < l; i++){
-			this.drawRect(offset, rects[i], color, fill);
-		}
-	}
-};
-
-renderer.prototype.drawRect = function(offset, rect, color, fill){
-	if(fill){
-		this.context.fillStyle = color;
-		this.context.fillRect(rect.x + offset.x ,rect.y + offset.y ,rect.w,rect.h);
-	}
-	else {
-		this.context.strokeStyle = color;
-		this.context.strokeRect(rect.x + offset.x ,rect.y + offset.y ,rect.w,rect.h);
-	}
-};
-
-renderer.prototype.drawLine = function(pointA, pointB, color){
-	this.context.beginPath();
-	this.context.strokeStyle = color;
-	this.context.moveTo(pointA.x, pointA.y);
-	this.context.lineTo(pointB.x, pointB.y);
-	this.context.stroke();
-};

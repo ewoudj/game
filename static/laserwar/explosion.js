@@ -5,7 +5,7 @@ if(typeof(require) !== 'undefined'){
 
 var explosion = function(config){
 	helpers.apply(config, this);
-	this.color = this.color || "#fff";
+	this.color = this.color || "#FFF";
 	this.position = this.position || {x:0, y:0};
 	this.duration = 0;
 	this.audioDone = false;
@@ -15,33 +15,22 @@ var explosion = function(config){
 explosion.prototype = new entity();
 
 explosion.prototype.render = function(){
-	this.renderExplosion(this.duration, this.position, !this.audioDone);
+	this.renderExplosion(this.duration, !this.audioDone);
 	this.audioDone = true;
-	/*if(!this.audioDone){
-		this.audioDone = true;
-		audio.explosionAudio.play();
-	}
-	if(this.duration%2){
-		var currentPosition = { x: this.position.x - (4 * this.duration), y: this.position.y };
-		for(var i = 0 ; i < 4 ; i++){
-			var rectPos = helpers.rotate(currentPosition, this.position, i*90);
-			this.engine.renderer.drawRect(helpers.ceilPoint(rectPos), this.rect, this.color, true);
-		}
-		this.engine.renderer.drawRect(this.position, this.rect, this.color, true);
-	}*/
 };
 
-explosion.prototype.renderExplosion = function(duration, position, sound){
+explosion.prototype.renderExplosion = function(duration, sound){
 	if(sound){
 		audio.explosionAudio.play();
 	}
 	if(duration%2){
-		var currentPosition = { x: position.x - (4 * duration), y: position.y };
+		var currentPosition = { x: 0 - (4 * duration), y: 0 };
+		this.classicModel = [];
 		for(var i = 0 ; i < 4 ; i++){
-			var rectPos = helpers.rotate(currentPosition, position, i*90);
-			this.engine.renderer.drawRect(helpers.ceilPoint(rectPos), this.rect, this.color, true);
+			var rectPos = helpers.rotate(currentPosition, {x:0, y:0}, i*90);
+			this.classicModel.push({x: -5 + rectPos.x, y: -5 + rectPos.y, w: 10, h: 10});
 		}
-		this.engine.renderer.drawRect(position, this.rect, this.color, true);
+		this.classicModel.push(this.rect);
 	}
 };
 
@@ -68,9 +57,10 @@ explosion.prototype.getRemoteData = function(){
 };
 
 explosion.prototype.renderRemoteData = function(remoteData, offset){
+	this.classicModel = remoteData[offset + 3] === "1"  ? this.rectsRight : this.rectsLeft;
+	this.position = {x:parseFloat(remoteData[offset + 1]), y:parseFloat(remoteData[offset + 2])};
 	this.renderExplosion(
-			parseFloat(remoteData[offset + 3]), 
-			{x:parseFloat(remoteData[offset + 1]), y:parseFloat(remoteData[offset + 2])}, 
+			parseFloat(remoteData[offset + 3]),
 			!(!!(parseFloat(remoteData[offset + 4]))));
 	return offset + 5;
 };

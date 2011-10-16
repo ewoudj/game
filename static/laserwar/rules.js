@@ -7,6 +7,7 @@ if(typeof(require) !== 'undefined'){
 	var engine = require("./engine").engine;
 }
 
+// On update check colorsBinary table in the webgl renderer
 var colors = [
    '#F00', // Red
    '#0F0', // Green
@@ -14,7 +15,7 @@ var colors = [
    '#FF0', // Yellow
    '#F0F', // Purple
    '#00F', // Blue
-   '#a0a0a0' // 'Grey'
+   '#AAA' // 'Grey'
 ];
 
 if(typeof(exports) !== 'undefined'){
@@ -285,12 +286,34 @@ rules.prototype.render = function(time){
 };
 
 rules.prototype.renderRules = function(player1Score, player2Score){
-	this.engine.renderer.drawRect({x:15,y: this.engine.height - 62},{x:0,y: 0,w: this.engine.width - 30, h: 50}, "00F", true);
-	this.engine.renderer.context.font = "50px CBM64";
-	this.engine.renderer.context.fillStyle = "#fff";
-	this.engine.renderer.context.fillText(player1Score, 20, this.engine.height - 15);
-	this.engine.renderer.context.fillText((player2Score < 10 ? ' ' : '') + player2Score, this.engine.width - 95, this.engine.height - 15);
-	this.engine.renderer.context.fillText("LASER WAR", 230, this.engine.height - 15);
+	this.position = {x:15 ,y: this.engine.height - 62};
+	this.color = '#00F';
+	this.classicModel = [{x:0,y: 0,w: this.engine.width - 30, h: 50}];
+	this.texts = [{
+		font: '50px CBM64', 
+		color: '#F00', 
+		text: player1Score, 
+		position: { 
+			x: 20, 
+			y: this.engine.height - 15
+		} 
+	}, {
+		font: '50px CBM64', 
+		color: '#FF0', 
+		text: (player2Score < 10 ? ' ' : '') + player2Score, 
+		position: { 
+			x: this.engine.width - 95, 
+			y: this.engine.height - 15
+		} 
+	}, {
+		font: '50px CBM64', 
+		color: '#FFF', 
+		text: 'LASER WAR', 
+		position: { 
+			x: 230, 
+			y: this.engine.height - 15
+		} 
+	}];
 };
 
 rules.prototype.getRemoteData = function(){

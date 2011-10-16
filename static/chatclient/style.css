@@ -5,6 +5,9 @@ body {
 body, #entry {
   color: #eee;
 }
+canvas {
+	background: #000;
+}
 body, table {
   font-family: Helvetica; 
   font-size: 12px;
