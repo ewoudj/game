@@ -135,7 +135,14 @@ rules.prototype.keyboardHandler = function(evt){
 			this.engine.add(this);
 		}
 		this.initialized = false;
-		$("#aiconfig").show();
+	}
+	// F7: Toggle Chat
+	if(event.keyCode == 118){
+		$(".chatcontainer").toggle();
+	}
+	// F8: Toggle settings
+	if(event.keyCode == 119){
+		$("#aiconfig").toggle();
 		if(!engine.initializedAIConfigCombos){
 			engine.initializedAIConfigCombos = true;
 			for(var s in engine.ai){
@@ -152,14 +159,14 @@ rules.prototype.keyboardHandler = function(evt){
 			$('#player2ai').change(function() {
 				engine.player2ai = $(this).val();
 			});
+			for(var s in engine.rendering){
+				$("#renderer").append("<option value='" + s + "'>" + s + "</option>");
+				$('#renderer').val(engine.configuredRendering);
+			}
+			$('#player2ai').change(function() {
+				engine.configuredRendering = $(this).val();
+			});
 		}
-	}
-	else{
-		$("#aiconfig").hide();
-	}
-	// F7: Toggle Chat
-	if(event.keyCode == 118){
-		$(".chatcontainer").toggle();
 	}
 };
 

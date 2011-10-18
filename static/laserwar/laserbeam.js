@@ -12,6 +12,7 @@ var laserbeam = function(config){
 	this.direction = this.direction || 1;
 	this.color = "#FFF";
 	this.position = this.position || {x:0, y:0};
+	this.modelIndex = 2;
 	this.rects = [
 		{x: -20, y: -5, w: 40, h: 10}
 	];

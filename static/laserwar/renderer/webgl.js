@@ -7,10 +7,13 @@ if(typeof(require) !== 'undefined'){
 }
 
 engine.rendering.webgl = function(){
-	if(!this.webglRenderer){
+	if(!this.renderer){
+		this.renderer = true;
 		var self = this;
 		this.renderer = new webglRenderer({
-			models: ['/laserwar/renderer/webgl/ship2.js'],
+			models: ['/laserwar/renderer/webgl/ship.js', 
+			         '/laserwar/renderer/webgl/star.js',
+			         '/laserwar/renderer/webgl/laser.js'],
 			centerOffset: {x: this.width / 2, y: this.height / 2},
 			callback: function(){
 				self.rendererInitialized = true;
@@ -45,11 +48,14 @@ var webglRenderer = function(config){
 		scene: new THREE.Scene(), 
 		renderer: new THREE.WebGLRenderer(), 
 		loader:  new THREE.JSONLoader( true ),
+		geometries: [],
 		lastFrameNumber: 0
 	}, this);
 	this.renderer.setSize( window.innerWidth, window.innerHeight );
     document.body.appendChild( this.renderer.domElement );
-	this.camera.position.z = 1000;
+	this.camera.position.z = 700;
+	this.camera.position.x = 700;
+	this.camera.lookAt({x:0,y:0,z:0});
 	this.scene.add( new THREE.AmbientLight( 0x202020 ) );
 	var directionalLight = new THREE.DirectionalLight( 0xffffff );
 	directionalLight.position.x = 0;
@@ -77,9 +83,9 @@ var colorsBinary = {
 
 webglRenderer.prototype.renderEntity = function(e){
 	if(!e.mesh){
-		var scale = 20;
+		var scale = 12;
 		e.mesh = new THREE.Mesh( 
-			this.geometries['/laserwar/renderer/webgl/ship2.js'],
+			this.geometries[e.modelIndex || 0],
 			new THREE.MeshPhongMaterial( { ambient: 0x060606, color: colorsBinary[e.color], shininess: 60, shading: THREE.FlatShading } )
 			/*new THREE.MeshBasicMaterial({ 
 				color: colorsBinary[e.color], 
@@ -92,7 +98,7 @@ webglRenderer.prototype.renderEntity = function(e){
 		e.mesh.gameColor = e.color;
 		e.mesh.scale.set( scale, scale, scale );
 		e.mesh.doubleSided = true;
-		e.mesh.rotation.y = Math.PI * 1.5;
+		e.mesh.rotation.y = Math.PI * (e.direction === 1 ? 1.5 : 0.5);
 	}
 	if(e.mesh && e.position){
 		e.mesh.lastFrameNumber = this.lastFrameNumber;
@@ -127,7 +133,7 @@ webglRenderer.prototype.loadModelGeometries = function(configModels, callback){
 	this.loadNextModel(models, callback);
 };
 
-renderer.prototype.loadNextModel = function(models, callback){
+webglRenderer.prototype.loadNextModel = function(models, callback){
 	var m = models.shift();
 	if(!m){
 		this.loader.statusDomElement.style.display = "none";
@@ -135,30 +141,12 @@ renderer.prototype.loadNextModel = function(models, callback){
 	}
 	else{
 		var self = this;
-		self.geometries = {};
 		this.loader.load( { 
 			model: m, 
 			callback: function( geometry ) { 
-				self.geometries[m] = geometry;
+				self.geometries.push( geometry );
 				self.loadNextModel(models, callback);
 			}
 		});
 	}
 };
-
-
-//function createScene( geometry, scale, material ) {
-//	animate();
-//}
-//
-//function animate() {
-//    // Include examples/js/RequestAnimationFrame.js for cross-browser compatibility.
-//    requestAnimationFrame( animate );
-//    render();
-//}
-//
-//function render() {
-//    mesh.rotation.x += 0.01;
-//    mesh.rotation.y += 0.02;
-//    renderer.render( scene, camera );
-//}

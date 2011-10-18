@@ -9,7 +9,7 @@ if(typeof(require) !== 'undefined'){
 engine.rendering.classic = function(){
 	if(!this.renderer){
 		this.renderer = new renderer({
-			context: document.getElementById('c').getContext('2d')
+			engine: this
 		});
 	}
 	this.renderer.context.fillStyle = this.canvasColor;
@@ -36,6 +36,35 @@ engine.rendering.classic = function(){
 
 var renderer = function(config){
 	helpers.apply(config, this);
+	this.canvas = document.createElement('canvas');//document.getElementById('c');
+	document.body.appendChild(this.canvas);
+	this.canvas.style.position = 'absolute';
+	this.canvas.width = this.engine.width;
+	this.canvas.height = this.engine.height;
+	this.canvas.onmousedown = this.onmousedown.bind(this);
+	this.canvas.onmouseup = this.onmouseup.bind(this);
+	window.onmousemove = this.onmousemove.bind(this);
+	window.onresize = this.resize.bind(this);
+	this.resize();
+	this.context = this.canvas.getContext('2d');
+};
+
+renderer.prototype.resize = function(){
+	this.canvas.style.top = Math.ceil((window.innerHeight - this.engine.height) / 2) + 'px';
+	this.canvas.style.left = Math.ceil((window.innerWidth - this.engine.width) / 2) + 'px';
+};
+
+renderer.prototype.onmousemove = function(){
+	this.engine.mousePosition.x = event.clientX - this.canvas.offsetLeft;
+	this.engine.mousePosition.y = event.clientY - this.canvas.offsetTop;
+};
+
+renderer.prototype.onmousedown = function(){
+	this.engine.buttonDown = true;
+};
+
+renderer.prototype.onmouseup = function(){
+	this.engine.buttonDown = false;
 };
 
 renderer.prototype.renderEntity = function(e){

@@ -33,6 +33,7 @@ var ship = function(config){
 	this.position = this.position || {x:0, y:0};
 	this.gunOffset =  {x:0, y: 0};
 	this.collisionRect = {x: -15, y: -10, w: 30,h: 20};
+	this.modelIndex = 0;
 	this.rectsRight = [
 		{x: -20, y: -15, w: 20, h: 10},
 		{x: -10, y: -5, w: 30, h: 10},

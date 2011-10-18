@@ -8,19 +8,9 @@ if(typeof(require) !== 'undefined'){
 var engine = function(config){
 	helpers.apply(config, this);
 	if(this.mode == 'standalone' || this.mode == 'client'){
-		this.canvas = document.getElementById('c');
 		// Disable selection of text/elements in the browser
-		document.onselectstart = function() {return false;}; // ie
-		// document.onmousedown = function() {return false;}; // mozilla
-		// Various client side init
-		window.onmousemove = this.onmousemove.bind(this);
-		this.canvas.onmousedown = this.onmousedown.bind(this);
-		this.canvas.onmouseup = this.onmouseup.bind(this);
+		document.onselectstart = function() {return false;};
 		document.body.style.background = this.pageColor;
-		this.canvas.width = this.width;
-		this.canvas.height = this.height;
-		window.onresize = this.resize.bind(this);
-		this.resize();
 	}
 	this.buttonDown = false;
 	this.mousePosition = {x: 0, y: 0};
@@ -32,11 +22,20 @@ var engine = function(config){
 	if(this.rulesType){
 		this.add(new this.rulesType());
 	}
-	setInterval(this.update.bind(this), 38);
+	
+	if(this.mode === 'server'){
+		setInterval(this.update.bind(this), 38);
+	}
 	
 	if(this.mode == 'standalone' || this.mode == 'client'){
-		setInterval(engine.rendering[engine.configuredRendering].bind(this), 38);
+		this.animate();
 	}
+};
+
+engine.prototype.animate = function(){
+	requestAnimationFrame(this.animate.bind(this));
+	this.update();
+	engine.rendering[engine.configuredRendering].call(this);
 };
 
 engine.prototype.add = function(entity){
@@ -93,29 +92,11 @@ engine.prototype.update = function(time){
 	}
 };
 
-engine.prototype.resize = function(){
-	this.canvas.style.top = Math.ceil((window.innerHeight - this.height) / 2) + 'px';
-	this.canvas.style.left = Math.ceil((window.innerWidth - this.width) / 2) + 'px';
-};
-
-engine.prototype.onmousemove = function(){
-	this.mousePosition.x = event.clientX - this.canvas.offsetLeft;
-	this.mousePosition.y = event.clientY - this.canvas.offsetTop;
-};
-
-engine.prototype.onmousedown = function(){
-	this.buttonDown = true;
-};
-
-engine.prototype.onmouseup = function(){
-	this.buttonDown = false;
-};
-
 engine.ai = {};
 engine.player1ai = 'heuristic';
 engine.player2ai = 'prioritizing';
 engine.rendering = {};
-engine.configuredRendering = 'classic';
+engine.configuredRendering = 'webgl';
 
 if(typeof(exports) !== 'undefined'){
 	exports.engine = engine;

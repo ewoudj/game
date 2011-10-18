@@ -16,6 +16,7 @@ var star = function(config){
 	this.originalPosition = this.position;
 	this.angle = this.angle || 0;
 	this.collisionRect = {x: -15, y: -15, w: 30,h: 30};
+	this.modelIndex = 1;
 	this.rects = [
 		{x: -10, y: -20, w: 20, h: 10},
 		{x: -20, y: -10, w: 40, h: 10},
