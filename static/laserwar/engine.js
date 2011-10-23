@@ -20,7 +20,7 @@ var engine = function(config){
 	this.entities = [];
 	this.remoteData = [];
 	if(this.rulesType){
-		this.add(new this.rulesType());
+		this.add(new this.rulesType({engine: this}));
 	}
 	
 	if(this.mode === 'server'){
@@ -62,8 +62,9 @@ engine.prototype.update = function(time){
 			}
 		}
 		// Update
+		var time = new Date().getTime();
 		for(var i = 0, l = this.entities.length; i < l; i++){
-			this.entities[i].update(0);
+			this.entities[i].update(time);
 		}
 		// Filter out the objects that indicate they are finished
 		for(var i = 0, l = this.entities.length; i < l; i++){
@@ -94,9 +95,9 @@ engine.prototype.update = function(time){
 
 engine.ai = {};
 engine.player1ai = 'heuristic';
-engine.player2ai = 'prioritizing';
+engine.player2ai = 'heuristic';
 engine.rendering = {};
-engine.configuredRendering = 'webgl';
+engine.configuredRendering = 'classic';
 
 if(typeof(exports) !== 'undefined'){
 	exports.engine = engine;

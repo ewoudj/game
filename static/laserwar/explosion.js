@@ -8,6 +8,16 @@ var explosion = function(config){
 	this.color = this.color || "#FFF";
 	this.position = this.position || {x:0, y:0};
 	this.duration = 0;
+	this.modelIndex = 6;
+	this.subEntities = [];
+	for(var i = 0 ; i < 4 ; i++){
+		this.subEntities.push({
+			modelIndex: 6,
+			color: this.color,
+			position: this.position,
+			direction: 0
+		});
+	}
 	this.audioDone = false;
 	this.rect = {x: -5, y: -5, w: 10, h: 10};
 };
@@ -29,6 +39,7 @@ explosion.prototype.renderExplosion = function(duration, sound){
 		for(var i = 0 ; i < 4 ; i++){
 			var rectPos = helpers.rotate(currentPosition, {x:0, y:0}, i*90);
 			this.classicModel.push({x: -5 + rectPos.x, y: -5 + rectPos.y, w: 10, h: 10});
+			this.subEntities[i].position = {x: this.position.x + rectPos.x, y: this.position.y + rectPos.y};
 		}
 		this.classicModel.push(this.rect);
 	}
@@ -38,6 +49,9 @@ explosion.prototype.update = function(time){
 	this.duration++;
 	if(this.duration > 10){
 		this.finished = true;
+		for(var i = 0 ; i < 4 ; i++){
+			this.subEntities[i].finished = true;
+		}
 	} 
 };
 

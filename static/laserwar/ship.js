@@ -20,14 +20,13 @@ if(typeof(require) !== 'undefined'){
 var ship = function(config){
 	helpers.apply(config, this);
 	this.type = this.type || 'player'; // player, computer
-	console.log(this.type);
 	this.laserState = 10; // 10 = ready, 0 = charging
 	this.direction = this.direction || 1;
 	this.colors = colors ? colors : require("./rules").colors;
 	this.color = this.colors[this.colorIndex] || this.color || "#FFF";
 	this.speed = 3;
 	this.colorLoop = 0;
-	this.invulerability = 20;
+	this.invulerability = 1000;
 	this.audioDone = false;
 	this.name = this.name || 'ship';
 	this.position = this.position || {x:0, y:0};
@@ -49,8 +48,16 @@ var ship = function(config){
 ship.prototype = new entity();
 
 ship.prototype.update = function(time){
+	if(!this.lastTimeCalled){
+		this.lastTimeCalled = time;
+	}
+	var timeDelta = time - this.lastTimeCalled;
+	this.lastTimeCalled = time;
 	if(this.invulerability){
-		this.invulerability--;
+		this.invulerability -= timeDelta;
+		if(this.invulerability < 0){
+			this.invulerability = 0;
+		}
 	}
 	if(this.engine.gameState.player1Score == 10 || this.engine.gameState.player2Score == 10){
 		this.engine.canvasColor = this.colors[this.colorLoop];
@@ -80,8 +87,7 @@ ship.prototype.update = function(time){
 	if(this.type != 'computer'){
 		if(this.engine.mode == 'standalone' || (this.name == "Player 1" && this.engine.player1)){
 			this.shoot = this.engine.buttonDown;
-			this.position = this.calculateMovement(this.position, this.engine.mousePosition, 10);//{x: this.engine.mousePosition.x, y: this.engine.mousePosition.y};
-			//console.log("x:" + this.position.x + " , y:" + this.position.y);
+			this.position = this.calculateMovement(this.position, this.engine.mousePosition, 10, timeDelta);
 		}
 		else if(this.name == "Player 2" && this.engine.player2){
 			this.shoot = this.engine.buttonDown2;
@@ -92,14 +98,17 @@ ship.prototype.update = function(time){
 		}
 	}
 	else if(this.type == 'computer'){
+		var controls;
 		if(this.name === 'Player 1'){
-			engine.ai[engine.player1ai].call(this);
+			controls = engine.ai[engine.player1ai].call(this);
 		}
 		else {
-			engine.ai[engine.player2ai].call(this);
+			controls = engine.ai[engine.player2ai].call(this);
 		}
+		this.position = this.calculateMovement(this.position, controls.mousePosition, 10, timeDelta);
+		this.shoot = controls.shoot;
 	}
-	if(this.shoot && this.laserState == 10){
+	if(this.shoot && this.laserState == 300){
 		this.laserState = 0;	
 		this.engine.add(new laserbeam({
 			position: {x:this.position.x + this.gunOffset.x, y:this.position.y + this.gunOffset.y},
@@ -107,11 +116,11 @@ ship.prototype.update = function(time){
 			owner: this
 		}));
 	}
-	else if(this.laserState < 10){
-		this.laserState = this.laserState + 2;
+	else if(this.laserState < 300){
+		this.laserState = this.laserState + timeDelta;
 	}
 	else{
-		this.laserState = 10;
+		this.laserState = 300;
 	}
 	if(this.position.x > previousPosition.x){
 		this.direction = 1;
@@ -122,13 +131,14 @@ ship.prototype.update = function(time){
 	this.rects = this.direction == 1 ? this.rectsRight : this.rectsLeft;
 };
 
-ship.prototype.calculateMovement = function(currentPosition, mousePosition, speedLimit){
+ship.prototype.calculateMovement = function(currentPosition, mousePosition, speedLimit, timeDelta){
 	var deltaX = mousePosition.x - currentPosition.x;
 	var deltaY = mousePosition.y - currentPosition.y;
 	var distance = helpers.distance(currentPosition, mousePosition);
 	var f = 0.25;
-	if(distance > 10){
-		f = 10 / distance;
+	var speed = speedLimit * (timeDelta / 40);
+	if(distance > 5){
+		f = 5 / distance;
 	}
 	//var r = distance / speedLimit;
 	return {

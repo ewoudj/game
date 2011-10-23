@@ -24,7 +24,12 @@ if(typeof(exports) !== 'undefined'){
 
 var rules = function(config){
 	helpers.apply(config, this);
+	this.geometry = new THREE.CubeGeometry(1, (50 * 2.5 / 12), ((this.engine.width - 30) * 2.5) / 12);
 	this.barHeight = 30;
+	this.finished = false;
+	this.modelIndex = -1;
+	this.position = {x:0 , y: 0, z: -40};
+	this.color = '#00F';
 	this.initialized = false;
 };
 rules.prototype = new entity();
@@ -163,7 +168,7 @@ rules.prototype.keyboardHandler = function(evt){
 				$("#renderer").append("<option value='" + s + "'>" + s + "</option>");
 				$('#renderer').val(engine.configuredRendering);
 			}
-			$('#player2ai').change(function() {
+			$('#renderer').change(function() {
 				engine.configuredRendering = $(this).val();
 			});
 		}
@@ -266,7 +271,7 @@ rules.prototype.update = function(time){
 			this.engine.gameState.player2Ship, 
 			this.engine.mousePosition2, this.engine.buttonDown2, 'Player 2', -1, 3);
 	
-	// Randomly create UFOs when they does not exist
+	// Randomly create UFOs when they do not exist
 	if((!(this.engine.gameState.player3) || (this.engine.gameState.player3 && this.engine.gameState.player3.finished)) && 6 == Math.floor(Math.random()*200)){
 		this.engine.add( this.engine.gameState.player3 = new ufo({
 			name        : 'Player 3',
@@ -293,8 +298,7 @@ rules.prototype.render = function(time){
 };
 
 rules.prototype.renderRules = function(player1Score, player2Score){
-	this.position = {x:15 ,y: this.engine.height - 62};
-	this.color = '#00F';
+	this.position = {x: engine.configuredRendering === 'classic' ? 15 : 400 , y: this.engine.height - 62, z: -40};
 	this.classicModel = [{x:0,y: 0,w: this.engine.width - 30, h: 50}];
 	this.texts = [{
 		font: '50px CBM64', 

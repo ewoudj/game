@@ -12,7 +12,7 @@ var laserbeam = function(config){
 	this.direction = this.direction || 1;
 	this.color = "#FFF";
 	this.position = this.position || {x:0, y:0};
-	this.modelIndex = 2;
+	this.modelIndex = 5;
 	this.rects = [
 		{x: -20, y: -5, w: 40, h: 10}
 	];
@@ -40,8 +40,13 @@ laserbeam.prototype.update = function(time){
 			}
 		}
 	}
+	if(!this.lastTimeCalled){
+		this.lastTimeCalled = time;
+	}
+	var timeDelta = time - this.lastTimeCalled;
+	this.lastTimeCalled = time;
 	var previousPosition = this.position;
-	this.position.x = this.position.x + (40 * this.direction);
+	this.position.x = this.position.x + ((40 * this.direction)  * (timeDelta / 40));
 };
 
 laserbeam.prototype.getRemoteData = function(){

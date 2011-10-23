@@ -24,6 +24,7 @@ var ufo = function(config){
 	this.pointerOffset = {x:20, y:15};
 	this.gunOffset =  {x:20, y:10};
 	this.collisionRect = {x: 0, y: 0, w: 40,h: 30};
+	this.modelIndex = 4;
 	this.ufoFrame = 0;
 	this.ufoFrames = [ [
 		{x: 10, y: 0, w: 20, h: 10},
@@ -157,16 +158,37 @@ ufo.prototype.update = function(time){
 	else if(this.position.x < previousPosition.x){
 		this.direction = -1;
 	}
-	this.rects = this.ufoFrames[this.ufoFrame];// this.direction == 1 ? this.ufo1 : this.ufo2;
-	//if(this.nextFrame){
+	if(!this.lastTimeFrameChanged){
+		this.lastTimeFrameChanged = time;
+	}
+	var frameChangeTimeDelta = time - this.lastTimeFrameChanged;
+	if(frameChangeTimeDelta > 80){
+		this.lastTimeFrameChanged = time;
+		this.rects = this.ufoFrames[this.ufoFrame];
 		this.ufoFrame += this.direction;
 		if(this.ufoFrame >= this.ufoFrames.length) this.ufoFrame = 0;
 		if(this.ufoFrame < 0) this.ufoFrame = this.ufoFrames.length - 1;
-		//this.nextFrame = false;
-	//}
-	//else{
-	//	this.nextFrame = true;
-	//}
+	}
+	if(this.ufoFrame === 0){
+		this.modelIndex = 2;
+		this.direction = 1;
+	}
+	else if(this.ufoFrame === 1){
+		this.modelIndex = 3;
+		this.direction = 1;
+	}
+	else if(this.ufoFrame === 2){
+		this.modelIndex = 4;
+		this.direction = 1;
+	}
+	else if(this.ufoFrame === 3){
+		this.modelIndex = 4;
+		this.direction = -1;
+	}
+	else if(this.ufoFrame === 4){
+		this.modelIndex = 3;
+		this.direction = -1;
+	}
 };
 
 ufo.prototype.getRemoteData = function(){

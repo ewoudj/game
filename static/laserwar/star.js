@@ -36,6 +36,11 @@ star.prototype.render = function(){
 };
 
 star.prototype.update = function(time){
+	if(!this.lastTimeCalled){
+		this.lastTimeCalled = time;
+	}
+	var timeDelta = time - this.lastTimeCalled;
+	this.lastTimeCalled = time;
 	if(!this.initialized){
 		if(!this.parent){
 			for(var i = 0; i < 4; i++){
@@ -65,7 +70,7 @@ star.prototype.update = function(time){
 			}
 		}
 	}
-	this.angle -= (this.parent ? 0.5 : 0.3);
+	this.angle -= ((this.parent ? 0.5 : 0.3) * (timeDelta / 40));
 	var center = this.parent ? this.parent.position : { x: this.engine.width / 2, y: (this.engine.height / 2) - this.bottomOffset };
 	if(this.parent){
 		this.originalPosition = { x: center.x - 100, y: center.y };

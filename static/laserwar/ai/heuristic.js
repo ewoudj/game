@@ -46,7 +46,7 @@ engine.ai.heuristic = function(){
 			this.evadingTime = 3;
 		}
 		this.evadingTime--;
-		this.position = helpers.rotate(this.position, this.nearestEntity.position, -25);
+		this.mousePosition = helpers.rotate(this.position, this.nearestEntity.position, -5);
 		this.evading = true;
 	}
 	// Priority 2: 
@@ -69,9 +69,9 @@ engine.ai.heuristic = function(){
 			var movey = !(deltay < 10 && deltay > -10);
 			var movex = !(deltax < 80 && deltax > -80);
 			var reversex = (deltax < 60 && deltax > -60);
-			this.position = {
-				x: this.position.x + ( this.targetVector.x * (movex ? this.speed : (reversex ? -this.speed : 0 ) ) ),
-				y: this.position.y + ( this.targetVector.y * (movey ? this.speed : 0) )
+			this.mousePosition = {
+				x: this.position.x + ( this.targetVector.x * (movex ? 100 : (reversex ? -100 : 0 ) ) ),
+				y: this.position.y + ( this.targetVector.y * (movey ? 100 : 0) )
 			};
 		}
 		if(this.position.x == previousPosition.x && this.direction != this.targetVector.x){
@@ -82,4 +82,8 @@ engine.ai.heuristic = function(){
 		// - the ship is pointed in the right direction
 		this.shoot = ((deltay < 40 && deltay > -40) && (this.direction == this.targetVector.x));
 	}
+	return {
+		mousePosition: this.mousePosition,
+		shoot: this.shoot
+	};
 };

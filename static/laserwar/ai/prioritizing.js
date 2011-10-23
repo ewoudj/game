@@ -8,7 +8,6 @@ if(typeof(require) !== 'undefined'){
 
 
 engine.ai.prioritizing = function(){
-	
 	var myStars = 0;
 	var maxDistance = Math.sqrt(Math.pow(this.engine.width,2) + Math.pow(this.engine.width,2));
 	var highestValue = 0;
@@ -87,5 +86,8 @@ engine.ai.prioritizing = function(){
 			}
 		}
 	}
-	this.position = this.calculateMovement(this.position, this.mousePosition, 10);
+	return {
+		mousePosition: this.mousePosition,
+		shoot: this.shoot
+	};
 };
