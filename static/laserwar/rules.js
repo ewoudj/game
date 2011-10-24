@@ -25,19 +25,85 @@ if(typeof(exports) !== 'undefined'){
 var rules = function(config){
 	helpers.apply(config, this);
 	this.geometry = new THREE.CubeGeometry(1, (50 * 2.5 / 12), ((this.engine.width - 30) * 2.5) / 12);
+	this.position = {
+		x: engine.configuredRendering === 'classic' ? 15 : 400 - 5 , 
+		y: engine.configuredRendering === 'classic' ? this.engine.height - 62 : this.engine.height - 32, 
+		z: -40
+	};
+	this.classicModel = [{x:0,y: 0,w: this.engine.width - 30, h: 50}];
+	this.subEntities = [];
+	this.texts = [];
+	this.addScoreBarItem("0", "#F00", 20);
+	this.addScoreBarItem(" 0", "#FF0", this.engine.width - 95);
+	this.addScoreBarItem("LASER WAR", "#FFF", 230);
+	this.direction = 1;
 	this.barHeight = 30;
 	this.finished = false;
 	this.modelIndex = -1;
-	this.position = {x:0 , y: 0, z: -40};
 	this.color = '#00F';
 	this.initialized = false;
 };
 rules.prototype = new entity();
 
+rules.prototype.to3dText = function(text){
+	return new THREE.TextGeometry( text, {
+		size: 80 / 12,
+		height: 10 / 12,
+		curveSegments: 1,
+		font: "cbm-64"
+	});
+};
+
+rules.prototype.addScoreBarItem = function(text, color, offsetLeft){
+	this.subEntities.push({
+		modelIndex: text,
+		score: 0,
+		geometry: this.to3dText( text ),
+		color: color,
+		position: { 
+			x: offsetLeft, 
+			y: this.engine.height - 15,
+			z: -25
+		},
+		rotation: {
+			x: 0, y:0, z:0
+		},
+		direction: -1
+	});
+	this.texts.push({
+		font: '50px CBM64', 
+		color: color, 
+		text: text, 
+		position: { 
+			x: offsetLeft, 
+			y: this.engine.height - 15
+		} 
+	});
+};
+
+rules.prototype.render = function(time){
+	this.renderRules(this.engine.gameState.player1Score, this.engine.gameState.player2Score);
+};
+
+rules.prototype.renderRules = function(player1Score, player2Score){
+	this.texts[0].text = player1Score;
+	this.texts[1].text = (player2Score < 10 ? ' ' : '') + player2Score;
+	if(this.subEntities[0].score != player1Score){
+		this.subEntities[0].score = player1Score;
+		this.subEntities[0].mesh = null;
+		this.subEntities[0].modelIndex = this.texts[0].text;
+		this.subEntities[0].geometry = this.to3dText( this.texts[0].text );
+	}
+	if(this.subEntities[1].score != player2Score){
+		this.subEntities[1].score = player2Score;
+		this.subEntities[1].mesh = null;
+		this.subEntities[1].modelIndex = this.texts[1].text;
+		this.subEntities[1].geometry = this.to3dText( this.texts[1].text );
+	}
+};
+
 rules.prototype.initialize = function(){
 	this.initialized = true;
-	//this.engine.add( new menu({
-	//}) );
 	this.engine.canvasColor = '#000';
 	this.engine.entities = [];
 	this.engine.add(this);
@@ -254,14 +320,6 @@ rules.prototype.update = function(time){
 	if(!this.initialized){
 		this.initialize();
 	}
-//	if(this.engine.player1Controls){
-//		this.parseControlString(this.engine.player1Controls, "buttonDown", "mousePosition");
-//		this.engine.player1Controls = "";
-//	}
-//	if(this.engine.player2Controls){
-//		this.parseControlString(this.engine.player2Controls, "buttonDown2", "mousePosition2");
-//		this.engine.player2Controls = "";
-//	}
 
 	this.engine.gameState.player1Ship = this.ensureUserRespawn(
 			this.engine.gameState.player1Ship, 
@@ -291,40 +349,6 @@ rules.prototype.update = function(time){
 			position    : { x: 10, y : (this.engine.height - 50 - this.barHeight) }
 		}));		
 	}
-};
-
-rules.prototype.render = function(time){
-	this.renderRules(this.engine.gameState.player1Score, this.engine.gameState.player2Score);
-};
-
-rules.prototype.renderRules = function(player1Score, player2Score){
-	this.position = {x: engine.configuredRendering === 'classic' ? 15 : 400 , y: this.engine.height - 62, z: -40};
-	this.classicModel = [{x:0,y: 0,w: this.engine.width - 30, h: 50}];
-	this.texts = [{
-		font: '50px CBM64', 
-		color: '#F00', 
-		text: player1Score, 
-		position: { 
-			x: 20, 
-			y: this.engine.height - 15
-		} 
-	}, {
-		font: '50px CBM64', 
-		color: '#FF0', 
-		text: (player2Score < 10 ? ' ' : '') + player2Score, 
-		position: { 
-			x: this.engine.width - 95, 
-			y: this.engine.height - 15
-		} 
-	}, {
-		font: '50px CBM64', 
-		color: '#FFF', 
-		text: 'LASER WAR', 
-		position: { 
-			x: 230, 
-			y: this.engine.height - 15
-		} 
-	}];
 };
 
 rules.prototype.getRemoteData = function(){
