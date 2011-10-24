@@ -69,30 +69,12 @@ var webglRenderer = function(config){
     // the 'background', used for 'flickering' and getting mouse coordinates
     this.backgroundPlane = new THREE.Mesh( 
 		new THREE.PlaneGeometry(config.engine.width, config.engine.height),
-		new THREE.MeshBasicMaterial( { 
-			ambient: 0x000000, 
-			color: 0x000000
-		})
+		this.createMaterial(config.engine.canvasColor)
 	);
+    this.backgroundPlane.gameColor = config.engine.canvasColor;
     this.backgroundPlane.scale.set( this.gameScale, this.gameScale, this.gameScale );
     this.backgroundPlane.position.z = -50;
     this.scene.add(this.backgroundPlane);
-    // Text for rendering the score, etc
-    var text3d = new THREE.TextGeometry( " 0     LASER WAR     0", {
-		size: 80,
-		height: 10,
-		curveSegments: 1,
-		font: "cbm-64"
-	});
-	var text = new THREE.Mesh( text3d, this.createMaterial(0xffffff) );
-	text.doubleSided = true;
-	text.position.x = -950;
-	text.position.y = -635;
-	text.position.z = -25;
-	//text.overdraw = true;
-	var parent = new THREE.Object3D();
-	parent.add( text );
-	this.scene.add( parent );
 	// Initial camera position and look at
 	this.camera.position.z = 1000;
 	this.camera.position.x = 0;
@@ -232,7 +214,14 @@ webglRenderer.prototype.renderEntity = function(e){
 		e.mesh.position.x = (e.position.x - this.centerOffset.x) * this.gameScale ;
 		e.mesh.position.y = (e.position.y - this.centerOffset.y) * -this.gameScale ;
 		e.mesh.position.z = e.position.z || 0;
-		e.mesh.rotation.y = Math.PI * (e.direction === 1 ? 1.5 : 0.5);
+		if(e.rotation){
+			e.mesh.rotation.x = e.rotation.x;
+			e.mesh.rotation.y = e.rotation.y;
+			e.mesh.rotation.z = e.rotation.z;
+		}
+		else{
+			e.mesh.rotation.y = Math.PI * (e.direction === 1 ? 1.5 : 0.5);
+		}
 		e.mesh.lastFrameNumber = this.lastFrameNumber;
 //		if(e.name === 'Player 1'){
 //			this.camera.position.x = e.mesh.position.x;
@@ -247,6 +236,10 @@ webglRenderer.prototype.renderEntity = function(e){
 };
 
 webglRenderer.prototype.renderScene = function(){
+    if(this.backgroundPlane.gameColor !== this.engine.canvasColor){
+    	this.backgroundPlane.materials[0] = this.createMaterial(this.engine.canvasColor);
+    	this.backgroundPlane.gameColor = this.engine.canvasColor;
+	}
 	var children = this.scene.children.slice(0);
 	for(var i = 0, l = children.length; i < l; i++){
 		var m = children[i];
