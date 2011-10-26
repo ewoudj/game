@@ -24,18 +24,6 @@ if(typeof(exports) !== 'undefined'){
 
 var rules = function(config){
 	helpers.apply(config, this);
-	this.geometry = new THREE.CubeGeometry(1, (50 * 2.5 / 12), ((this.engine.width - 30) * 2.5) / 12);
-	this.position = {
-		x: engine.configuredRendering === 'classic' ? 15 : 400 - 5 , 
-		y: engine.configuredRendering === 'classic' ? this.engine.height - 62 : this.engine.height - 32, 
-		z: -40
-	};
-	this.classicModel = [{x:0,y: 0,w: this.engine.width - 30, h: 50}];
-	this.subEntities = [];
-	this.texts = [];
-	this.addScoreBarItem("0", "#F00", 20);
-	this.addScoreBarItem(" 0", "#FF0", this.engine.width - 95);
-	this.addScoreBarItem("LASER WAR", "#FFF", 230);
 	this.direction = 1;
 	this.barHeight = 30;
 	this.finished = false;
@@ -86,6 +74,20 @@ rules.prototype.render = function(time){
 };
 
 rules.prototype.renderRules = function(player1Score, player2Score){
+	if(!this.geometry){
+		this.geometry = new THREE.CubeGeometry(1, (50 * 2.5 / 12), ((this.engine.width - 30) * 2.5) / 12);
+		this.position = {
+			x: engine.configuredRendering === 'classic' ? 15 : 400 - 5 , 
+			y: engine.configuredRendering === 'classic' ? this.engine.height - 62 : this.engine.height - 32, 
+			z: -40
+		};
+		this.classicModel = [{x:0,y: 0,w: this.engine.width - 30, h: 50}];
+		this.subEntities = [];
+		this.texts = [];
+		this.addScoreBarItem("0", "#F00", 20);
+		this.addScoreBarItem(" 0", "#FF0", this.engine.width - 95);
+		this.addScoreBarItem("LASER WAR", "#FFF", 230);
+	}
 	this.texts[0].text = player1Score;
 	this.texts[1].text = (player2Score < 10 ? ' ' : '') + player2Score;
 	if(this.subEntities[0].score != player1Score){

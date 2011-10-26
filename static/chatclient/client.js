@@ -441,20 +441,6 @@ function onConnect(session) {
 		CONFIG.unread = 0;
 		//updateTitle();
 	});
-
-	// Start the game
-	var settings = {
-		debug : false,
-		width : 800,
-		height : 600,
-		pageColor : '#555',
-		canvasColor : '#000',
-		rulesType : rules,
-		crosshair : true,
-		mode : 'standalone' // 'client', 'server', 'standalone'
-	};
-
-	window.game = new engine(settings);
 }
 
 //add a list of present chat members to the stream
@@ -474,87 +460,71 @@ function who() {
 	}, "json");
 }
 
-$(document)
-		.ready(
-				function() {
+function connectToServer() {
+	//lock the UI while waiting for a response
+	var nick = "Player" + Math.ceil(Math.random() * 1000);
 
-					//submit new messages when the user hits enter if the message isnt blank
-					$("#entry").keypress(function(e) {
-						if (e.keyCode != 13 /* Return */)
-							return;
-						var msg = $("#entry").attr("value").replace("\n", "");
-						if (!util.isBlank(msg))
-							send(msg);
-						$("#entry").attr("value", ""); // clear the entry field.
-					});
+	//dont bother the backend if we fail easy validations
+	if (nick.length > 50) {
+		alert("Nick too long. 50 character max.");
+		return false;
+	}
 
-					$("#usersLink").click(outputUsers);
+	//more validations
+	if (/[^\w_\-^!]/.exec(nick)) {
+		alert("Bad character in nick. Can only have letters, numbers, and '_', '-', '^', '!'");
+		return false;
+	}
 
-					//try joining the chat when the user clicks the connect button
-					$("#connectButton")
-							.click(
-									function() {
-										//lock the UI while waiting for a response
-										showLoad();
-										var nick = $("#nickInput")
-												.attr("value");
+	//make the actual join request to the server
+	$.ajax({
+		cache : false,
+		type : "GET", // XXX should be POST
+		dataType : "json",
+		url : "/join",
+		data : {
+			nick : nick
+		},
+		error : function() {
+			alert("error connecting to server");
+		},
+		success : onConnect
+	});
+	return false;
+}
 
-										//dont bother the backend if we fail easy validations
-										if (nick.length > 50) {
-											alert("Nick too long. 50 character max.");
-											showConnect();
-											return false;
-										}
+$(document).ready(function() {
+	//submit new messages when the user hits enter if the message isnt blank
+	$("#entry").keypress(function(e) {
+		if (e.keyCode != 13 /* Return */)
+			return;
+		var msg = $("#entry").attr("value").replace("\n", "");
+		if (!util.isBlank(msg))
+			send(msg);
+		$("#entry").attr("value", ""); // clear the entry field.
+	});
+	$("#usersLink").click(outputUsers);
+	//try joining the chat when the user clicks the connect button
+	connectToServer();
+	// update the daemon uptime every 10 seconds
+	setInterval(function() {
+		updateUptime();
+	}, 10 * 1000);
 
-										//more validations
-										if (/[^\w_\-^!]/.exec(nick)) {
-											alert("Bad character in nick. Can only have letters, numbers, and '_', '-', '^', '!'");
-											showConnect();
-											return false;
-										}
+	if (CONFIG.debug) {
+		$("#loading").hide();
+		$("#connect").hide();
+		scrollDown();
+		return;
+	}
 
-										//make the actual join request to the server
-										$
-												.ajax({
-													cache : false,
-													type : "GET" // XXX should be POST
-													,
-													dataType : "json",
-													url : "/join",
-													data : {
-														nick : nick
-													},
-													error : function() {
-														alert("error connecting to server");
-														showConnect();
-													},
-													success : onConnect
-												});
-										return false;
-									});
+	//begin listening for updates right away
+	//interestingly, we don't need to join a room to get its updates
+	//we just don't show the chat stream to the user until we create a session
+	longPoll();
 
-					// update the daemon uptime every 10 seconds
-					setInterval(function() {
-						updateUptime();
-					}, 10 * 1000);
-
-					if (CONFIG.debug) {
-						$("#loading").hide();
-						$("#connect").hide();
-						scrollDown();
-						return;
-					}
-
-					// remove fixtures
-					$("#log table").remove();
-
-					//begin listening for updates right away
-					//interestingly, we don't need to join a room to get its updates
-					//we just don't show the chat stream to the user until we create a session
-					longPoll();
-
-					showConnect();
-				});
+	showConnect();
+});
 
 //if we can, notify the server that we're going away.
 $(window).unload(function() {

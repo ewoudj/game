@@ -15,23 +15,25 @@
 				font-style: normal;
 			}
 		</style>
+		<script type="text/javascript">
+			var onBodyLoad = function(){
+				// Start the game
+				var settings = {
+					debug : false,
+					width : 800,
+					height : 600,
+					pageColor : '#555',
+					canvasColor : '#000',
+					rulesType : rules,
+					crosshair : true,
+					mode : 'standalone' // 'client', 'server', 'standalone'
+				};
+
+				window.game = new engine(settings);
+			};
+		</script>
 	</head>
-  	<body>
-  	  		<div id="connect">
-				  <form action="#">
-				    <fieldset> 
-				      <h1>
-				        Welcome. Please enter your name to start playing.
-				      </h1>
-				
-				      <label for="nick">Name:</label>
-				      <input id="nickInput" class="text"type="text" name="nick" value=""/>
-				      <input id="connectButton" class="button" type="submit" name="" value="Join"/>
-				
-				    </fieldset>
-				  </form>
-				</div>
-				<div id="loading"><h1>loading...</h1></div>
+  	<body onload="onBodyLoad()">
   		<div class="chatcontainer">
 		    <div id="app" class="logcontainer">
 				<div id="log">
