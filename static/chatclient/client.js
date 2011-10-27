@@ -205,6 +205,10 @@ function addMessage(from, text, time, _class) {
 			} else {
 				var remoteGameState = text.substr(2);
 				window.game.remoteDataString = remoteGameState;
+//				if(!window.game.remoteFrame){
+//					window.game.remoteFrame = 0;
+//				}
+//				window.game.remoteFrame++;
 			}
 			return;
 		}
@@ -282,7 +286,6 @@ var first_poll = true;
 // function's execution.
 function longPoll(data) {
 	if (transmission_errors > 2) {
-		showConnect();
 		return;
 	}
 
@@ -372,32 +375,6 @@ function send(msg) {
 	}
 }
 
-//Transition the page to the state that prompts the user for a nickname
-function showConnect() {
-	$("#connect").show();
-	$("#loading").hide();
-	$("#toolbar").hide();
-	$("#nickInput").focus();
-}
-
-//transition the page to the loading screen
-function showLoad() {
-	$("#connect").hide();
-	$("#loading").show();
-	$("#toolbar").hide();
-}
-
-//transition the page to the main chat view, putting the cursor in the textfield
-function showChat(nick) {
-	$("#toolbar").show();
-	$("#entry").focus();
-
-	$("#connect").hide();
-	$("#loading").hide();
-
-	scrollDown();
-}
-
 //we want to show a count of unread messages when the window does not have focus
 function updateTitle() {
 	if (CONFIG.unread) {
@@ -416,7 +393,6 @@ var rss;
 function onConnect(session) {
 	if (session.error) {
 		alert("error connecting: " + session.error);
-		showConnect();
 		return;
 	}
 
@@ -426,9 +402,6 @@ function onConnect(session) {
 	rss = session.rss;
 	updateRSS();
 	updateUptime();
-
-	//update the UI to show the chat
-	showChat(CONFIG.nick);
 
 	//listen for browser events so we know to update the document title
 	$(window).bind("blur", function() {
@@ -505,25 +478,16 @@ $(document).ready(function() {
 	});
 	$("#usersLink").click(outputUsers);
 	//try joining the chat when the user clicks the connect button
-	connectToServer();
+	//connectToServer();
 	// update the daemon uptime every 10 seconds
 	setInterval(function() {
 		updateUptime();
 	}, 10 * 1000);
 
-	if (CONFIG.debug) {
-		$("#loading").hide();
-		$("#connect").hide();
-		scrollDown();
-		return;
-	}
-
 	//begin listening for updates right away
 	//interestingly, we don't need to join a room to get its updates
 	//we just don't show the chat stream to the user until we create a session
 	longPoll();
-
-	showConnect();
 });
 
 //if we can, notify the server that we're going away.

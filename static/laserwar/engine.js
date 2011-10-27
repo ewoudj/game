@@ -24,10 +24,17 @@ var engine = function(config){
 	}
 	
 	if(this.mode === 'server'){
-		setInterval(this.update.bind(this), 38);
+		setInterval(this.update.bind(this), 20);
 	}
 	
-	if(this.mode == 'standalone' || this.mode == 'client'){
+//	if(this.mode === 'client'){
+//		setInterval(function(){
+//			this.update();
+//			engine.rendering[engine.configuredRendering].call(this);
+//		}.bind(this), 38);
+//	}
+	
+	if(this.mode == 'standalone' || this.mode === 'client'){
 		this.animate();
 	}
 };
@@ -64,12 +71,15 @@ engine.prototype.update = function(time){
 		// Update
 		var time = new Date().getTime();
 		for(var i = 0, l = this.entities.length; i < l; i++){
-			this.entities[i].update(time);
+			var e1 = this.entities[i];
+			if(e1 && e1.update){
+				e1.update(time);
+			}
 		}
 		// Filter out the objects that indicate they are finished
 		for(var i = 0, l = this.entities.length; i < l; i++){
 			var e1 = this.entities[i];
-			if(!e1.finished){
+			if(e1 && !e1.finished){
 				newList.push(e1);
 			}
 		}

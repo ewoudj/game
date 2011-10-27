@@ -8,6 +8,8 @@ if(typeof(require) !== 'undefined'){
 
 engine.rendering.classic = function(){
 	if(!this.renderer){
+//		this.remoteFrame = 0;
+//		this.lastRemoteFrame = 0;
 		this.renderer = new renderer({
 			engine: this
 		});
@@ -23,14 +25,17 @@ engine.rendering.classic = function(){
 		}
 	}
 	else if(this.mode == 'client'){
-		this.remoteData = this.remoteDataString.split(",");
-		var offset = 0;
-		var l = this.remoteData.length;
-		while(offset < l){
-			var e = this.remoteRenderer[this.remoteData[offset]];
-			offset = e.renderRemoteData(this.remoteData,offset);
-			this.renderer.renderEntity(e);
-		}
+//		if(this.remoteFrame > this.lastRemoteFrame){
+//			this.lastRemoteFrame = this.remoteFrame;
+			this.remoteData = this.remoteDataString.split(",");
+			var offset = 0;
+			var l = this.remoteData.length;
+			while(offset < l){
+				var e = this.remoteRenderer[this.remoteData[offset]];
+				offset = e.renderRemoteData(this.remoteData,offset);
+				this.renderer.renderEntity(e);
+			}
+//		}
 	}
 };
 

@@ -150,7 +150,10 @@ ship.prototype.calculateMovement = function(currentPosition, mousePosition, spee
 ship.prototype.render = function(){
 	if(!this.audioDone){
 		this.audioDone = true;
-		audio.appearAudio.play();
+		try{
+		if(audio){
+			audio.appearAudio.play();
+		}}catch(ex){}
 	}
 	this.classicModel = this.rects;
 };

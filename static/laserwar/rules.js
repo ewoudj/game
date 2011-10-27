@@ -24,6 +24,15 @@ if(typeof(exports) !== 'undefined'){
 
 var rules = function(config){
 	helpers.apply(config, this);
+	if(this.engine.mode == 'standalone' || this.engine.mode == 'client'){
+		this.geometry = new THREE.CubeGeometry(1, (50 * 2.5 / 12), ((this.engine.width - 30) * 2.5) / 12);
+	}
+	this.position = {
+		x: engine.configuredRendering === 'classic' ? 15 : 400 - 5 , 
+		y: engine.configuredRendering === 'classic' ? this.engine.height - 62 : this.engine.height - 32, 
+		z: -40
+	};
+	this.classicModel = [{x:0,y: 0,w: this.engine.width - 30, h: 50}];
 	this.direction = 1;
 	this.barHeight = 30;
 	this.finished = false;
@@ -34,12 +43,16 @@ var rules = function(config){
 rules.prototype = new entity();
 
 rules.prototype.to3dText = function(text){
-	return new THREE.TextGeometry( text, {
-		size: 80 / 12,
-		height: 10 / 12,
-		curveSegments: 1,
-		font: "cbm-64"
-	});
+	var result = null;
+	if(this.engine.mode == 'standalone' || this.engine.mode == 'client'){
+		result = new THREE.TextGeometry( text, {
+			size: 80 / 12,
+			height: 10 / 12,
+			curveSegments: 1,
+			font: "cbm-64"
+		});
+	}
+	return result;
 };
 
 rules.prototype.addScoreBarItem = function(text, color, offsetLeft){
@@ -74,14 +87,7 @@ rules.prototype.render = function(time){
 };
 
 rules.prototype.renderRules = function(player1Score, player2Score){
-	if(!this.geometry){
-		this.geometry = new THREE.CubeGeometry(1, (50 * 2.5 / 12), ((this.engine.width - 30) * 2.5) / 12);
-		this.position = {
-			x: engine.configuredRendering === 'classic' ? 15 : 400 - 5 , 
-			y: engine.configuredRendering === 'classic' ? this.engine.height - 62 : this.engine.height - 32, 
-			z: -40
-		};
-		this.classicModel = [{x:0,y: 0,w: this.engine.width - 30, h: 50}];
+	if(!this.subEntities){
 		this.subEntities = [];
 		this.texts = [];
 		this.addScoreBarItem("0", "#F00", 20);
