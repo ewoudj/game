@@ -1,0 +1,23 @@
+{
+  "name": "game",
+  "description": "Late 1970's style space shooter",
+  "version": "0.0.1",
+  "author": "Ewoud van den Boom <ewoudj@gmail.com>",
+  "contributors": [ 
+    { "name": "Ewoud van den Boom", "email": "ewoudj@gmail.com" }
+  ],
+  "keywords": ["game", "node.js", "javascript", "webgl", "canvas"],
+  "repository" : { 
+    "type" : "git"
+  , "url" : "git://github.com/ewoudj/game.git"
+  },
+  "main": "server.js",
+  "engines": { "node": ">= 0.4.1" },
+  "dependencies": {
+    "socket.io": "*"
+  },
+  "licenses" : [ { "type" : "MIT"
+    , "url" : "http://github.com/ewoudj/game/raw/master/LICENSE"
+    }
+  ]
+}
