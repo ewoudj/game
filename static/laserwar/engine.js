@@ -6,6 +6,14 @@ if(typeof(require) !== 'undefined'){
 }
 
 var engine = function(config){
+	helpers.apply({
+		debug : false,
+		width : 800,
+		height : 600,
+		pageColor : '#555',
+		canvasColor : '#000',
+		crosshair : true
+	}, this);
 	helpers.apply(config, this);
 	if(this.mode == 'standalone' || this.mode == 'client'){
 		// Disable selection of text/elements in the browser
@@ -19,6 +27,7 @@ var engine = function(config){
 	this.remoteRenderer = [];
 	this.entities = [];
 	this.remoteData = [];
+	this.previousControllerMessageTime = 0;
 	if(this.rulesType){
 		this.add(new this.rulesType({engine: this}));
 	}
@@ -26,13 +35,12 @@ var engine = function(config){
 	if(this.mode === 'server'){
 		setInterval(this.update.bind(this), 20);
 	}
-	
-//	if(this.mode === 'client'){
-//		setInterval(function(){
-//			this.update();
-//			engine.rendering[engine.configuredRendering].call(this);
-//		}.bind(this), 38);
-//	}
+	else{
+		var self = this;
+		this.socket.on('game state', function(msg){
+			self.remoteDataString = msg;
+		}); 
+	}
 	
 	if(this.mode == 'standalone' || this.mode === 'client'){
 		this.animate();
@@ -42,7 +50,13 @@ var engine = function(config){
 engine.prototype.animate = function(){
 	requestAnimationFrame(this.animate.bind(this));
 	this.update();
+	// Check to see if the renderer changed, 
+	// if so, suspend the previous renderer (if it exists at all) 
+	if(engine.previousRenderer && engine.previousRenderer !== engine.configuredRendering){
+		engine.rendering[engine.previousRenderer].call(this, true);
+	}
 	engine.rendering[engine.configuredRendering].call(this);
+	engine.previousRenderer = engine.configuredRendering;
 };
 
 engine.prototype.add = function(entity){
@@ -51,6 +65,7 @@ engine.prototype.add = function(entity){
 };
 
 engine.prototype.update = function(time){
+	time = time || new Date().getTime();
 	if(this.mode == 'standalone' || this.mode == 'server'){
 		var newList = [];
 		// Calculate collisions
@@ -69,7 +84,6 @@ engine.prototype.update = function(time){
 			}
 		}
 		// Update
-		var time = new Date().getTime();
 		for(var i = 0, l = this.entities.length; i < l; i++){
 			var e1 = this.entities[i];
 			if(e1 && e1.update){
@@ -86,7 +100,19 @@ engine.prototype.update = function(time){
 		this.entities = newList;
 	}
 	else if(this.mode == "client"){
-		send('::r1,' + this.mousePosition.x + ',' + this.mousePosition.y + ',' + (this.buttonDown ? 1 : 0));
+		if(this.socket){
+			// Send controller state to the server
+			// Send the message at most 20 times per second
+			if((time - this.previousControllerMessageTime) >= 50) {
+				this.previousControllerMessageTime = time;
+				this.controllerMessage =  this.mousePosition.x + ',' + this.mousePosition.y + ',' + (this.buttonDown ? 1 : 0);
+				// If the controls have not changed, do not send a message
+				if(this.controllerMessage !== this.previousControllerMessage){
+					this.previousControllerMessage = this.controllerMessage;
+					this.socket.emit('controller state',this.controllerMessage);
+				}
+			}
+		}
 	}
 	if(this.mode == 'server'){
 		var remoteData = ""; //[];
@@ -99,15 +125,24 @@ engine.prototype.update = function(time){
 				remoteData = remoteData + e.getRemoteData();
 			}
 		}
-		this.channel.appendMessage('game','msg', '::' + remoteData);
+		// Send game state to the clients
+		if(this.player1){
+			this.player1.emit('game state', remoteData);
+		}
+		if(this.player2){
+			this.player2.emit('game state', remoteData);
+		}
 	}
 };
 
+// Static configuration options
 engine.ai = {};
 engine.player1ai = 'heuristic';
 engine.player2ai = 'heuristic';
 engine.rendering = {};
 engine.configuredRendering = 'classic';
+engine.effectsVolume = 100;
+engine.musicVolume = 100;
 
 if(typeof(exports) !== 'undefined'){
 	exports.engine = engine;

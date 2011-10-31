@@ -28,11 +28,11 @@ var rules = function(config){
 		this.geometry = new THREE.CubeGeometry(1, (50 * 2.5 / 12), ((this.engine.width - 30) * 2.5) / 12);
 	}
 	this.position = {
-		x: engine.configuredRendering === 'classic' ? 15 : 400 - 5 , 
-		y: engine.configuredRendering === 'classic' ? this.engine.height - 62 : this.engine.height - 32, 
+		x: this.engine.width / 2 , 
+		y: this.engine.height - 36, 
 		z: -40
 	};
-	this.classicModel = [{x:0,y: 0,w: this.engine.width - 30, h: 50}];
+	this.classicModel = [{x:-(this.engine.width - 30) / 2,y: -25,w: this.engine.width - 30, h: 50}];
 	this.direction = 1;
 	this.barHeight = 30;
 	this.finished = false;
@@ -46,7 +46,7 @@ rules.prototype.to3dText = function(text){
 	var result = null;
 	if(this.engine.mode == 'standalone' || this.engine.mode == 'client'){
 		result = new THREE.TextGeometry( text, {
-			size: 80 / 12,
+			size: 90 / 12,
 			height: 10 / 12,
 			curveSegments: 1,
 			font: "cbm-64"
@@ -190,7 +190,8 @@ rules.prototype.keyboardHandler = function(evt){
 	}
 	// F2: restart game multi player mode, 'client' only renders on the client, game logic runs on the server
 	if(event.keyCode == 113){
-		send('::rg'); // Sends request game message to the server (the server will start an engine on the server in 'server' mode)
+		// send('::rg'); // Sends request game message to the server (the server will start an engine on the server in 'server' mode)
+		this.engine.socket.emit('start game', 'foo', 'bar');
 		this.engine.mode = 'client';
 		this.engine.entities = [];
 	}
@@ -215,37 +216,9 @@ rules.prototype.keyboardHandler = function(evt){
 		}
 		this.initialized = false;
 	}
-	// F7: Toggle Chat
-	if(event.keyCode == 118){
-		$(".chatcontainer").toggle();
-	}
 	// F8: Toggle settings
-	if(event.keyCode == 119){
-		$("#aiconfig").toggle();
-		if(!engine.initializedAIConfigCombos){
-			engine.initializedAIConfigCombos = true;
-			for(var s in engine.ai){
-				$('#player1ai').append("<option value='" + s + "'>" + s + "</option>");
-				$('#player1ai').val(engine.player1ai);
-			}
-			$('#player1ai').change(function() {
-				engine.player1ai = $(this).val();
-			});
-			for(var s in engine.ai){
-				$("#player2ai").append("<option value='" + s + "'>" + s + "</option>");
-				$('#player2ai').val(engine.player2ai);
-			}
-			$('#player2ai').change(function() {
-				engine.player2ai = $(this).val();
-			});
-			for(var s in engine.rendering){
-				$("#renderer").append("<option value='" + s + "'>" + s + "</option>");
-				$('#renderer').val(engine.configuredRendering);
-			}
-			$('#renderer').change(function() {
-				engine.configuredRendering = $(this).val();
-			});
-		}
+	if(event.keyCode === 119 || event.keyCode === 192){
+		DAT.GUI.toggleHide();
 	}
 };
 
