@@ -64,11 +64,22 @@
 				var gui = new DAT.GUI();
 				DAT.GUI.toggleHide();
 				DAT.GUI.supressHotKeys = true; // Disable the H key
-				gui.add(engine, 'player1ai').options('heuristic', 'prioritizing');
-				gui.add(engine, 'player2ai').options('heuristic', 'prioritizing');
-				gui.add(engine, 'configuredRendering').options('classic', 'webgl');
-				gui.add(engine, 'effectsVolume', 0, 100, 1);
-				gui.add(engine, 'musicVolume', 0, 100, 1);
+				gui.add(engine, 'player1ai').options('heuristic', 'prioritizing').onChange(function(newValue) {
+			    	engine.setItem('player1ai', newValue);
+		    	});
+				gui.add(engine, 'player2ai').options('heuristic', 'prioritizing').onChange(function(newValue) {
+			    	engine.setItem('player2ai', newValue);
+		    	});
+				gui.add(engine, 'renderer').options('classic', 'webgl').onChange(function(newValue) {
+			    	engine.setItem('renderer', newValue);
+		    	});
+				gui.add(engine, 'effectsVolume', 0, 100, 1).onChange(function(newValue) {
+			    	engine.setItem('effectsVolume', newValue);
+					window.audio.setVolume(newValue);
+		    	});
+				gui.add(engine, 'musicVolume', 0, 100, 1).onChange(function(newValue) {
+			    	engine.setItem('musicVolume', newValue);
+		    	});
 			};
 		</script>
 		

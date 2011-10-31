@@ -6,7 +6,7 @@ soundManager.onload = function() {
 		appearAudio 		: soundManager.createSound({id:'appear', url:'/resources/audio/appear.mp3'}),
 		changeColorAudio 	: soundManager.createSound({id:'changecolor', url:'/resources/audio/changecolor.mp3'}),
 		laserAudio 			: soundManager.createSound({id:'laserSound', url:'/resources/audio/laser.mp3'}),
-		volume				: 100,
+		volume				: engine.effectsVolume,
 		setVolume			: function(newVolume){
 			audio.volume = newVolume;
 			for(var s in audio){

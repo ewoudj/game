@@ -52,11 +52,11 @@ engine.prototype.animate = function(){
 	this.update();
 	// Check to see if the renderer changed, 
 	// if so, suspend the previous renderer (if it exists at all) 
-	if(engine.previousRenderer && engine.previousRenderer !== engine.configuredRendering){
+	if(engine.previousRenderer && engine.previousRenderer !== engine.renderer){
 		engine.rendering[engine.previousRenderer].call(this, true);
 	}
-	engine.rendering[engine.configuredRendering].call(this);
-	engine.previousRenderer = engine.configuredRendering;
+	engine.rendering[engine.renderer].call(this);
+	engine.previousRenderer = engine.renderer;
 };
 
 engine.prototype.add = function(entity){
@@ -135,14 +135,35 @@ engine.prototype.update = function(time){
 	}
 };
 
+//Stores a value in local storage. Will handle objects, will probably fail when called on the server.
+engine.setItem = function(key, value) {
+    if (typeof value == "object") {
+        value = JSON.stringify(value);
+    }
+    localStorage.setItem(key, value);
+};
+
+// Gets an object from local storage, if no value for key was found defaultValue is returned;
+engine.getItem = function(key, defaultValue) {
+    var result = null;
+    if(typeof localStorage != 'undefined'){
+		result = localStorage.getItem(key);
+	    // assume it is an object that has been stringified
+	    if (result && result[0] == "{") {
+	        result = JSON.parse(result);
+	    }
+    }
+    return result || defaultValue;
+};
+
 // Static configuration options
 engine.ai = {};
-engine.player1ai = 'heuristic';
-engine.player2ai = 'heuristic';
+engine.player1ai = engine.getItem("player1ai", 'heuristic');
+engine.player2ai = engine.getItem("player2ai", 'heuristic');
 engine.rendering = {};
-engine.configuredRendering = 'classic';
-engine.effectsVolume = 100;
-engine.musicVolume = 100;
+engine.renderer = engine.getItem("renderer",'classic');
+engine.effectsVolume = parseInt(engine.getItem("effectsVolume", 25));
+engine.musicVolume = parseInt(engine.getItem("musicVolume", 40));
 
 if(typeof(exports) !== 'undefined'){
 	exports.engine = engine;
