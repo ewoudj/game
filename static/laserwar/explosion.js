@@ -56,16 +56,10 @@ explosion.prototype.update = function(time){
 };
 
 explosion.prototype.getRemoteData = function(){
-	/*var result =  [
-        4 , // type index (4 is explosion)
-        Math.ceil(this.position.x) ,
-        Math.ceil(this.position.y) ,
-        this.duration,
-        this.audioDone
-    ];*/
 	var result = "4," + Math.ceil(this.position.x) + "," +
 		Math.ceil(this.position.y) + "," + this.duration  + "," + 
-		(this.audioDone ? "1" : "0");
+		(this.audioDone ? "1" : "0") + "," +
+        (this.finished ? "1" :  "0");
 	this.audioDone = true;
 	return result;
 };
@@ -75,8 +69,9 @@ explosion.prototype.renderRemoteData = function(remoteData, offset){
 	this.position = {x:parseFloat(remoteData[offset + 1]), y:parseFloat(remoteData[offset + 2])};
 	this.renderExplosion(
 			parseFloat(remoteData[offset + 3]),
-			!(!!(parseFloat(remoteData[offset + 4]))));
-	return offset + 5;
+			(remoteData[offset + 5] === "4"));
+	this.finished = (remoteData[offset + 5] === "1");
+	return offset + 6;
 };
 
 if(typeof(exports) !== 'undefined'){

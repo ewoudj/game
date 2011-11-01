@@ -26,23 +26,12 @@ engine.rendering.webgl = function(suspend){
 	if(!this.webglRenderer.suspended){
 		if(this.rendererInitialized){
 			// Render
-			if(this.mode == 'standalone'){
-				for(var i = 0, l = this.entities.length; i < l; i++){
-					var e = this.entities[i];			
-					this.webglRenderer.renderEntity(e);
-				}
-				this.webglRenderer.renderScene();
+			for(var i = 0, l = this.entities.length; i < l; i++){
+				var e = this.entities[i];			
+				this.webglRenderer.renderEntity(e);
 			}
-			else if(this.mode == 'client'){
-				this.remoteData = this.remoteDataString.split(",");
-				var offset = 0;
-				var l = this.remoteData.length;
-				while(offset < l){
-					var e = this.remoteRenderer[this.remoteData[offset]];
-					offset = e.renderRemoteData(this.remoteData,offset);
-					this.webglRenderer.renderEntity(e);
-				}
-			}
+			this.webglRenderer.renderScene();
+
 		}
 	}
 };

@@ -28,23 +28,29 @@ var engine = function(config){
 	this.entities = [];
 	this.remoteData = [];
 	this.previousControllerMessageTime = 0;
+	this.remoteDataString = [];
 	if(this.rulesType){
 		this.add(new this.rulesType({engine: this}));
 	}
 	
 	if(this.mode === 'server'){
-		setInterval(this.update.bind(this), 20);
+		this.serverUpdateLoop();
 	}
 	else{
 		var self = this;
 		this.socket.on('game state', function(msg){
-			self.remoteDataString = msg;
+			self.remoteDataString.push(msg);
 		}); 
 	}
 	
 	if(this.mode == 'standalone' || this.mode === 'client'){
 		this.animate();
 	}
+};
+
+engine.prototype.serverUpdateLoop = function(){
+	setTimeout( this.serverUpdateLoop.bind(this), 1000 / 60 );
+	this.update();
 };
 
 engine.prototype.animate = function(){
@@ -60,46 +66,109 @@ engine.prototype.animate = function(){
 };
 
 engine.prototype.add = function(entity){
+	if(this.entities.length === 0){
+		this.entityIdCounter = 0;
+	}
+	if(!entity.engineId){
+		entity.engineId = this.entityIdCounter;
+		this.entityIdCounter++;
+	}
 	this.entities.push(entity);
 	entity.engine = this;
 };
 
+engine.prototype.calculateCollisions = function(){
+	for(var i = 0, l = this.entities.length; i < l; i++){
+		var e1 = this.entities[i];
+		e1.collisions = [];
+		for(var j = 0; j < l; j++){
+			var e2 = this.entities[j];
+			var e2 = this.entities[j];
+			if(e1 != e2 && e1.collidesWith(e2)){
+				e1.collisions.push(e2);
+				if(!e2.collisions){
+					e2.collisions = [];
+				}
+				e2.collisions.push(e1);
+			}
+		}
+	}
+};
+
+engine.prototype.processRemoteData = function(){
+	var s = this.remoteDataString.shift();
+	while(s){
+		var dataFromServer = s.split(",");
+		var offset = 0;
+		var l = dataFromServer.length;
+		var i = 0;
+		while(offset < l){
+			var e = null;
+			var engineId = parseInt(dataFromServer[offset]);
+			offset++;
+			for(var j = 0, m = this.entities.length; j < m; j++){
+				if(engineId === this.entities[j].engineId){
+					e = this.entities[j];
+					break;
+				}
+			}
+			if(e === null){
+				// Add new entities
+				var entityType = this.remoteRenderer[dataFromServer[offset]];
+				e = new entityType({
+					engine: this,
+					engineId: engineId
+				});
+				this.add(e);
+			}
+			offset = e.renderRemoteData(dataFromServer,offset);
+			i++;
+		}
+		s = this.remoteDataString.shift();
+	}
+};
+
 engine.prototype.update = function(time){
 	time = time || new Date().getTime();
-	if(this.mode == 'standalone' || this.mode == 'server'){
-		var newList = [];
+	var newList = [];
+	var remoteData = "";
+	if(this.mode !== "client"){
 		// Calculate collisions
-		for(var i = 0, l = this.entities.length; i < l; i++){
-			var e1 = this.entities[i];
-			e1.collisions = [];
-			for(var j = 0; j < l; j++){
-				var e2 = this.entities[j];
-				if(e1 != e2 && e1.collidesWith(e2)){
-					e1.collisions.push(e2);
-					if(!e2.collisions){
-						e2.collisions = [];
+		this.calculateCollisions();
+	}
+	else {
+		// If we are on the client and we have server data, parse it
+		this.processRemoteData();
+	}
+	// Update
+	for(var i = 0, l = this.entities.length; i < l; i++){
+		var e1 = this.entities[i];
+		if(e1 && e1.update){
+			// Run the entity update logic
+			if(this.mode !== "client"){
+				e1.update(time);
+			}
+			// If we are on the server we want to serialize the objects now
+			// before finished entities get removed from the list.
+			if(this.mode === "server"){
+				if(e1.getRemoteData){
+					if(remoteData != ""){
+						remoteData = remoteData + ",";
 					}
-					e2.collisions.push(e1);
+					remoteData =  remoteData + e1.engineId + "," + e1.getRemoteData();
 				}
 			}
 		}
-		// Update
-		for(var i = 0, l = this.entities.length; i < l; i++){
-			var e1 = this.entities[i];
-			if(e1 && e1.update){
-				e1.update(time);
-			}
-		}
-		// Filter out the objects that indicate they are finished
-		for(var i = 0, l = this.entities.length; i < l; i++){
-			var e1 = this.entities[i];
-			if(e1 && !e1.finished){
-				newList.push(e1);
-			}
-		}
-		this.entities = newList;
 	}
-	else if(this.mode == "client"){
+	// Filter out the objects that indicate they are finished
+	for(var i = 0, l = this.entities.length; i < l; i++){
+		var e1 = this.entities[i];
+		if(e1 && !e1.finished){
+			newList.push(e1);
+		}
+	}
+	this.entities = newList;
+	if(this.mode === "client"){
 		if(this.socket){
 			// Send controller state to the server
 			// Send the message at most 20 times per second
@@ -115,16 +184,6 @@ engine.prototype.update = function(time){
 		}
 	}
 	if(this.mode == 'server'){
-		var remoteData = ""; //[];
-		for(var i = 0, l = this.entities.length; i < l; i++){
-			var e = this.entities[i];
-			if(e.getRemoteData){
-				if(remoteData != ""){
-					remoteData = remoteData + ",";
-				}
-				remoteData = remoteData + e.getRemoteData();
-			}
-		}
 		// Send game state to the clients
 		if(this.player1){
 			this.player1.emit('game state', remoteData);

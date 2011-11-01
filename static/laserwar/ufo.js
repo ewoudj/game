@@ -56,7 +56,7 @@ var ufo = function(config){
 ufo.prototype = new entity();
 
 ufo.prototype.render = function(){
-	this.classicModel = this.rects;
+	
 };
 
 ufo.prototype.update = function(time){
@@ -164,7 +164,7 @@ ufo.prototype.update = function(time){
 	var frameChangeTimeDelta = time - this.lastTimeFrameChanged;
 	if(frameChangeTimeDelta > 80){
 		this.lastTimeFrameChanged = time;
-		this.rects = this.ufoFrames[this.ufoFrame];
+		this.classicModel = this.ufoFrames[this.ufoFrame];
 		this.ufoFrame += this.direction;
 		if(this.ufoFrame >= this.ufoFrames.length) this.ufoFrame = 0;
 		if(this.ufoFrame < 0) this.ufoFrame = this.ufoFrames.length - 1;
@@ -192,34 +192,25 @@ ufo.prototype.update = function(time){
 };
 
 ufo.prototype.getRemoteData = function(){
-//	return [
-//        3 , // type index (0 is ship)
-//        Math.ceil(this.position.x) ,
-//        Math.ceil(this.position.y) ,
-//        this.ufoFrame,
-//        this.color
-//    ];
 	var result = "3," + Math.ceil(this.position.x) + "," +
 			Math.ceil(this.position.y) + "," +
 			this.ufoFrame + "," +
 			this.color + "," +
-            (this.audioDone ? "1" :  "0");
+            (this.audioDone ? "1" :  "0") + "," +
+            (this.finished ? "1" :  "0");
 	this.audioDone = true;
 	return result;
 };
 
 ufo.prototype.renderRemoteData = function(remoteData, offset){
-	//if(!this.firstRender){
-	//	this.firstRender = true;
-	//	audio.appearAudio.play();
-	//}
-	if(!(!!(parseFloat(remoteData[offset + 5])))){
+	if(remoteData[offset + 5] === "0"){
 		audio.appearAudio.play();
 	}
 	this.classicModel = this.ufoFrames[parseFloat(remoteData[offset + 3])];
 	this.position = {x:parseFloat(remoteData[offset + 1]), y:parseFloat(remoteData[offset + 2])};
 	this.color = remoteData[offset + 4];
-	return offset + 6;
+	this.finished = (remoteData[offset + 6] === "1");
+	return offset + 7;
 };
 
 if(typeof(exports) !== 'undefined'){

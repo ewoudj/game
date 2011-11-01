@@ -50,15 +50,10 @@ laserbeam.prototype.update = function(time){
 };
 
 laserbeam.prototype.getRemoteData = function(){
-	/*var result = [
-        1 , // type index (1 is laserbeam)
-        Math.ceil(this.position.x) ,
-        Math.ceil(this.position.y) ,
-        this.audioDone
-    ];*/
 	var result = "1," + Math.ceil(this.position.x) + "," +
 	              Math.ceil(this.position.y) + "," + 
-	              (this.audioDone ? "1" : "0");
+	              (this.audioDone ? "1" : "0") + "," +
+	              (this.finished ? "1" :  "0");
 	this.audioDone = true;
 	return result;
 };
@@ -67,10 +62,11 @@ laserbeam.prototype.renderRemoteData = function(remoteData, offset){
 	this.classicModel = this.rects;
 	this.position = {x:parseFloat(remoteData[offset + 1]), y:parseFloat(remoteData[offset + 2])};
 	this.color = '#FFF';
-	if(!(!!(parseFloat(remoteData[offset + 3])))){
+	if(remoteData[offset + 3] === "0"){
 		audio.laserAudio.play();
 	}
-	return offset + 4;
+	this.finished = (remoteData[offset + 4] === "1");
+	return offset + 5;
 };
 
 if(typeof(exports) !== 'undefined'){

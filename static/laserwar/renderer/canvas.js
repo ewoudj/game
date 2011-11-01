@@ -4,8 +4,6 @@
  */
 engine.rendering.classic = function(suspend){
 	if(!this.classicRenderer){
-//		this.remoteFrame = 0;
-//		this.lastRemoteFrame = 0;
 		this.classicRenderer = new engine.rendering.classic.renderer({
 			engine: this
 		});
@@ -15,25 +13,12 @@ engine.rendering.classic = function(suspend){
 		this.classicRenderer.context.fillStyle = this.canvasColor;
 		this.classicRenderer.context.fillRect(0, 0, window.innerWidth, window.innerHeight);
 		// Render
-		if(this.mode == 'standalone'){
+		if(this.mode == 'standalone' || this.mode == 'client'){
 			for(var i = 0, l = this.entities.length; i < l; i++){
 				var e = this.entities[i];
 				e.render();
 				this.classicRenderer.renderEntity(e);
 			}
-		}
-		else if(this.mode == 'client'){
-	//		if(this.remoteFrame > this.lastRemoteFrame){
-	//			this.lastRemoteFrame = this.remoteFrame;
-				this.remoteData = this.remoteDataString.split(",");
-				var offset = 0;
-				var l = this.remoteData.length;
-				while(offset < l){
-					var e = this.remoteRenderer[this.remoteData[offset]];
-					offset = e.renderRemoteData(this.remoteData,offset);
-					this.classicRenderer.renderEntity(e);
-				}
-	//		}
 		}
 	}
 };

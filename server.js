@@ -14,6 +14,7 @@ var nicknames = {};
 var games = [];
 var waitingGame = null;
 
+io.set('log level', 0);
 io.sockets.on('connection', function (socket) {
 
 	// Client requests new server side multiple player game

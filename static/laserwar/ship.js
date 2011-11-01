@@ -128,7 +128,7 @@ ship.prototype.update = function(time){
 	else if(this.position.x < previousPosition.x){
 		this.direction = -1;
 	}
-	this.rects = this.direction == 1 ? this.rectsRight : this.rectsLeft;
+	this.classicModel = this.direction === 1 ? this.rectsRight : this.rectsLeft;
 };
 
 ship.prototype.calculateMovement = function(currentPosition, mousePosition, speedLimit, timeDelta){
@@ -155,7 +155,6 @@ ship.prototype.render = function(){
 			audio.appearAudio.play();
 		}}catch(ex){}
 	}
-	this.classicModel = this.rects;
 };
 
 ship.prototype.getRemoteData = function(){
@@ -168,14 +167,27 @@ ship.prototype.getRemoteData = function(){
 	return result;
 };
 
+ship.prototype.getRemoteData = function(){
+	var result = "0," + Math.ceil(this.position.x) + "," +
+	              Math.ceil(this.position.y) + "," +
+	              this.direction + "," +
+	              this.color + "," +
+	              (this.audioDone ? "1" : "0") + "," +
+	              (this.finished ? "1" :  "0");
+	this.audioDone = true;
+	return result;
+};
+
 ship.prototype.renderRemoteData = function(remoteData, offset){
-	if(!(!!(parseFloat(remoteData[offset + 5])))){
+	if(remoteData[offset + 5] === "0"){
 		audio.appearAudio.play();
 	}
-	this.classicModel = remoteData[offset + 3] === "1"  ? this.rectsRight : this.rectsLeft;
-	this.position = {x:parseFloat(remoteData[offset + 1]), y: parseFloat(remoteData[offset + 2])};
+	this.direction = parseInt(remoteData[offset + 3]);
+	this.classicModel = this.direction === 1  ? this.rectsRight : this.rectsLeft;
+	this.position = {x:parseInt(remoteData[offset + 1]), y: parseInt(remoteData[offset + 2])};
 	this.color = remoteData[offset + 4];
-	return offset + 6;
+	this.finished = (remoteData[offset + 6] === "1");
+	return offset + 7;
 };
 
 

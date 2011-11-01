@@ -134,12 +134,12 @@ rules.prototype.initialize = function(){
 	}
 	if(this.engine.mode != 'server'){
 		this.engine.remoteRenderer = [];
-		this.engine.remoteRenderer.push(new ship({engine: this.engine}));
-		this.engine.remoteRenderer.push(new laserbeam({engine: this.engine}));
-		this.engine.remoteRenderer.push(new star({engine: this.engine}));
-		this.engine.remoteRenderer.push(new ufo({engine: this.engine}));
-		this.engine.remoteRenderer.push(new explosion({engine: this.engine}));
-		this.engine.remoteRenderer.push(this);
+		this.engine.remoteRenderer.push(ship);
+		this.engine.remoteRenderer.push(laserbeam);
+		this.engine.remoteRenderer.push(star);
+		this.engine.remoteRenderer.push(ufo);
+		this.engine.remoteRenderer.push(explosion);
+		this.engine.remoteRenderer.push(rules);
 	}
 	if(this.crosshair){
 		this.add(new crosshair() );
@@ -190,7 +190,7 @@ rules.prototype.keyboardHandler = function(evt){
 	}
 	// F2: restart game multi player mode, 'client' only renders on the client, game logic runs on the server
 	if(event.keyCode == 113){
-		// send('::rg'); // Sends request game message to the server (the server will start an engine on the server in 'server' mode)
+		// Sends request game message to the server (the server will start an engine on the server in 'server' mode)
 		this.engine.socket.emit('start game', 'foo', 'bar');
 		this.engine.mode = 'client';
 		this.engine.entities = [];
@@ -333,12 +333,6 @@ rules.prototype.update = function(time){
 };
 
 rules.prototype.getRemoteData = function(){
-	/*return [
-        5 , // type index (5 is rules)
-        this.engine.gameState.player1Score ,
-        this.engine.gameState.player2Score ,
-        this.engine.canvasColor
-    ];*/
 	return "5," + this.engine.gameState.player1Score + "," +
 	        this.engine.gameState.player2Score + "," +
 	        this.engine.canvasColor;
