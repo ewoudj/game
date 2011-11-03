@@ -178,6 +178,7 @@ engine.rendering.webgl.webglRenderer = function(){
 	
 	webglRenderer.prototype.setEntityMesh = function(e){
 		var index = e.modelIndex || 0;
+		var scale = e.modelScale || this.modelScale;
 		e.meshCache = e.meshCache || {};
 		if(e.mesh){
 			this.scene.remove( e.mesh );
@@ -194,7 +195,7 @@ engine.rendering.webgl.webglRenderer = function(){
 			e.mesh.gameMesh = true;
 			e.mesh.gameColor = e.color;
 			e.mesh.modelIndex = e.modelIndex;
-			e.mesh.scale.set( this.modelScale, this.modelScale, this.modelScale );
+			e.mesh.scale.set( scale, scale, scale );
 			e.mesh.doubleSided = true;
 		}
 		this.scene.add( e.mesh );

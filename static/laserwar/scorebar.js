@@ -25,9 +25,9 @@ scorebar.prototype.to3dText = function(text){
 	var result = null;
 	if(this.engine.mode == 'standalone' || this.engine.mode == 'client'){
 		result = new THREE.TextGeometry( text, {
-			size: 90 / 12,
-			height: 10 / 12,
-			curveSegments: 1,
+			size: 90,
+			height: 10,
+			curveSegments: 0,
 			font: "cbm-64"
 		});
 	}
@@ -39,6 +39,7 @@ scorebar.prototype.addScoreBarItem = function(text, color, offsetLeft){
 		modelIndex: text,
 		score: 0,
 		geometry: this.to3dText( text ),
+		modelScale: 1,
 		color: color,
 		position: { 
 			x: offsetLeft, 
