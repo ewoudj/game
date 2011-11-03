@@ -26,7 +26,6 @@ var engine = function(config){
 	this.mousePosition = {x: 0, y: 0};
 	this.buttonDown2 = false;
 	this.mousePosition2 = {x: 0, y: 0};
-	this.remoteRenderer = [];
 	this.entities = [];
 	this.remoteData = [];
 	this.previousControllerMessageTime = 0;
@@ -71,7 +70,7 @@ engine.prototype.add = function(entity){
 	if(this.entities.length === 0){
 		this.entityIdCounter = 0;
 	}
-	if(!entity.engineId){
+	if(!entity.engineId && this.mode === 'server'){
 		entity.engineId = this.entityIdCounter;
 		this.entityIdCounter++;
 	}
@@ -116,7 +115,7 @@ engine.prototype.processRemoteData = function(){
 			}
 			if(e === null){
 				// Add new entities
-				var entityType = this.remoteRenderer[dataFromServer[offset]];
+				var entityType = engine.remoteRenderer[dataFromServer[offset]];
 				e = new entityType({
 					engine: this,
 					engineId: engineId
@@ -144,7 +143,7 @@ engine.prototype.update = function(time){
 		var e1 = this.entities[i];
 		if(e1 && e1.update){
 			// Run the entity update logic
-			if(this.mode !== "client"){
+			if(this.mode !== "client" && e1.update){
 				e1.update(time);
 			}
 			// If we are on the server we want to serialize the objects now
@@ -215,7 +214,12 @@ engine.getItem = function(key, defaultValue) {
     return result || defaultValue;
 };
 
-// Static configuration options
+/*
+ * Everything below this line needs to move into
+ * either server or client settings files.
+ */
+
+// Configuration options, still need to make this nice
 engine.ai = {};
 engine.player1ai = engine.getItem("player1ai", 'heuristic');
 engine.player2ai = engine.getItem("player2ai", 'heuristic');
@@ -226,6 +230,18 @@ engine.musicVolume = parseInt(engine.getItem("musicVolume", 40));
 
 if(typeof(exports) !== 'undefined'){
 	exports.engine = engine;
+}
+else {
+	// The order of this list is important, the index
+	// maps to what the ship emits as the first number 
+	// in it's remoting data
+	engine.remoteRenderer = [];
+	engine.remoteRenderer.push(ship);
+	engine.remoteRenderer.push(laserbeam);
+	engine.remoteRenderer.push(star);
+	engine.remoteRenderer.push(ufo);
+	engine.remoteRenderer.push(explosion);
+	engine.remoteRenderer.push(rules);
 }
 
 

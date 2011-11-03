@@ -24,91 +24,11 @@ if(typeof(exports) !== 'undefined'){
 
 var rules = function(config){
 	helpers.apply(config, this);
-	if(this.engine.mode == 'standalone' || this.engine.mode == 'client'){
-		this.geometry = new THREE.CubeGeometry(1, (50 * 2.5 / 12), ((this.engine.width - 30) * 2.5) / 12);
-	}
-	this.position = {
-		x: this.engine.width / 2 , 
-		y: this.engine.height - 36, 
-		z: -40
-	};
-	this.classicModel = [{x:-(this.engine.width - 30) / 2,y: -25,w: this.engine.width - 30, h: 50}];
-	this.direction = 1;
-	this.barHeight = 30;
-	this.finished = false;
-	this.modelIndex = -1;
-	this.color = '#00F';
 	this.initialized = false;
+	this.name = 'rules';
+	this.barHeight = 30;
 };
 rules.prototype = new entity();
-
-rules.prototype.to3dText = function(text){
-	var result = null;
-	if(this.engine.mode == 'standalone' || this.engine.mode == 'client'){
-		result = new THREE.TextGeometry( text, {
-			size: 90 / 12,
-			height: 10 / 12,
-			curveSegments: 1,
-			font: "cbm-64"
-		});
-	}
-	return result;
-};
-
-rules.prototype.addScoreBarItem = function(text, color, offsetLeft){
-	this.subEntities.push({
-		modelIndex: text,
-		score: 0,
-		geometry: this.to3dText( text ),
-		color: color,
-		position: { 
-			x: offsetLeft, 
-			y: this.engine.height - 15,
-			z: -25
-		},
-		rotation: {
-			x: 0, y:0, z:0
-		},
-		direction: -1
-	});
-	this.texts.push({
-		font: '50px CBM64', 
-		color: color, 
-		text: text, 
-		position: { 
-			x: offsetLeft, 
-			y: this.engine.height - 15
-		} 
-	});
-};
-
-rules.prototype.render = function(time){
-	this.renderRules(this.engine.gameState.player1Score, this.engine.gameState.player2Score);
-};
-
-rules.prototype.renderRules = function(player1Score, player2Score){
-	if(!this.subEntities){
-		this.subEntities = [];
-		this.texts = [];
-		this.addScoreBarItem("0", "#F00", 20);
-		this.addScoreBarItem(" 0", "#FF0", this.engine.width - 95);
-		this.addScoreBarItem("LASER WAR", "#FFF", 230);
-	}
-	this.texts[0].text = player1Score;
-	this.texts[1].text = (player2Score < 10 ? ' ' : '') + player2Score;
-	if(this.subEntities[0].score != player1Score){
-		this.subEntities[0].score = player1Score;
-		this.subEntities[0].mesh = null;
-		this.subEntities[0].modelIndex = this.texts[0].text;
-		this.subEntities[0].geometry = this.to3dText( this.texts[0].text );
-	}
-	if(this.subEntities[1].score != player2Score){
-		this.subEntities[1].score = player2Score;
-		this.subEntities[1].mesh = null;
-		this.subEntities[1].modelIndex = this.texts[1].text;
-		this.subEntities[1].geometry = this.to3dText( this.texts[1].text );
-	}
-};
 
 rules.prototype.initialize = function(){
 	this.initialized = true;
@@ -125,21 +45,10 @@ rules.prototype.initialize = function(){
 	};
 	if(this.engine.mode == 'standalone' || this.engine.mode == 'client'){
 		document.onkeydown = this.keyboardHandler.bind(this);
-		this.engine.gameState.player1Remote = (location.hash == '#player1Remote');
-		this.engine.gameState.player2Remote = (location.hash == '#player2Remote');
-	}
-	else{
-		this.engine.gameState.player1Remote = true;
-		this.engine.gameState.player2Remote = true;
-	}
-	if(this.engine.mode != 'server'){
-		this.engine.remoteRenderer = [];
-		this.engine.remoteRenderer.push(ship);
-		this.engine.remoteRenderer.push(laserbeam);
-		this.engine.remoteRenderer.push(star);
-		this.engine.remoteRenderer.push(ufo);
-		this.engine.remoteRenderer.push(explosion);
-		this.engine.remoteRenderer.push(rules);
+		this.scoreBar = this.scoreBar || new scorebar({
+			engine: this.engine
+		});
+		this.engine.add(this.scoreBar);
 	}
 	if(this.crosshair){
 		this.add(new crosshair() );
@@ -178,50 +87,6 @@ rules.prototype.initialize = function(){
 	}) );
 };
 
-rules.prototype.keyboardHandler = function(evt){
-	// F1: Restart game single player mode, standalone (all runs on the client)
-	if(event.keyCode == 112){
-		this.engine.mode = 'standalone';
-		this.engine.playerCount = 1;
-		if(this.engine.entities.length == 0){
-			this.engine.add(this);
-		}
-		this.initialized = false;
-	}
-	// F2: restart game multi player mode, 'client' only renders on the client, game logic runs on the server
-	if(event.keyCode == 113){
-		// Sends request game message to the server (the server will start an engine on the server in 'server' mode)
-		this.engine.socket.emit('start game', 'foo', 'bar');
-		this.engine.mode = 'client';
-		this.engine.entities = [];
-	}
-	// F3: Audio volume down
-	if(event.keyCode == 114){
-		audio.decreaseVolume();
-	}
-	// F4: Audio volume up
-	if(event.keyCode == 115){
-		audio.increaseVolume();
-	}
-	// F5: Mute
-	if(event.keyCode == 116){
-		audio.mute();
-	}
-	// F6: Restart game in zero player mode
-	if(event.keyCode == 117){
-		this.engine.mode = 'standalone';
-		this.engine.playerCount = 0;
-		if(this.engine.entities.length == 0){
-			this.engine.add(this);
-		}
-		this.initialized = false;
-	}
-	// F8: Toggle settings
-	if(event.keyCode === 119 || event.keyCode === 192){
-		DAT.GUI.toggleHide();
-	}
-};
-
 // Checks to see if the players mouse pointer is over a star
 // with the players color. Returns the star entity.
 rules.prototype.getStar = function(player, considerMouse, mousePosition){
@@ -235,7 +100,6 @@ rules.prototype.getStar = function(player, considerMouse, mousePosition){
 	return null;
 };
 
-// this.engine.mode == 'standalone' ? 'player' : (this.engine.player1 ? 'player' : 'computer'),
 rules.prototype.spawnPlayerShip = function(playerShip, button, name, type, direction, colorIndex, position){
 	var result = playerShip;
 	if(playerShip.finished && ((button && type == 'player') || type == 'computer') ){
@@ -301,7 +165,6 @@ rules.prototype.update = function(time){
 	if(!this.initialized){
 		this.initialize();
 	}
-
 	this.engine.gameState.player1Ship = this.ensureUserRespawn(
 			this.engine.gameState.player1Ship, 
 			this.engine.mousePosition, this.engine.buttonDown, 'Player 1', 1, 0);
@@ -320,7 +183,6 @@ rules.prototype.update = function(time){
 			position    : { x: this.engine.width - 40, y : 10 }
 		}));		
 	}
-	
 	if((!(this.engine.gameState.player4) || (this.engine.gameState.player4 && this.engine.gameState.player4.finished)) && 6 == Math.floor(Math.random()*200)){
 		this.engine.add( this.engine.gameState.player4 = new ufo({
 			name        : 'Player 4',
@@ -329,6 +191,9 @@ rules.prototype.update = function(time){
 			direction   : -1,
 			position    : { x: 10, y : (this.engine.height - 50 - this.barHeight) }
 		}));		
+	}
+	if(this.engine.mode == 'standalone' || this.engine.mode == 'client'){
+		this.scoreBar.setScore(this.engine.gameState.player1Score, this.engine.gameState.player2Score);
 	}
 };
 
@@ -339,10 +204,61 @@ rules.prototype.getRemoteData = function(){
 };
 
 rules.prototype.renderRemoteData = function(remoteData, offset){
-	this.renderRules(parseFloat(remoteData[offset + 1]), parseFloat(remoteData[offset + 2]));
+	if(!this.scoreBar){
+		this.scoreBar = new scorebar({
+			engine: this.engine
+		});
+		this.engine.add(this.scoreBar);
+	}
+	this.scoreBar.setScore(parseInt(remoteData[offset + 1]), parseInt(remoteData[offset + 2]));
 	this.engine.canvasColor = remoteData[offset + 3];
 	return offset + 4;
 };
+
+rules.prototype.keyboardHandler = function(evt){
+	// F1: Restart game single player mode, standalone (all runs on the client)
+	if(event.keyCode == 112){
+		this.engine.mode = 'standalone';
+		this.engine.playerCount = 1;
+		if(this.engine.entities.length == 0){
+			this.engine.add(this);
+		}
+		this.initialized = false;
+	}
+	// F2: restart game multi player mode, 'client' only renders on the client, game logic runs on the server
+	if(event.keyCode == 113){
+		// Sends request game message to the server (the server will start an engine on the server in 'server' mode)
+		this.engine.socket.emit('start game', 'foo', 'bar');
+		this.engine.mode = 'client';
+		this.engine.entities = [];
+	}
+	// F3: Audio volume down
+	if(event.keyCode == 114){
+		audio.decreaseVolume();
+	}
+	// F4: Audio volume up
+	if(event.keyCode == 115){
+		audio.increaseVolume();
+	}
+	// F5: Mute
+	if(event.keyCode == 116){
+		audio.mute();
+	}
+	// F6: Restart game in zero player mode
+	if(event.keyCode == 117){
+		this.engine.mode = 'standalone';
+		this.engine.playerCount = 0;
+		if(this.engine.entities.length == 0){
+			this.engine.add(this);
+		}
+		this.initialized = false;
+	}
+	// F8: Toggle settings
+	if(event.keyCode === 119 || event.keyCode === 192){
+		DAT.GUI.toggleHide();
+	}
+};
+
 
 if(typeof(exports) !== 'undefined'){
 	exports.rules = rules;
