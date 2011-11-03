@@ -19,6 +19,8 @@ var engine = function(config){
 		// Disable selection of text/elements in the browser
 		document.onselectstart = function() {return false;};
 		document.body.style.background = this.pageColor;
+		// Initialize the settings UI
+		engine.settings.initialize();
 	}
 	this.buttonDown = false;
 	this.mousePosition = {x: 0, y: 0};
@@ -130,14 +132,11 @@ engine.prototype.processRemoteData = function(){
 
 engine.prototype.update = function(time){
 	time = time || new Date().getTime();
-	var newList = [];
 	var remoteData = "";
 	if(this.mode !== "client"){
-		// Calculate collisions
 		this.calculateCollisions();
 	}
-	else {
-		// If we are on the client and we have server data, parse it
+	else if(this.mode === "client"){
 		this.processRemoteData();
 	}
 	// Update
@@ -161,6 +160,7 @@ engine.prototype.update = function(time){
 		}
 	}
 	// Filter out the objects that indicate they are finished
+	var newList = [];
 	for(var i = 0, l = this.entities.length; i < l; i++){
 		var e1 = this.entities[i];
 		if(e1 && !e1.finished){

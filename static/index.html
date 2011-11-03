@@ -35,6 +35,7 @@
 		<script src="laserwar/laserbeam.js"></script>
 		<script src="laserwar/rules.js"></script>
 		<script src="laserwar/engine.js"></script>
+		<script src="laserwar/settings.js"></script>
 		<script src="laserwar/menu.js"></script>
 		<script src="laserwar/ai/prioritizing.js"></script>
 		<script src="laserwar/ai/heuristic.js"></script>
@@ -55,31 +56,11 @@
 			var onBodyLoad = function(){
 				// Start the game
 				var settings = {
-					socket: io.connect('http://localhost:8002'),
+					socket: io.connect('http://' + document.domain + ':8002'),
 					rulesType: rules,
 					mode : 'standalone' // 'client', 'server', 'standalone'
 				};
 				window.game = new engine(settings);
-				
-				var gui = new DAT.GUI();
-				DAT.GUI.toggleHide();
-				DAT.GUI.supressHotKeys = true; // Disable the H key
-				gui.add(engine, 'player1ai').options('heuristic', 'prioritizing').onChange(function(newValue) {
-			    	engine.setItem('player1ai', newValue);
-		    	});
-				gui.add(engine, 'player2ai').options('heuristic', 'prioritizing').onChange(function(newValue) {
-			    	engine.setItem('player2ai', newValue);
-		    	});
-				gui.add(engine, 'renderer').options('classic', 'webgl').onChange(function(newValue) {
-			    	engine.setItem('renderer', newValue);
-		    	});
-				gui.add(engine, 'effectsVolume', 0, 100, 1).onChange(function(newValue) {
-			    	engine.setItem('effectsVolume', newValue);
-					window.audio.setVolume(newValue);
-		    	});
-				gui.add(engine, 'musicVolume', 0, 100, 1).onChange(function(newValue) {
-			    	engine.setItem('musicVolume', newValue);
-		    	});
 			};
 		</script>
 		
