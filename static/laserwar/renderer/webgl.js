@@ -176,6 +176,57 @@ engine.rendering.webgl.webglRenderer = function(){
 		});
 	};
 	
+	webglRenderer.prototype.processTexts = function(e){
+		if(e.texts){
+			for(var i = 0, l = e.texts.length; i < l; i++ ){
+				var t = e.texts[i];
+				var text = t.text;
+				if(!t.entity){
+					t.entity = {
+						text : text,
+						modelIndex: text,
+						score: 0,
+						geometry: this.to3dText( text ),
+						modelScale: 1,
+						color: t.color,
+						position: { 
+							x: t.position.x || 0, 
+							y: t.position.y || 0,
+							z: t.position.z || 0
+						},
+						rotation: {
+							x: 0, y:0, z:0
+						},
+						direction: -1
+					};
+					if(!e.subEntities){
+						e.subEntities = [];
+					}
+					e.subEntities.push(t.entity);
+				}
+				if(t.entity.text != text){
+					t.entity.text = text;
+					t.entity.mesh = null;
+					t.entity.modelIndex = text;
+					t.entity.geometry = this.to3dText( text );
+				}
+			}
+		}
+	};
+	
+	webglRenderer.prototype.to3dText = function(text){
+		var result = null;
+		if(this.engine.mode == 'standalone' || this.engine.mode == 'client'){
+			result = new THREE.TextGeometry( text, {
+				size: 90,
+				height: 10,
+				curveSegments: 1,
+				font: "cbm-64"
+			});
+		}
+		return result;
+	};
+	
 	webglRenderer.prototype.setEntityMesh = function(e){
 		var index = e.modelIndex || 0;
 		var scale = e.modelScale || this.modelScale;
@@ -207,6 +258,7 @@ engine.rendering.webgl.webglRenderer = function(){
 			this.setEntityMesh(e);
 		}
 		if(e.mesh && e.position){
+			this.processTexts(e);
 			if(e.subEntities){
 				for(var i = 0, l = e.subEntities.length; i < l; i++){
 					this.renderEntity(e.subEntities[i]);
