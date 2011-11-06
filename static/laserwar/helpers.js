@@ -35,6 +35,7 @@ var helpers = {
 				target[s] = source[s];
 			}
 		}
+		return target;
 	},
 	
 	rectInRect :function(offsetA, rectA, offsetB, rectB){
