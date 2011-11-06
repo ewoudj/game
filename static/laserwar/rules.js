@@ -49,6 +49,10 @@ rules.prototype.initialize = function(){
 			engine: this.engine
 		});
 		this.engine.add(this.scoreBar);
+		this.menu = this.menu || new menu({
+			engine: this.engine
+		});
+		this.engine.add(this.menu);
 	}
 	if(this.crosshair){
 		this.add(new crosshair() );
@@ -215,16 +219,25 @@ rules.prototype.renderRemoteData = function(remoteData, offset){
 	return offset + 4;
 };
 
-rules.prototype.keyboardHandler = function(evt){
-	// F1: Restart game single player mode, standalone (all runs on the client)
-	if(event.keyCode == 112){
-		this.engine.mode = 'standalone';
-		this.engine.playerCount = 1;
-		if(this.engine.entities.length == 0){
-			this.engine.add(this);
-		}
-		this.initialized = false;
+rules.prototype.startSinglePlayerGame = function(){
+	this.engine.mode = 'standalone';
+	this.engine.playerCount = 1;
+	if(this.engine.entities.length == 0){
+		this.engine.add(this);
 	}
+	this.initialized = false;
+};
+
+rules.prototype.keyboardHandler = function(evt){
+//	// F1: Restart game single player mode, standalone (all runs on the client)
+//	if(event.keyCode == 112){
+//		this.engine.mode = 'standalone';
+//		this.engine.playerCount = 1;
+//		if(this.engine.entities.length == 0){
+//			this.engine.add(this);
+//		}
+//		this.initialized = false;
+//	}
 	// F2: restart game multi player mode, 'client' only renders on the client, game logic runs on the server
 	if(event.keyCode == 113){
 		// Sends request game message to the server (the server will start an engine on the server in 'server' mode)
