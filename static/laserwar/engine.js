@@ -31,7 +31,8 @@ var engine = function(config){
 	this.previousControllerMessageTime = 0;
 	this.remoteDataString = [];
 	if(this.rulesType){
-		this.add(new this.rulesType({engine: this}));
+		this.rules = new this.rulesType({engine: this});
+		this.add(this.rules);
 	}
 	
 	if(this.mode === 'server'){
