@@ -69,14 +69,17 @@ engine.rendering.webgl.webglRenderer = function(){
 		this.camera.position.x = 0;
 		this.camera.position.y = 0;
 		this.camera.lookAt({x:0,y:0,z:0});
-		this.scene.add( new THREE.AmbientLight( 0x202020 ) );
-		var directionalLight = new THREE.DirectionalLight( 0xffffff );
+		//this.scene.add( new THREE.AmbientLight( 0x101010 ) );
+		var directionalLight = new THREE.DirectionalLight( 0x505050 );
 		directionalLight.position.x = 0;
 		directionalLight.position.y = 0;
 		directionalLight.position.z = 1000;
 		directionalLight.position.normalize();
 		this.scene.add( directionalLight );
-		this.scene.add( new THREE.PointLight( 0xffffff, 1 ) );
+		// this.scene.add( new THREE.PointLight( 0xffffff, 1 ) );
+		this.spotlight = new THREE.SpotLight( 0xffffff, 0.5, 1000, true );
+		this.spotlight.position.set( 0, 0, 1100 );
+		this.scene.add( this.spotlight );
 	//	this.composer = new THREE.EffectComposer( this.renderer );
 	//	var renderPass = new THREE.RenderPass( this.scene, this.camera );
 	//	this.composer.addPass( new THREE.RenderPass( this.scene, this.camera ) );
@@ -118,26 +121,57 @@ engine.rendering.webgl.webglRenderer = function(){
 	  '#000': 0x000000 // Black
 	};
 	
+	webglRenderer.prototype.notify = function(eventName, entities){
+		for(var i = 0, l = entities.length; i < l; i++ ){
+    		var mesh = entities[i].object;
+    		if(mesh && mesh.gameEntity && mesh.gameEntity[eventName]){
+    			mesh.gameEntity[eventName](mesh.gameEntity, entities[i]);
+    		}
+    	}
+	};
+	
 	webglRenderer.prototype.onmousemove = function(e){
 		if(this.suspended) return;
-	    var mouse_pos = new THREE.Vector2(e.clientX, e.clientY);
-	    var hit_points = this.pick(mouse_pos, this.backgroundPlane);
-	    if (hit_points.length > 0) {
-	        var pos = this.worldMouse = hit_points[0].point;        
-	        this.engine.mousePosition.x = Math.ceil((pos.x / this.gameScale) + this.centerOffset.x);
-	    	this.engine.mousePosition.y = (this.engine.height - Math.ceil((pos.y / this.gameScale) + this.centerOffset.y));
-	    	// console.log(pos.x + ", " + pos.y + ' => ' + this.engine.mousePosition.x + ", " + this.engine.mousePosition.y);
+		var mouse_pos = new THREE.Vector2(e.clientX, e.clientY);
+		var ray = this.create_mouse_ray(mouse_pos);
+//	    var hit_points = ray.intersectObject(this.backgroundPlane);
+//	    if (hit_points.length > 0) {
+//	        var pos = this.worldMouse = hit_points[0].point;
+//	        this.engine.mousePosition = this.toGamePoint(pos);
+////	        this.engine.mousePosition.x = Math.ceil((pos.x / this.gameScale) + this.centerOffset.x);
+////	    	this.engine.mousePosition.y = (this.engine.height - Math.ceil((pos.y / this.gameScale) + this.centerOffset.y));
+//	    }
+		this.worldMouse = this.planeIntersect(ray, 'z', 0);
+		this.engine.mousePosition = this.toGamePoint(this.worldMouse);
+	    this.mouseEntities = ray.intersectObjects(this.scene.objects);
+	    var items = this.engine.entities;
+	    for(var i = 0, l = items.length; i < l; i++){
+	    	var item = items[i];
+	    	if(item.mousePlane){
+	    		item.mousePosition = this.toGamePoint(this.planeIntersect(ray, item.mousePlane, item.mousePlaneOffset || 0));
+	    	}
 	    }
+	    this.notify('onmousemove', this.mouseEntities);
+	};
+	
+	webglRenderer.prototype.toGamePoint = function(point){
+		return {
+			x: Math.ceil((point.x / this.gameScale) + this.centerOffset.x),
+			y: (this.engine.height - Math.ceil((point.y / this.gameScale) + this.centerOffset.y)),
+			z: point.z
+		};
 	};
 	
 	webglRenderer.prototype.onmousedown = function(){
 		if(this.suspended) return;
 		this.engine.buttonDown = true;
+		this.notify('onmousedown', this.mouseEntities);
 	};
 	
-	webglRenderer.prototype.onmouseup = function(){
+	webglRenderer.prototype.onmouseup = function(e){
 		if(this.suspended) return;
 		this.engine.buttonDown = false;
+		this.notify('onmouseup', this.mouseEntities);
 	};
 	
 	webglRenderer.prototype.pick = function(mouse_pos, obj) {
@@ -146,7 +180,8 @@ engine.rendering.webgl.webglRenderer = function(){
 	        return ray.intersectObject(obj);
 	    }
 	    else {
-	        return this.scene.intersect(ray);
+	        // return this.scene.intersect(ray);
+	    	return ray.intersectObjects(this.scene.objects);
 	    }
 	};
 	
@@ -155,6 +190,29 @@ engine.rendering.webgl.webglRenderer = function(){
 	    var norm_pos = new THREE.Vector2((mouse_pos.x / window.innerWidth) * 2 - 1, -(mouse_pos.y / window.innerHeight) * 2 + 1);
 	    var mouse_3d = projector.unprojectVector(new THREE.Vector3(norm_pos.x, norm_pos.y, 1.0), this.camera);
 	    return new THREE.Ray(this.camera.position, mouse_3d.subSelf(this.camera.position).normalize());
+	};
+	
+	webglRenderer.prototype.planeIntersect = function(ray, plane /* x, y z*/, planeOffset){
+		// planeOffset = start[plane] + (vector[plane] * time)
+		// -(vector[plane] * time) = start[plane] - planeOffset
+		// vector[plane] * time = -start[plane] + planeOffset
+		// time = (-start[plane] + planeOffset) / vector[plane]
+		// time = (planeOffset - start[plane]) / vector[plane]
+		var result = null;
+		var start = ray.origin;
+		var vector = ray.direction;
+		if(vector[plane]){
+			var time = (planeOffset - start[plane]) / vector[plane];
+			var result = {
+				x: start.x + (vector.x * time),
+				y: start.y + (vector.y * time),
+				z: start.z + (vector.z * time)
+			};
+		}
+		return result;
+		// 250 = 10 + (5 * time)
+		// -(5 * time) = 10 - 250
+		// time = 48
 	};
 	
 	webglRenderer.prototype.resize = function( event ) {
@@ -169,7 +227,7 @@ engine.rendering.webgl.webglRenderer = function(){
 	
 	webglRenderer.prototype.createMaterial = function(color){
 		return new THREE.MeshPhongMaterial( { 
-			ambient: 0x060606, 
+			//ambient: 0x060606, 
 			color: colorsBinary[color], 
 			shininess: 20, 
 			shading: THREE.FlatShading 
@@ -182,7 +240,7 @@ engine.rendering.webgl.webglRenderer = function(){
 				var t = e.texts[i];
 				var text = t.text;
 				if(!t.entity){
-					t.entity = {
+					t.entity = helpers.apply(t ,{
 						text : text,
 						modelIndex: text,
 						score: 0,
@@ -198,7 +256,7 @@ engine.rendering.webgl.webglRenderer = function(){
 							x: 0, y:0, z:0
 						},
 						direction: -1
-					};
+					});
 					if(!e.subEntities){
 						e.subEntities = [];
 					}
@@ -243,6 +301,7 @@ engine.rendering.webgl.webglRenderer = function(){
 				geometry,
 				this.createMaterial(e.color)
 			);
+			e.mesh.gameEntity = e;
 			e.mesh.gameMesh = true;
 			e.mesh.gameColor = e.color;
 			e.mesh.modelIndex = e.modelIndex;
@@ -258,12 +317,6 @@ engine.rendering.webgl.webglRenderer = function(){
 			this.setEntityMesh(e);
 		}
 		if(e.mesh && e.position){
-			this.processTexts(e);
-			if(e.subEntities){
-				for(var i = 0, l = e.subEntities.length; i < l; i++){
-					this.renderEntity(e.subEntities[i]);
-				}
-			}
 			if(e.mesh.modelIndex !== e.modelIndex){
 				this.setEntityMesh(e);
 			}
@@ -290,6 +343,17 @@ engine.rendering.webgl.webglRenderer = function(){
 	//			this.camera.lookAt({x: e.mesh.position.x / 2, y: e.mesh.position.y / 2, z:0});
 	//		}
 		}
+		this.processTexts(e);
+		if(e.subEntities){
+			var unfinishedEntities = [];
+			for(var i = 0, l = e.subEntities.length; i < l; i++){
+				if(!e.subEntities[i].finished){
+					unfinishedEntities.push(e.subEntities[i]);
+					this.renderEntity(e.subEntities[i]);
+				}
+			}
+			e.subEntities = unfinishedEntities;
+		}
 		if(e.render){
 			e.render();
 		}
@@ -309,9 +373,12 @@ engine.rendering.webgl.webglRenderer = function(){
 			}
 		}
 		if(this.worldMouse){
-			this.camera.position.x = this.worldMouse.x / 1;
-			this.camera.position.y = this.worldMouse.y / 1;
+			this.camera.position.x = this.worldMouse.x;
+			this.camera.position.y = this.worldMouse.y;
 			this.camera.lookAt({x: 0 , y: 0 , z: 0});
+			this.spotlight.position.x = this.worldMouse.x / 2;
+			this.spotlight.position.y = this.worldMouse.y / 2;
+			this.spotlight.lookAt({x: 0 , y: 0 , z: 0});
 		}
 		this.renderer.render( this.scene, this.camera );
 		//this.composer.render();
