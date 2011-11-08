@@ -1,33 +1,52 @@
-var menu = function(config){
-	helpers.apply({
-		color: '#AAA',
-		selectedColor: '#FFF',
-		mousePlaneOffset: 250,
-		mousePlane: 'z'
-	}, this);
-	helpers.apply(config, this);
-	this.setItems({
-		'SINGLE PLAYER': {
-			onmouseup: function(entity, evt){
-				entity.engine.rules.startSinglePlayerGame();
-			}
-		},
-		'MULTI  PLAYER': {
-			submenu: {
-				'LOCAL': {} ,
-				'ONLINE': {}
-			}
-		},
-		'ZERO   PLAYER': {
-			onmouseup: function(entity, evt){
-				entity.engine.rules.startZeroPlayerGame();
-			}
-		},
-		'SETTINGS': {}, 
-		'CREDITS': {}
-	});
+var menu = function (config) {
+    helpers.apply({
+        color: '#AAA',
+        selectedColor: '#FFF',
+        mousePlaneOffset: 250,
+        mousePlane: 'z',
+        onmouseup: this.onmouseup.bind(this)
+    }, this);
+    helpers.apply(config, this);
+    this.mainMenu = {
+        'SINGLE PLAYER': {
+            onMousePlaneUp: function (entity, evt) {
+                entity.engine.rules.startSinglePlayerGame();
+            }
+        },
+        'MULTI  PLAYER': {
+//            submenu: {
+//                'LOCAL': {},
+//                'ONLINE': {}
+            //            }
+            onMousePlaneUp: function (entity, evt) {
+                entity.engine.rules.startMultiPlayerGame();
+            }
+        },
+        'ZERO   PLAYER': {
+            onMousePlaneUp: function (entity, evt) {
+                entity.engine.rules.startZeroPlayerGame();
+            }
+        },
+        'SETTINGS': {
+            onMousePlaneUp: function (entity, evt) {
+                entity.engine.rules.toggleSettings();
+            }
+        },
+        'CREDITS': {}
+    };
+    this.setItems(this.mainMenu);
 };
 menu.prototype = new entity();
+
+menu.prototype.gotoRoot = function () {
+    this.setItems(this.mainMenu);
+};
+
+menu.prototype.onmouseup = function(entity, hit){
+	if(this.selected){
+		this.selected.onMousePlaneUp(this, this);
+	}
+};
 
 menu.prototype.setItems = function(items){
 	this.clear();
@@ -47,7 +66,7 @@ menu.prototype.setItems = function(items){
 		});
 		if(config.submenu){
 			var self = this;
-			config.onmouseup = function(entity, hit){
+			config.onMousePlaneUp = function(entity, hit){
 				self.setItems(entity.submenu);
 			};
 		}

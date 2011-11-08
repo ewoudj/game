@@ -12,7 +12,8 @@ var engine = function(config){
 		height : 600,
 		pageColor : '#555',
 		canvasColor : '#000',
-		crosshair : true
+		crosshair : true,
+		playerCount : 0
 	}, this);
 	helpers.apply(config, this);
 	if(this.mode == 'standalone' || this.mode == 'client'){
@@ -228,6 +229,8 @@ engine.rendering = {};
 engine.renderer = engine.getItem("renderer",'classic');
 engine.effectsVolume = parseInt(engine.getItem("effectsVolume", 25));
 engine.musicVolume = parseInt(engine.getItem("musicVolume", 40));
+engine.maxScore = parseInt(engine.getItem("maxScore", 10));
+engine.maxAiScore = parseInt(engine.getItem("maxAiScore", 10));
 
 if(typeof(exports) !== 'undefined'){
 	exports.engine = engine;

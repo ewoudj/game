@@ -59,7 +59,8 @@ ship.prototype.update = function(time){
 			this.invulerability = 0;
 		}
 	}
-	if(this.engine.gameState.player1Score == 10 || this.engine.gameState.player2Score == 10){
+	var maxScore = this.engine.playerCount === 0 ? engine.maxAiScore : engine.maxScore;
+	if(this.engine.gameState.player1Score === maxScore || this.engine.gameState.player2Score === maxScore){
 		this.engine.canvasColor = this.colors[this.colorLoop];
 		this.colorLoop++;
 		if(!(this.colorLoop < this.colors.length)){

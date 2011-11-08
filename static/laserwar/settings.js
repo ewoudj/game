@@ -3,7 +3,7 @@ engine.settings = {
 		// TODO: remove try catch ugliness (currently there to keep it working on IE)
 		try{
 			var gui = new DAT.GUI({
-				height : 5 * 32 - 1
+				height : 7 * 32 - 1
 			});
 			DAT.GUI.toggleHide();
 			DAT.GUI.supressHotKeys = true; // Disable the H key
@@ -22,6 +22,12 @@ engine.settings = {
 			});
 			gui.add(engine, 'musicVolume', 0, 100, 1).onChange(function(newValue) {
 				engine.setItem('musicVolume', newValue);
+			});
+			gui.add(engine, 'maxScore', 1, 99, 1).onChange(function(newValue) {
+				engine.setItem('maxScore', newValue);
+			});
+			gui.add(engine, 'maxAiScore', 1, 99, 1).onChange(function(newValue) {
+				engine.setItem('maxAiScore', newValue);
 			});
 		}
 		catch(exception){

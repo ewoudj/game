@@ -44,7 +44,7 @@ rules.prototype.initialize = function(){
 		player2Score: 0
 	};
 	if(this.engine.mode == 'standalone' || this.engine.mode == 'client'){
-		document.onkeydown = this.keyboardHandler.bind(this);
+		document.onkeyup = this.keyboardHandler.bind(this);
 		this.scoreBar = this.scoreBar || new scorebar({
 			engine: this.engine
 		});
@@ -225,51 +225,80 @@ rules.prototype.startSinglePlayerGame = function(){
 	if(this.engine.entities.length == 0){
 		this.engine.add(this);
 	}
-	this.initialized = false;
+    this.initialized = false;
+    this.hideMenu();
 };
 
-rules.prototype.keyboardHandler = function(evt){
-//	// F1: Restart game single player mode, standalone (all runs on the client)
-//	if(event.keyCode == 112){
-//		this.engine.mode = 'standalone';
-//		this.engine.playerCount = 1;
-//		if(this.engine.entities.length == 0){
-//			this.engine.add(this);
-//		}
-//		this.initialized = false;
-//	}
-	// F2: restart game multi player mode, 'client' only renders on the client, game logic runs on the server
-	if(event.keyCode == 113){
-		// Sends request game message to the server (the server will start an engine on the server in 'server' mode)
-		this.engine.socket.emit('start game', 'foo', 'bar');
-		this.engine.mode = 'client';
-		this.engine.entities = [];
-	}
-	// F3: Audio volume down
-	if(event.keyCode == 114){
-		audio.decreaseVolume();
-	}
-	// F4: Audio volume up
-	if(event.keyCode == 115){
-		audio.increaseVolume();
-	}
-	// F5: Mute
-	if(event.keyCode == 116){
-		audio.mute();
-	}
-	// F6: Restart game in zero player mode
-	if(event.keyCode == 117){
-		this.engine.mode = 'standalone';
-		this.engine.playerCount = 0;
-		if(this.engine.entities.length == 0){
-			this.engine.add(this);
-		}
-		this.initialized = false;
-	}
-	// F8: Toggle settings
-	if(event.keyCode === 119 || event.keyCode === 192){
-		DAT.GUI.toggleHide();
-	}
+rules.prototype.startMultiPlayerGame = function () {
+    // Sends request game message to the server (the server will start an engine on the server in 'server' mode)
+    this.engine.socket.emit('start game', 'foo', 'bar');
+    this.engine.mode = 'client';
+    this.engine.entities = [];
+    this.hideMenu();
+};
+
+rules.prototype.startZeroPlayerGame = function () {
+    this.engine.mode = 'standalone';
+    this.engine.playerCount = 0;
+    if (this.engine.entities.length == 0) {
+        this.engine.add(this);
+    }
+    this.initialized = false;
+    this.hideMenu();
+};
+
+rules.prototype.toggleMenu = function () {
+    if (this.menu.finished) {
+        this.menu.finished = false;
+        this.engine.add(this.menu);
+        this.menu.gotoRoot();
+    }
+    else {
+        this.menu.finished = true;
+    }
+};
+
+rules.prototype.hideMenu = function () {
+    this.menu.finished = true;
+};
+
+rules.prototype.toggleSettings = function () {
+    DAT.GUI.toggleHide();
+};
+
+rules.prototype.keyboardHandler = function (evt) {
+    // F1: Restart game single player mode, standalone (all runs on the client)
+    if (event.keyCode == 112) {
+        this.startSinglePlayerGame();
+    }
+    // F2: restart game multi player mode, 'client' only renders on the client, game logic runs on the server
+    if (event.keyCode == 113) {
+    	this.startMultiPlayerGame();
+    }
+    // F3: Audio volume down
+    if (event.keyCode == 114) {
+        audio.decreaseVolume();
+    }
+    // F4: Audio volume up
+    if (event.keyCode == 115) {
+        audio.increaseVolume();
+    }
+    // F5: Mute
+    if (event.keyCode == 116) {
+        audio.mute();
+    }
+    // F6: Restart game in zero player mode
+    if (event.keyCode == 117) {
+    	this.startZeroPlayerGame();
+    }
+    // F8: Toggle settings
+    if (event.keyCode === 119 || event.keyCode === 192) {
+        DAT.GUI.toggleHide();
+    }
+    // F8: Toggle menu
+    if (event.keyCode === 27) {
+        this.toggleMenu();
+    }
 };
 
 

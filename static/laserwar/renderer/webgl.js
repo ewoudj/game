@@ -127,6 +127,9 @@ engine.rendering.webgl.webglRenderer = function(){
     		if(mesh && mesh.gameEntity && mesh.gameEntity[eventName]){
     			mesh.gameEntity[eventName](mesh.gameEntity, entities[i]);
     		}
+    		else if(entities[i][eventName]){
+    			entities[i][eventName](entities[i], entities[i]);
+    		}
     	}
 	};
 	
@@ -134,13 +137,6 @@ engine.rendering.webgl.webglRenderer = function(){
 		if(this.suspended) return;
 		var mouse_pos = new THREE.Vector2(e.clientX, e.clientY);
 		var ray = this.create_mouse_ray(mouse_pos);
-//	    var hit_points = ray.intersectObject(this.backgroundPlane);
-//	    if (hit_points.length > 0) {
-//	        var pos = this.worldMouse = hit_points[0].point;
-//	        this.engine.mousePosition = this.toGamePoint(pos);
-////	        this.engine.mousePosition.x = Math.ceil((pos.x / this.gameScale) + this.centerOffset.x);
-////	    	this.engine.mousePosition.y = (this.engine.height - Math.ceil((pos.y / this.gameScale) + this.centerOffset.y));
-//	    }
 		this.worldMouse = this.planeIntersect(ray, 'z', 0);
 		this.engine.mousePosition = this.toGamePoint(this.worldMouse);
 	    this.mouseEntities = ray.intersectObjects(this.scene.objects);
@@ -149,6 +145,7 @@ engine.rendering.webgl.webglRenderer = function(){
 	    	var item = items[i];
 	    	if(item.mousePlane){
 	    		item.mousePosition = this.toGamePoint(this.planeIntersect(ray, item.mousePlane, item.mousePlaneOffset || 0));
+	    		this.mouseEntities.push(item);
 	    	}
 	    }
 	    this.notify('onmousemove', this.mouseEntities);
@@ -277,7 +274,7 @@ engine.rendering.webgl.webglRenderer = function(){
 		if(this.engine.mode == 'standalone' || this.engine.mode == 'client'){
 			result = new THREE.TextGeometry( text, {
 				size: 90,
-				height: 10,
+				height: 50,
 				curveSegments: 1,
 				font: "cbm-64"
 			});
