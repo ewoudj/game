@@ -12,6 +12,7 @@ var star = function(config){
 	this.type = 'star';
 	this.colors = colors ? colors : require("./rules").colors;
 	this.color = this.colors[this.colorIndex] || this.color || "#FFF";
+	this.previousColor = this.color;
 	this.position = this.position || {x:0, y:0};
 	this.originalPosition = this.position;
 	this.angle = this.angle || 0;
@@ -36,61 +37,63 @@ star.prototype.render = function(){
 };
 
 star.prototype.update = function(time){
+	if(this.engine.mode !== 'client'){
+		if(!this.initialized){
+			if(!this.parent){
+				for(var i = 0; i < 4; i++){
+						this.engine.add( new star({
+						name        	: this.name + '.' + i,
+						type        	: 'star',
+						colorIndex  	: this.colorIndex,
+						direction   	: -1,
+						position    	: { x: this.position.x - 110, y: this.position.y },
+						angle			: 90 * i,
+						parent			: this,
+						bottomOffset	: this.bottomOffset
+					}) );
+				}
+			}
+			this.initialized = true;
+		}
+		if(this.collisions && this.collisions.length){
+			for(var i = 0; i < this.collisions.length; i++){
+				if(this.collisions[0].name == 'laserbeam'){
+					this.colorIndex++;
+					if(this.colorIndex == this.colors.length){
+						this.colorIndex = 0;
+					}
+					this.color = this.colors[this.colorIndex];
+					this.makeSound = true;
+				}
+			}
+		}
+
 	if(!this.lastTimeCalled){
 		this.lastTimeCalled = time;
 	}
 	var timeDelta = time - this.lastTimeCalled;
 	this.lastTimeCalled = time;
-	if(!this.initialized){
-		if(!this.parent){
-			for(var i = 0; i < 4; i++){
-					this.engine.add( new star({
-					name        	: this.name + '.' + i,
-					type        	: 'star',
-					colorIndex  	: this.colorIndex,
-					direction   	: -1,
-					position    	: { x: this.position.x - 110, y: this.position.y },
-					angle			: 90 * i,
-					parent			: this,
-					bottomOffset	: this.bottomOffset
-				}) );
-			}
-		}
-		this.initialized = true;
-	}
-	if(this.collisions && this.collisions.length){
-		for(var i = 0; i < this.collisions.length; i++){
-			if(this.collisions[0].name == 'laserbeam'){
-				this.colorIndex++;
-				if(this.colorIndex == this.colors.length){
-					this.colorIndex = 0;
-				}
-				this.color = this.colors[this.colorIndex];
-				this.makeSound = true;
-			}
-		}
-	}
 	this.angle -= ((this.parent ? 0.5 : 0.3) * (timeDelta / 40));
 	var center = this.parent ? this.parent.position : { x: this.engine.width / 2, y: (this.engine.height / 2) - this.bottomOffset };
 	if(this.parent){
 		this.originalPosition = { x: center.x - 100, y: center.y };
 	}
 	this.position = helpers.rotate(this.originalPosition, center, this.angle);
+	
+	}
 };
 
 star.prototype.getRemoteData = function(){
-//	var result = [
-//        2 , // type index (2 is star)
-//        Math.ceil(this.position.x) ,
-//        Math.ceil(this.position.y) ,
-//        this.color,
-//        this.makeSound
-//    ];
-	var result = "2," + Math.ceil(this.position.x) + "," +
-	              Math.ceil(this.position.y) + "," +
-	              this.color + "," +
-	              (this.makeSound ? "1" : "0");
-	this.makeSound = false;
+	var result = null;
+//	if(!this.remoteDataSend || this.color !== this.previousColor){
+		result = "2," + Math.ceil(this.position.x) + "," +
+		              Math.ceil(this.position.y) + "," +
+		              this.color + "," +
+		              (this.makeSound ? "1" : "0");
+		this.makeSound = false;
+//		this.remoteDataSend = true;
+//		this.previousColor = this.color;
+//	}
 	return result;
 };
 

@@ -30,12 +30,13 @@ var engine = function(config){
 	this.entities = [];
 	this.remoteData = [];
 	this.previousControllerMessageTime = 0;
+	this.previousGameStateMessageTime = 0;
 	this.remoteDataString = [];
+	this.finishedEntities = [];
 	if(this.rulesType){
 		this.rules = new this.rulesType({engine: this});
 		this.add(this.rules);
 	}
-	
 	if(this.mode === 'server'){
 		this.serverUpdateLoop();
 	}
@@ -45,7 +46,6 @@ var engine = function(config){
 			self.remoteDataString.push(msg);
 		}); 
 	}
-	
 	if(this.mode == 'standalone' || this.mode === 'client'){
 		this.animate();
 	}
@@ -98,6 +98,105 @@ engine.prototype.calculateCollisions = function(){
 	}
 };
 
+engine.prototype.update = function(time){
+	time = time || new Date().getTime();
+	if(this.mode !== "client"){
+		this.calculateCollisions();
+	}
+	else if(this.mode === "client"){
+		this.sendControllerStateToServer(time);
+		this.processRemoteData();
+	}
+	// Update
+	this.updateEntities(time);
+};
+
+engine.prototype.sendControllerStateToServer = function(time){
+	if(this.socket){
+		// Send controller state to the server
+		// Send the message at most 20 times per second
+		if((time - this.previousControllerMessageTime) >= 50) {
+			this.previousControllerMessageTime = time;
+			this.controllerMessage =  this.mousePosition.x + ',' + this.mousePosition.y + ',' + (this.buttonDown ? 1 : 0);
+			// If the controls have not changed, do not send a message
+			if(this.controllerMessage !== this.previousControllerMessage){
+				this.previousControllerMessage = this.controllerMessage;
+				this.socket.emit('controller state',this.controllerMessage);
+			}
+		}
+	}
+};
+
+engine.prototype.updateEntities = function (time){
+	for(var i = 0, l = this.entities.length; i < l; i++){
+		var e = this.entities[i];
+		if(e && e.update){
+			e.update(time);
+		}
+	}
+	this.removeFinishedEntities();
+	this.sendGameStateToClient(time);
+};
+
+engine.prototype.removeFinishedEntities = function(){
+	// Filter out the objects that indicate they are finished
+	var newList = [];
+	this.finishedEntities = this.finishedEntities || [];
+	for(var i = 0, l = this.entities.length; i < l; i++){
+		var e1 = this.entities[i];
+		if(e1 && !e1.finished){
+			newList.push(e1);
+		}
+		else if(e1 && e1.finished && (this.mode === "server") ){
+			this.finishedEntities.push(e1);
+		}
+	}
+	this.entities = newList;
+};
+
+engine.prototype.sendGameStateToClient = function(time){
+	var remoteData = this.prepareRemoteData(time);
+	if(remoteData !== ''){
+		if(this.player1){
+			this.player1.emit('game state', remoteData);
+		}
+		if(this.player2){
+			this.player2.emit('game state', remoteData);
+		}
+	}
+};
+
+engine.prototype.prepareRemoteData = function(time){
+	var remoteData = '';
+	if((this.mode === "server") && ((time - this.previousGameStateMessageTime) >= 50)){
+		this.previousGameStateMessageTime = time;
+		remoteData = this.appendRemoteData(this.entities, remoteData);
+		remoteData = this.appendRemoteData(this.finishedEntities, remoteData);
+		this.finishedEntities = [];
+	}
+	return remoteData;
+};
+
+engine.prototype.appendRemoteData = function(entities, remoteData){
+	for(var i = 0, l = entities.length; i < l; i++){
+		var e = entities[i];
+		if(e && e.getRemoteData){
+			if(e.finished){
+				remoteData = remoteData ? remoteData + "," : "";
+				remoteData =  remoteData + e.engineId + ",-1";
+			}
+			else{
+				var newData = e.getRemoteData();
+				if(newData){
+					remoteData = remoteData ? remoteData + "," : "";
+					remoteData =  remoteData + e.engineId + "," + newData;
+				}
+			}
+		}
+	}
+	return remoteData;
+};
+
 engine.prototype.processRemoteData = function(){
 	var s = this.remoteDataString.shift();
 	while(s){
@@ -115,7 +214,7 @@ engine.prototype.processRemoteData = function(){
 					break;
 				}
 			}
-			if(e === null){
+			if(e === null && dataFromServer[offset] !== "-1"){
 				// Add new entities
 				var entityType = engine.remoteRenderer[dataFromServer[offset]];
 				e = new entityType({
@@ -124,74 +223,18 @@ engine.prototype.processRemoteData = function(){
 				});
 				this.add(e);
 			}
-			offset = e.renderRemoteData(dataFromServer,offset);
-			i++;
+			else if(!e && dataFromServer[offset] === "-1"){
+				offset++;
+			}
+			else if(e && dataFromServer[offset] === "-1"){
+				offset++;
+				e.finished = true;
+			}
+			if(e && !e.finished) {
+				offset = e.renderRemoteData(dataFromServer,offset);
+			}
 		}
 		s = this.remoteDataString.shift();
-	}
-};
-
-engine.prototype.update = function(time){
-	time = time || new Date().getTime();
-	var remoteData = "";
-	if(this.mode !== "client"){
-		this.calculateCollisions();
-	}
-	else if(this.mode === "client"){
-		this.processRemoteData();
-	}
-	// Update
-	for(var i = 0, l = this.entities.length; i < l; i++){
-		var e1 = this.entities[i];
-		if(e1 && e1.update){
-			// Run the entity update logic
-			if(this.mode !== "client" && e1.update){
-				e1.update(time);
-			}
-			// If we are on the server we want to serialize the objects now
-			// before finished entities get removed from the list.
-			if(this.mode === "server"){
-				if(e1.getRemoteData){
-					if(remoteData != ""){
-						remoteData = remoteData + ",";
-					}
-					remoteData =  remoteData + e1.engineId + "," + e1.getRemoteData();
-				}
-			}
-		}
-	}
-	// Filter out the objects that indicate they are finished
-	var newList = [];
-	for(var i = 0, l = this.entities.length; i < l; i++){
-		var e1 = this.entities[i];
-		if(e1 && !e1.finished){
-			newList.push(e1);
-		}
-	}
-	this.entities = newList;
-	if(this.mode === "client"){
-		if(this.socket){
-			// Send controller state to the server
-			// Send the message at most 20 times per second
-			if((time - this.previousControllerMessageTime) >= 50) {
-				this.previousControllerMessageTime = time;
-				this.controllerMessage =  this.mousePosition.x + ',' + this.mousePosition.y + ',' + (this.buttonDown ? 1 : 0);
-				// If the controls have not changed, do not send a message
-				if(this.controllerMessage !== this.previousControllerMessage){
-					this.previousControllerMessage = this.controllerMessage;
-					this.socket.emit('controller state',this.controllerMessage);
-				}
-			}
-		}
-	}
-	if(this.mode == 'server'){
-		// Send game state to the clients
-		if(this.player1){
-			this.player1.emit('game state', remoteData);
-		}
-		if(this.player2){
-			this.player2.emit('game state', remoteData);
-		}
 	}
 };
 

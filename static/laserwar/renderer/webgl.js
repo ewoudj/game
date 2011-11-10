@@ -274,7 +274,7 @@ engine.rendering.webgl.webglRenderer = function(){
 		if(this.engine.mode == 'standalone' || this.engine.mode == 'client'){
 			result = new THREE.TextGeometry( text, {
 				size: 90,
-				height: 50,
+				height: 30,
 				curveSegments: 1,
 				font: "cbm-64"
 			});

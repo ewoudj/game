@@ -166,6 +166,7 @@ rules.prototype.ensureUserRespawn = function(ship, mousePosition, buttonDown, pl
 };
 
 rules.prototype.update = function(time){
+	if(this.engine.mode == 'client'){return;}
 	if(!this.initialized){
 		this.initialize();
 	}

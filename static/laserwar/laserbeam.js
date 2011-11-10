@@ -31,12 +31,14 @@ laserbeam.prototype.render = function(){
 };
 
 laserbeam.prototype.update = function(time){
-	this.finished = (this.position.x < -40 || this.position.x > this.engine.width + 20);
-	if(this.collisions && this.collisions.length){
-		for(var i = 0; i < this.collisions.length; i++){
-			if(this.collisions[i] != this.owner){
-				this.finished = true;
-				return;
+	if(this.engine.mode !== 'client'){
+		this.finished = (this.position.x < -40 || this.position.x > this.engine.width + 20);
+		if(this.collisions && this.collisions.length){
+			for(var i = 0; i < this.collisions.length; i++){
+				if(this.collisions[i] != this.owner){
+					this.finished = true;
+					return;
+				}
 			}
 		}
 	}
@@ -45,16 +47,20 @@ laserbeam.prototype.update = function(time){
 	}
 	var timeDelta = time - this.lastTimeCalled;
 	this.lastTimeCalled = time;
-	var previousPosition = this.position;
 	this.position.x = this.position.x + ((40 * this.direction)  * (timeDelta / 40));
 };
 
 laserbeam.prototype.getRemoteData = function(){
-	var result = "1," + Math.ceil(this.position.x) + "," +
+	var result = null;
+	if(!this.remoteDataSend && !this.finished){
+		result = "1," + Math.ceil(this.position.x) + "," +
 	              Math.ceil(this.position.y) + "," + 
 	              (this.audioDone ? "1" : "0") + "," +
-	              (this.finished ? "1" :  "0");
-	this.audioDone = true;
+	              (this.finished ? "1" :  "0") + "," +
+	              this.direction;
+		this.audioDone = true;
+		this.remoteDataSend = true;
+	}
 	return result;
 };
 
@@ -66,7 +72,8 @@ laserbeam.prototype.renderRemoteData = function(remoteData, offset){
 		audio.laserAudio.play();
 	}
 	this.finished = (remoteData[offset + 4] === "1");
-	return offset + 5;
+	this.direction = parseInt(remoteData[offset + 5]);
+	return offset + 6;
 };
 
 if(typeof(exports) !== 'undefined'){

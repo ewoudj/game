@@ -60,6 +60,7 @@ ufo.prototype.render = function(){
 };
 
 ufo.prototype.update = function(time){
+	if(this.engine.mode == 'client'){return;}
 	if(this.invulerability){
 		this.invulerability--;
 	}

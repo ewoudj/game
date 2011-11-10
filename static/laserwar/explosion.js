@@ -56,11 +56,15 @@ explosion.prototype.update = function(time){
 };
 
 explosion.prototype.getRemoteData = function(){
-	var result = "4," + Math.ceil(this.position.x) + "," +
-		Math.ceil(this.position.y) + "," + this.duration  + "," + 
-		(this.audioDone ? "1" : "0") + "," +
-        (this.finished ? "1" :  "0");
-	this.audioDone = true;
+	var result = null;
+	if(!this.remoteDataSend){
+		var result = "4," + Math.ceil(this.position.x) + "," +
+			Math.ceil(this.position.y) + "," + this.duration  + "," + 
+			(this.audioDone ? "1" : "0") + "," +
+	        (this.finished ? "1" :  "0");
+		this.audioDone = true;
+		this.remoteDataSend = true;
+	}
 	return result;
 };
 

@@ -48,6 +48,7 @@ var ship = function(config){
 ship.prototype = new entity();
 
 ship.prototype.update = function(time){
+	if(this.engine.mode == 'client'){return;}
 	if(!this.lastTimeCalled){
 		this.lastTimeCalled = time;
 	}
