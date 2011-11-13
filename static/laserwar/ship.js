@@ -47,69 +47,69 @@ var ship = function(config){
 
 ship.prototype = new entity();
 
-ship.prototype.update = function(time){
-	if(this.engine.mode == 'client'){return;}
+ship.prototype.getTimeDelta = function(){
 	if(!this.lastTimeCalled){
 		this.lastTimeCalled = time;
 	}
 	var timeDelta = time - this.lastTimeCalled;
 	this.lastTimeCalled = time;
-	if(this.invulerability){
-		this.invulerability -= timeDelta;
-		if(this.invulerability < 0){
-			this.invulerability = 0;
-		}
-	}
-	var maxScore = this.engine.playerCount === 0 ? engine.maxAiScore : engine.maxScore;
-	if(this.engine.gameState.player1Score === maxScore || this.engine.gameState.player2Score === maxScore){
-		this.engine.canvasColor = this.colors[this.colorLoop];
-		this.colorLoop++;
-		if(!(this.colorLoop < this.colors.length)){
-			this.colorLoop = 0;
-		}
-	}
-	else if(this.collisions && this.collisions.length){
-		for(var i = 0; i < this.collisions.length; i++){
-			if(this.collisions[i].owner != this && !(this.invulerability && this.collisions[i] == this.spawnStar)){
-				if(!this.finished && this.collisions[i].owner == this.engine.gameState.player1Ship && this == this.engine.gameState.player2Ship){
-					this.engine.gameState.player1Score++;
-				}
-				if(!this.finished && this.collisions[i].owner == this.engine.gameState.player2Ship && this == this.engine.gameState.player1Ship){
-					this.engine.gameState.player2Score++;
-				}
-				this.finished = true;
-				this.engine.add(new explosion({
-					position: this.position
-				}));
+	return timeDelta;
+};
+
+ship.prototype.update = function(time){
+	var timeDelta = this.getTimeDelta();
+	if(this.engine.mode !== 'client'){
+		if(this.invulerability){
+			this.invulerability -= timeDelta;
+			if(this.invulerability < 0){
+				this.invulerability = 0;
 			}
 		}
+		var maxScore = this.engine.playerCount === 0 ? engine.maxAiScore : engine.maxScore;
+		if(this.engine.gameState.player1Score === maxScore || this.engine.gameState.player2Score === maxScore){
+			this.engine.canvasColor = this.colors[this.colorLoop];
+			this.colorLoop++;
+			if(!(this.colorLoop < this.colors.length)){
+				this.colorLoop = 0;
+			}
+		}
+		else if(this.collisions && this.collisions.length){
+			for(var i = 0; i < this.collisions.length; i++){
+				if(this.collisions[i].owner != this && !(this.invulerability && this.collisions[i] == this.spawnStar)){
+					if(!this.finished && this.collisions[i].owner == this.engine.gameState.player1Ship && this == this.engine.gameState.player2Ship){
+						this.engine.gameState.player1Score++;
+					}
+					if(!this.finished && this.collisions[i].owner == this.engine.gameState.player2Ship && this == this.engine.gameState.player1Ship){
+						this.engine.gameState.player2Score++;
+					}
+					this.finished = true;
+					this.engine.add(new explosion({
+						position: this.position
+					}));
+				}
+			}
+		}
+		this.updateControllerState();
 	}
+	this.move(timeDelta);
+	if(this.engine.mode !== 'client'){
+		this.updateLaser(timeDelta);
+	}
+};
+
+ship.prototype.move = function(timeDelta){
 	var previousPosition = this.position;
-	this.shoot = false;
-	if(this.type != 'computer'){
-		if(this.engine.mode == 'standalone' || (this.name == "Player 1" && this.engine.player1)){
-			this.shoot = this.engine.buttonDown;
-			this.position = this.calculateMovement(this.position, this.engine.mousePosition, 10, timeDelta);
-		}
-		else if(this.name == "Player 2" && this.engine.player2){
-			this.shoot = this.engine.buttonDown2;
-			this.position = {
-					x: this.engine.mousePosition2.x, 
-					y: this.engine.mousePosition2.y
-			};
-		}
+	this.position = this.calculateMovement(this.position, this.mousePosition, 10, timeDelta);
+	if(this.position.x > previousPosition.x){
+		this.direction = 1;
 	}
-	else if(this.type == 'computer'){
-		var controls;
-		if(this.name === 'Player 1'){
-			controls = engine.ai[engine.player1ai].call(this);
-		}
-		else {
-			controls = engine.ai[engine.player2ai].call(this);
-		}
-		this.position = this.calculateMovement(this.position, controls.mousePosition, 10, timeDelta);
-		this.shoot = controls.shoot;
+	else if(this.position.x < previousPosition.x){
+		this.direction = -1;
 	}
+	this.classicModel = this.direction === 1 ? this.rectsRight : this.rectsLeft;
+};
+
+ship.prototype.updateLaser = function(timeDelta){
 	if(this.shoot && this.laserState == 300){
 		this.laserState = 0;	
 		this.engine.add(new laserbeam({
@@ -124,13 +124,37 @@ ship.prototype.update = function(time){
 	else{
 		this.laserState = 300;
 	}
-	if(this.position.x > previousPosition.x){
-		this.direction = 1;
+};
+
+ship.prototype.updateControllerState = function(){
+	// This will determine, for every ship, the state of the related controller
+	// Specifically it will set the 'shoot' and 'mousePosition' values.
+	this.shoot = false;
+	if(this.type != 'computer'){
+		// If the player is a human, get the controller values from the engine
+		// This works the same for the server and the stand-alone modes.
+		if(this.engine.mode == 'standalone' || (this.name == "Player 1" && this.engine.player1)){
+			this.shoot = this.engine.buttonDown;
+			this.mousePosition = this.engine.mousePosition;
+			
+		}
+		else if(this.name == "Player 2" && this.engine.player2){
+			this.shoot = this.engine.buttonDown2;
+			this.mousePosition = this.engine.mousePosition2;
+		}
 	}
-	else if(this.position.x < previousPosition.x){
-		this.direction = -1;
+	else if(this.type == 'computer'){
+		// In the case of AI the active AI will set the controller 
+		var controls;
+		if(this.name === 'Player 1'){
+			controls = engine.ai[engine.player1ai].call(this);
+		}
+		else {
+			controls = engine.ai[engine.player2ai].call(this);
+		}
+		this.mousePosition = controls.mousePosition;
+		this.shoot = controls.shoot;
 	}
-	this.classicModel = this.direction === 1 ? this.rectsRight : this.rectsLeft;
 };
 
 ship.prototype.calculateMovement = function(currentPosition, mousePosition, speedLimit, timeDelta){
@@ -142,7 +166,6 @@ ship.prototype.calculateMovement = function(currentPosition, mousePosition, spee
 	if(distance > 5){
 		f = 5 / distance;
 	}
-	//var r = distance / speedLimit;
 	return {
 		x: this.position.x + (deltaX * f),
 		y: this.position.y + (deltaY * f)
@@ -160,36 +183,30 @@ ship.prototype.render = function(){
 };
 
 ship.prototype.getRemoteData = function(){
-	var result = "0," + Math.ceil(this.position.x) + "," +
-	              Math.ceil(this.position.y) + "," +
-	              this.direction + "," +
-	              this.color + "," +
-	              (this.audioDone ? "1" :  "0");
-	this.audioDone = true;
-	return result;
-};
-
-ship.prototype.getRemoteData = function(){
-	var result = "0," + Math.ceil(this.position.x) + "," +
-	              Math.ceil(this.position.y) + "," +
-	              this.direction + "," +
-	              this.color + "," +
-	              (this.audioDone ? "1" : "0") + "," +
-	              (this.finished ? "1" :  "0");
-	this.audioDone = true;
+	if(this.mousePosition){
+		var mouseX = Math.ceil(this.mousePosition.x);
+		var mouseY = Math.ceil(this.mousePosition.y);
+		if(!this.previousMousePosition || mouseX !== this.previousMousePosition.x || mouseY !== this.previousMousePosition.y){
+			this.previousMousePosition = {
+				x: mouseX,
+				y: mouseY
+			};
+			var result = "0," + Math.ceil(this.position.x) + "," +
+			              Math.ceil(this.position.y) + "," +
+			              this.color + "," + 
+		        		  mouseX + "," +
+			              mouseY;
+		}
+	}
 	return result;
 };
 
 ship.prototype.renderRemoteData = function(remoteData, offset){
-	if(remoteData[offset + 5] === "0"){
-		audio.appearAudio.play();
-	}
-	this.direction = parseInt(remoteData[offset + 3]);
 	this.classicModel = this.direction === 1  ? this.rectsRight : this.rectsLeft;
 	this.position = {x:parseInt(remoteData[offset + 1]), y: parseInt(remoteData[offset + 2])};
-	this.color = remoteData[offset + 4];
-	this.finished = (remoteData[offset + 6] === "1");
-	return offset + 7;
+	this.mousePosition = {x:parseInt(remoteData[offset + 4]), y: parseInt(remoteData[offset + 5])};
+	this.color = remoteData[offset + 3];
+	return offset + 6;
 };
 
 

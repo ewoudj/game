@@ -33,6 +33,7 @@ var engine = function(config){
 	this.previousGameStateMessageTime = 0;
 	this.remoteDataString = [];
 	this.finishedEntities = [];
+    this.startTime = new Date().getTime();
 	if(this.rulesType){
 		this.rules = new this.rulesType({engine: this});
 		this.add(this.rules);
@@ -52,7 +53,7 @@ var engine = function(config){
 };
 
 engine.prototype.serverUpdateLoop = function(){
-	setTimeout( this.serverUpdateLoop.bind(this), 1000 / 60 );
+	setTimeout( this.serverUpdateLoop.bind(this), 1000 / 50 );
 	this.update();
 };
 
@@ -98,8 +99,13 @@ engine.prototype.calculateCollisions = function(){
 	}
 };
 
-engine.prototype.update = function(time){
-	time = time || new Date().getTime();
+engine.prototype.reset = function(){
+	this.entities = [];
+	this.startTime = new Date().getTime();
+};
+
+engine.prototype.update = function(){
+	time = new Date().getTime() - this.startTime;
 	if(this.mode !== "client"){
 		this.calculateCollisions();
 	}
@@ -197,6 +203,17 @@ engine.prototype.appendRemoteData = function(entities, remoteData){
 	return remoteData;
 };
 
+engine.prototype.getEntityById = function(engineId){
+	var result = null;
+	for(var i = 0, m = this.entities.length; i < m; i++){
+		if(engineId === this.entities[i].engineId){
+			result = this.entities[i];
+			break;
+		}
+	}
+	return result;
+};
+
 engine.prototype.processRemoteData = function(){
 	var s = this.remoteDataString.shift();
 	while(s){
@@ -208,12 +225,7 @@ engine.prototype.processRemoteData = function(){
 			var e = null;
 			var engineId = parseInt(dataFromServer[offset]);
 			offset++;
-			for(var j = 0, m = this.entities.length; j < m; j++){
-				if(engineId === this.entities[j].engineId){
-					e = this.entities[j];
-					break;
-				}
-			}
+			e = this.getEntityById(engineId);
 			if(e === null && dataFromServer[offset] !== "-1"){
 				// Add new entities
 				var entityType = engine.remoteRenderer[dataFromServer[offset]];

@@ -16,6 +16,7 @@ var laserbeam = function(config){
 	this.rects = [
 		{x: -20, y: -5, w: 40, h: 10}
 	];
+	this.classicModel = this.rects;
 	this.collisionRect = this.rects[0];
 	this.audioDone = false;
 };
@@ -23,7 +24,6 @@ var laserbeam = function(config){
 laserbeam.prototype = new entity();
 
 laserbeam.prototype.render = function(){
-	this.classicModel = this.rects;
 	if(!this.audioDone){
 		this.audioDone = true;
 		audio.laserAudio.play();
@@ -42,12 +42,11 @@ laserbeam.prototype.update = function(time){
 			}
 		}
 	}
-	if(!this.lastTimeCalled){
-		this.lastTimeCalled = time;
+	if(!this.startTime){
+		this.startTime = time;
+		this.startPosition = this.position;
 	}
-	var timeDelta = time - this.lastTimeCalled;
-	this.lastTimeCalled = time;
-	this.position.x = this.position.x + ((40 * this.direction)  * (timeDelta / 40));
+	this.position.x = this.startPosition.x + ((this.direction * (time - this.startTime)) / 6);
 };
 
 laserbeam.prototype.getRemoteData = function(){
@@ -55,8 +54,6 @@ laserbeam.prototype.getRemoteData = function(){
 	if(!this.remoteDataSend && !this.finished){
 		result = "1," + Math.ceil(this.position.x) + "," +
 	              Math.ceil(this.position.y) + "," + 
-	              (this.audioDone ? "1" : "0") + "," +
-	              (this.finished ? "1" :  "0") + "," +
 	              this.direction;
 		this.audioDone = true;
 		this.remoteDataSend = true;
@@ -65,15 +62,9 @@ laserbeam.prototype.getRemoteData = function(){
 };
 
 laserbeam.prototype.renderRemoteData = function(remoteData, offset){
-	this.classicModel = this.rects;
-	this.position = {x:parseFloat(remoteData[offset + 1]), y:parseFloat(remoteData[offset + 2])};
-	this.color = '#FFF';
-	if(remoteData[offset + 3] === "0"){
-		audio.laserAudio.play();
-	}
-	this.finished = (remoteData[offset + 4] === "1");
-	this.direction = parseInt(remoteData[offset + 5]);
-	return offset + 6;
+	this.position = {x:parseInt(remoteData[offset + 1]), y:parseInt(remoteData[offset + 2])};
+	this.direction = parseInt(remoteData[offset + 3]);
+	return offset + 4;
 };
 
 if(typeof(exports) !== 'undefined'){

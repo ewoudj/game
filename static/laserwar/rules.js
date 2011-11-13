@@ -33,7 +33,7 @@ rules.prototype = new entity();
 rules.prototype.initialize = function(){
 	this.initialized = true;
 	this.engine.canvasColor = '#000';
-	this.engine.entities = [];
+	this.engine.reset();
 	this.engine.add(this);
 	this.engine.gameState = {
 		player1Ship: null,
@@ -78,6 +78,7 @@ rules.prototype.initialize = function(){
 		type        	: 'star',
 		colorIndex  	: 0,
 		direction   	: -1,
+		starId			: 0,
 		position    	: { x: this.engine.width / 2, y : (this.engine.height * 0.25) - this.barHeight },
 		bottomOffset	: this.barHeight
 	}) );
@@ -86,6 +87,7 @@ rules.prototype.initialize = function(){
 		type        	: 'star',
 		colorIndex  	: 3,
 		direction   	: -1,
+		starId			: 5,
 		position    	: { x: (this.engine.width / 2) , y : (this.engine.height * 0.75) - this.barHeight },
 		bottomOffset	: this.barHeight
 	}) );
@@ -234,7 +236,7 @@ rules.prototype.startMultiPlayerGame = function () {
     // Sends request game message to the server (the server will start an engine on the server in 'server' mode)
     this.engine.socket.emit('start game', 'foo', 'bar');
     this.engine.mode = 'client';
-    this.engine.entities = [];
+    this.engine.reset();
     this.hideMenu();
 };
 
