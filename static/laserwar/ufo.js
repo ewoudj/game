@@ -7,6 +7,9 @@ if(typeof(require) !== 'undefined'){
 	var colors; // = require("./rules").colors;
 	var laserbeam = require("./laserbeam").laserbeam;
 	var explosion = require("./explosion").explosion;
+	// AI
+	var engine = require("./engine").engine;
+	require('./ai/ufo.js');
 }
 
 var ufo = function(config){
@@ -21,46 +24,90 @@ var ufo = function(config){
 	this.nextFrame = false;
 	this.name = this.name || 'ufo';
 	this.position = this.position || {x:0, y:0};
-	this.pointerOffset = {x:20, y:15};
-	this.gunOffset =  {x:20, y:10};
-	this.collisionRect = {x: 0, y: 0, w: 40,h: 30};
+	this.gunOffset =  {x:40, y:0};
+	// x -20   y -15
+	this.collisionRect = {x: -20, y: -15, w: 40,h: 30};
 	this.modelIndex = 4;
 	this.ufoFrame = 0;
 	this.ufoFrames = [ [
-		{x: 10, y: 0, w: 20, h: 10},
-		{x: 10, y: 10, w: 30, h: 10},
-		{x: 10, y: 20, w: 20, h: 10}
+		{x: -10, y: -15, w: 20, h: 10},
+		{x: -10, y: -5, w: 30, h: 10},
+		{x: -10, y: 5, w: 20, h: 10}
 	],
 	[
-		{x: 10, y: 0, w: 20, h: 10},
-		{x: 0, y: 10, w: 10, h: 10}, {x: 20, y: 10, w: 20, h: 10},
-		{x: 10, y: 20, w: 20, h: 10}
+		{x: -10, y: -15, w: 20, h: 10},
+		{x: -20, y: -5, w: 10, h: 10}, {x: 0, y: -5, w: 20, h: 10},
+		{x: -10, y: 5, w: 20, h: 10}
 	],
 	[
-		{x: 10, y: 0, w: 20, h: 10},
-		{x: 0, y: 10, w: 20, h: 10}, {x: 30, y: 10, w: 10, h: 10},
-		{x: 10, y: 20, w: 20, h: 10}
+		{x: -10, y: -15, w: 20, h: 10},
+		{x: -20, y: -5, w: 20, h: 10}, {x: 10, y: -5, w: 10, h: 10},
+		{x: -10, y: 5, w: 20, h: 10}
 	],
 	[
-		{x: 10, y: 0, w: 20, h: 10},
-		{x: 0, y: 10, w: 30, h: 10},
-		{x: 10, y: 20, w: 20, h: 10}
+		{x: -10, y: -15, w: 20, h: 10},
+		{x: -20, y: -5, w: 30, h: 10},
+		{x: -10, y: 5, w: 20, h: 10}
 	],
 	[
-		{x: 10, y: 0, w: 20, h: 10},
-		{x: 0, y: 10, w: 40, h: 10},
-		{x: 10, y: 20, w: 20, h: 10}
+		{x: -10, y: -15, w: 20, h: 10},
+		{x: -20, y: -5, w: 40, h: 10},
+		{x: -10, y: 5, w: 20, h: 10}
 	]];
 };
 
 ufo.prototype = new entity();
 
 ufo.prototype.render = function(){
-	
+	if(!this.audioDone){
+		this.audioDone = true;
+		try{
+		if(audio){
+			audio.appearAudio.play();
+		}}catch(ex){}
+	}
 };
 
 ufo.prototype.update = function(time){
-	if(this.engine.mode == 'client'){return;}
+	if(this.engine.mode !== 'client'){
+		this.handleCollisions();
+		var controls = engine.ai[engine.ufoai].call(this);
+		this.mousePosition = controls.mousePosition;
+		this.shoot = controls.shoot;
+	}
+	var timeDelta = this.getTimeDelta();
+	this.position = this.calculateMovement(this.position, this.mousePosition, 10, timeDelta);
+	if(this.engine.mode !== 'client'){
+		this.handleLaser(time);
+	}
+	this.handleAnimation(time);
+};
+
+ufo.prototype.getTimeDelta = function(){
+	if(!this.lastTimeCalled){
+		this.lastTimeCalled = time;
+	}
+	var timeDelta = time - this.lastTimeCalled;
+	this.lastTimeCalled = time;
+	return timeDelta;
+};
+
+ufo.prototype.calculateMovement = function(currentPosition, mousePosition, speedLimit, timeDelta){
+	var deltaX = mousePosition.x - currentPosition.x;
+	var deltaY = mousePosition.y - currentPosition.y;
+	var distance = helpers.distance(currentPosition, mousePosition);
+	var f = 0.25;
+	var speed = speedLimit * (timeDelta / 40);
+	if(distance > 5){
+		f = 5 / distance;
+	}
+	return {
+		x: this.position.x + (deltaX * f),
+		y: this.position.y + (deltaY * f)
+	};
+};
+
+ufo.prototype.handleCollisions = function(){
 	if(this.invulerability){
 		this.invulerability--;
 	}
@@ -68,82 +115,24 @@ ufo.prototype.update = function(time){
 		for(var i = 0; i < this.collisions.length; i++){
 			if(this.collisions[i].owner != this && !this.invulerability){
 				this.finished = true;
-				this.engine.add(new explosion({
-					position: this.position
-				}));
 			}
 		}
-	}
-	var previousPosition = this.position;
-	var shoot = false;
+	}	
+};
 
-	// AI
-	// Priority 1: staying alive
-	// Avoid collisions
-	var nearestEntityDistance = Infinity;
-	var nearestEntity = null;
-	var nearestStarDistance = Infinity;
-	var nearestStar = null;
-	var evading = false;
-	// Determine the nearest object  
-	for(var i = 0; i < this.engine.entities.length; i++){
-		if(this.engine.entities[i] != this && this.engine.entities[i].owner != this && this.engine.entities[i].position){
-			var d = helpers.distance(this.position, this.engine.entities[i].position);
-			if(d < nearestEntityDistance){ 
-				nearestEntityDistance = d;
-				nearestEntity = this.engine.entities[i];
-			}
-			if(this.engine.entities[i].type == 'star' && this.engine.entities[i].colorIndex != this.colorIndex && d < nearestStarDistance){ 
-				nearestStarDistance = d;
-				nearestStar = this.engine.entities[i];
-			}
-		}
+ufo.prototype.onRemove = function(){
+	if(this.engine.mode !== 'server'){
+		// The server does not care about the explosion as it is just a visual
+		this.engine.add(new explosion({
+			position: this.position
+		}));
 	}
-	if(nearestEntity && nearestEntityDistance < 3){
-		var deltax = nearestEntity.position.x - this.position.x;
-		var deltay = nearestEntity.position.y - this.position.y;
-		var targetVector = { 
-		y: (deltay) < 0 ? 1 : -1,
-		x: (deltax) < 0 ? 1 : -1
-		};
-		this.position = {
-		x: this.position.x + ( targetVector.x * this.speed ) ,
-		y: this.position.y + ( targetVector.y * this.speed )
-		};
-		evading = true;
-	}
-	// Priority 2: 
-	// Select target
-	var target = null;
-	if(!target){
-		target = nearestStar;
-	}
-	if(target){                    
-		var deltax = target.position.x - this.position.x;
-		var deltay = target.position.y - this.position.y;
-		var targetVector = { 
-		y: (deltay) < 0 ? -1 : 1,
-		x: (deltax) < 0 ? -1 : 1
-		};
-		if(!evading){
-			var movey = !(deltay < 10 && deltay > -10);
-			var movex = !(deltax < 80 && deltax > -80);
-			var reversex = (deltax < 60 && deltax > -60);
-			this.position = {
-			x: this.position.x + ( targetVector.x * (movex ? this.speed : (reversex ? -this.speed : 0 ) ) ),
-			y: this.position.y + ( targetVector.y * (movey ? this.speed : 0) )
-			};
-		}
-		if(this.position.x == previousPosition.x && this.direction != targetVector.x){
-			this.direction = targetVector.x;
-		}
-		// Only shoot when
-		// - the target is near (y)
-		// - the ship is pointed in the right direction
-		shoot = ((deltay < 40 && deltay > -40) && (this.direction == targetVector.x));
-	}
-	if(shoot && this.laserState == 10){
+};
+
+ufo.prototype.handleLaser = function(time){
+	if(this.shoot && this.laserState == 10){
 		this.laserState = -20;
+		this.gunOffset.x = this.direction === 1 ? 40 : -40;
 		this.engine.add(new laserbeam({
 									position: {x:this.position.x + this.gunOffset.x, y:this.position.y + this.gunOffset.y},
 									direction: this.direction,
@@ -153,10 +142,13 @@ ufo.prototype.update = function(time){
 	else if(this.laserState != 10){
 		this.laserState = this.laserState + 2;
 	}
-	if(this.position.x > previousPosition.x){
+};
+
+ufo.prototype.handleAnimation = function(time){
+	if(this.position.x > this.mousePosition.x){
 		this.direction = 1;
 	}
-	else if(this.position.x < previousPosition.x){
+	else if(this.position.x < this.mousePosition.x){
 		this.direction = -1;
 	}
 	if(!this.lastTimeFrameChanged){
@@ -193,25 +185,30 @@ ufo.prototype.update = function(time){
 };
 
 ufo.prototype.getRemoteData = function(){
-	var result = "3," + Math.ceil(this.position.x) + "," +
-			Math.ceil(this.position.y) + "," +
-			this.ufoFrame + "," +
-			this.color + "," +
-            (this.audioDone ? "1" :  "0") + "," +
-            (this.finished ? "1" :  "0");
-	this.audioDone = true;
+	if(this.mousePosition){
+		var mouseX = Math.ceil(this.mousePosition.x);
+		var mouseY = Math.ceil(this.mousePosition.y);
+		if(!this.previousMousePosition || mouseX !== this.previousMousePosition.x || mouseY !== this.previousMousePosition.y){
+			this.previousMousePosition = {
+				x: mouseX,
+				y: mouseY
+			};
+			var result = "3," + Math.ceil(this.position.x) + "," +
+			              Math.ceil(this.position.y) + "," +
+			              this.colorIndex + "," + 
+		        		  mouseX + "," +
+			              mouseY;
+		}
+	}
 	return result;
 };
 
 ufo.prototype.renderRemoteData = function(remoteData, offset){
-	if(remoteData[offset + 5] === "0"){
-		audio.appearAudio.play();
-	}
-	this.classicModel = this.ufoFrames[parseFloat(remoteData[offset + 3])];
 	this.position = {x:parseFloat(remoteData[offset + 1]), y:parseFloat(remoteData[offset + 2])};
-	this.color = remoteData[offset + 4];
-	this.finished = (remoteData[offset + 6] === "1");
-	return offset + 7;
+	this.colorIndex = parseInt(remoteData[offset + 3]);
+	this.color = this.colors[this.colorIndex];
+	this.mousePosition = {x:parseInt(remoteData[offset + 4]), y: parseInt(remoteData[offset + 5])};
+	return offset + 6;
 };
 
 if(typeof(exports) !== 'undefined'){

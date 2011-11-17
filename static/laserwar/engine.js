@@ -146,18 +146,23 @@ engine.prototype.updateEntities = function (time){
 
 engine.prototype.removeFinishedEntities = function(){
 	// Filter out the objects that indicate they are finished
-	var newList = [];
+	var oldEntityList = this.entities;
+	this.entities = [];
 	this.finishedEntities = this.finishedEntities || [];
-	for(var i = 0, l = this.entities.length; i < l; i++){
-		var e1 = this.entities[i];
+	for(var i = 0, l = oldEntityList.length; i < l; i++){
+		var e1 = oldEntityList[i];
 		if(e1 && !e1.finished){
-			newList.push(e1);
+			 this.entities.push(e1);
 		}
-		else if(e1 && e1.finished && (this.mode === "server") ){
-			this.finishedEntities.push(e1);
+		else if(e1 && e1.finished){
+			if(e1.onRemove){
+				e1.onRemove();
+			}
+			if(this.mode === "server"){
+				this.finishedEntities.push(e1);
+			}
 		}
 	}
-	this.entities = newList;
 };
 
 engine.prototype.sendGameStateToClient = function(time){
@@ -179,6 +184,9 @@ engine.prototype.prepareRemoteData = function(time){
 		remoteData = this.appendRemoteData(this.entities, remoteData);
 		remoteData = this.appendRemoteData(this.finishedEntities, remoteData);
 		this.finishedEntities = [];
+	}
+	if(remoteData){
+		remoteData = time + ',' + remoteData;
 	}
 	return remoteData;
 };
@@ -219,16 +227,22 @@ engine.prototype.processRemoteData = function(){
 	while(s){
 		var dataFromServer = s.split(",");
 		var offset = 0;
+		// First item in the array is always the server time for the data
+		this.lastServerTime = dataFromServer[0];
+		offset++;
 		var l = dataFromServer.length;
 		var i = 0;
 		while(offset < l){
 			var e = null;
+			// For each entity, the first array item contains it's id  
 			var engineId = parseInt(dataFromServer[offset]);
 			offset++;
 			e = this.getEntityById(engineId);
+			// If the object was not found by Id it needs to be created
 			if(e === null && dataFromServer[offset] !== "-1"){
-				// Add new entities
+				// The type of the entity is stored in the second array item
 				var entityType = engine.remoteRenderer[dataFromServer[offset]];
+				// Create a new instance and add it to the engine
 				e = new entityType({
 					engine: this,
 					engineId: engineId
@@ -236,13 +250,20 @@ engine.prototype.processRemoteData = function(){
 				this.add(e);
 			}
 			else if(!e && dataFromServer[offset] === "-1"){
-				offset++;
+				// If the type of the entity is -1 that means the object was finished.
+				// In this case the object was finished but apparently never reached the
+				// client in the first place (lived extremely shortly on the server). 
+				// The offset needs to be increased anyway.
+ 				offset++;
 			}
 			else if(e && dataFromServer[offset] === "-1"){
+				// If the type of the entity is -1 that means the object was finished.
 				offset++;
+				// By tagging the entity as finished the engine will clean it up
 				e.finished = true;
 			}
 			if(e && !e.finished) {
+				// Update the existing entity with the remote data
 				offset = e.renderRemoteData(dataFromServer,offset);
 			}
 		}
@@ -280,6 +301,7 @@ engine.getItem = function(key, defaultValue) {
 engine.ai = {};
 engine.player1ai = engine.getItem("player1ai", 'heuristic');
 engine.player2ai = engine.getItem("player2ai", 'heuristic');
+engine.ufoai = engine.getItem("player2ai", 'heuristic');
 engine.rendering = {};
 engine.renderer = engine.getItem("renderer",'classic');
 engine.effectsVolume = parseInt(engine.getItem("effectsVolume", 25));

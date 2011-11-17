@@ -110,7 +110,7 @@ star.prototype.calculateSubPosition = function(starId, time){
 star.prototype.getRemoteData = function(){
 	var result = null;
 	if(!this.remoteDataSend || this.color !== this.previousColor){
-		result = "2," + this.color + "," +
+		result = "2," + this.colorIndex + "," +
 	        (this.makeSound ? "1" : "0") + "," +
 	        this.starId;
 		this.makeSound = false;
@@ -125,7 +125,8 @@ star.prototype.renderRemoteData = function(remoteData, offset){
 		audio.changeColorAudio.play();		
 	}
 	this.classicModel = this.rects;
-	this.color = remoteData[offset + 1];
+	this.colorIndex = parseInt(remoteData[offset + 1]);
+	this.color = this.colors[this.colorIndex];
 	this.starId = parseInt(remoteData[offset + 3]);
 	return offset + 4;
 };

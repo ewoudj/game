@@ -30,7 +30,7 @@ var ship = function(config){
 	this.audioDone = false;
 	this.name = this.name || 'ship';
 	this.position = this.position || {x:0, y:0};
-	this.gunOffset =  {x:0, y: 0};
+	this.gunOffset =  {x:40, y: 0};
 	this.collisionRect = {x: -15, y: -10, w: 30,h: 20};
 	this.modelIndex = 0;
 	this.rectsRight = [
@@ -83,9 +83,6 @@ ship.prototype.update = function(time){
 						this.engine.gameState.player2Score++;
 					}
 					this.finished = true;
-					this.engine.add(new explosion({
-						position: this.position
-					}));
 				}
 			}
 		}
@@ -94,6 +91,15 @@ ship.prototype.update = function(time){
 	this.move(timeDelta);
 	if(this.engine.mode !== 'client'){
 		this.updateLaser(timeDelta);
+	}
+};
+
+ship.prototype.onRemove = function(){
+	if(this.engine.mode !== 'server'){
+		// The server does not care about the explosion as it is just a visual
+		this.engine.add(new explosion({
+			position: this.position
+		}));
 	}
 };
 
@@ -111,7 +117,8 @@ ship.prototype.move = function(timeDelta){
 
 ship.prototype.updateLaser = function(timeDelta){
 	if(this.shoot && this.laserState == 300){
-		this.laserState = 0;	
+		this.laserState = 0;
+		this.gunOffset.x = this.direction === 1 ? 40 : -40;
 		this.engine.add(new laserbeam({
 			position: {x:this.position.x + this.gunOffset.x, y:this.position.y + this.gunOffset.y},
 			direction: this.direction,
@@ -193,7 +200,7 @@ ship.prototype.getRemoteData = function(){
 			};
 			var result = "0," + Math.ceil(this.position.x) + "," +
 			              Math.ceil(this.position.y) + "," +
-			              this.color + "," + 
+			              this.colorIndex + "," + 
 		        		  mouseX + "," +
 			              mouseY;
 		}
@@ -205,7 +212,8 @@ ship.prototype.renderRemoteData = function(remoteData, offset){
 	this.classicModel = this.direction === 1  ? this.rectsRight : this.rectsLeft;
 	this.position = {x:parseInt(remoteData[offset + 1]), y: parseInt(remoteData[offset + 2])};
 	this.mousePosition = {x:parseInt(remoteData[offset + 4]), y: parseInt(remoteData[offset + 5])};
-	this.color = remoteData[offset + 3];
+	this.colorIndex = parseInt(remoteData[offset + 3]);
+	this.color = this.colors[this.colorIndex];
 	return offset + 6;
 };
 

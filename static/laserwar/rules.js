@@ -205,9 +205,14 @@ rules.prototype.update = function(time){
 };
 
 rules.prototype.getRemoteData = function(){
-	return "5," + this.engine.gameState.player1Score + "," +
+	var result = null;
+	var newMessage = "5," + this.engine.gameState.player1Score + "," +
 	        this.engine.gameState.player2Score + "," +
 	        this.engine.canvasColor;
+	if(newMessage !== this.previousMessage){
+		result = this.previousMessage = newMessage;
+	}
+	return result;
 };
 
 rules.prototype.renderRemoteData = function(remoteData, offset){
