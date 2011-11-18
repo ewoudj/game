@@ -20,7 +20,7 @@ if(typeof(require) !== 'undefined'){
 var ship = function(config){
 	helpers.apply(config, this);
 	this.type = this.type || 'player'; // player, computer
-	this.laserState = 10; // 10 = ready, 0 = charging
+	this.laserState = 300; // 10 = ready, 0 = charging
 	this.direction = this.direction || 1;
 	this.colors = colors ? colors : require("./rules").colors;
 	this.color = this.colors[this.colorIndex] || this.color || "#FFF";
@@ -116,7 +116,7 @@ ship.prototype.move = function(timeDelta){
 };
 
 ship.prototype.updateLaser = function(timeDelta){
-	if(this.shoot && this.laserState == 300){
+	if(this.shoot && this.laserState >= 300){
 		this.laserState = 0;
 		this.gunOffset.x = this.direction === 1 ? 40 : -40;
 		this.engine.add(new laserbeam({
