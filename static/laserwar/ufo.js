@@ -93,18 +93,22 @@ ufo.prototype.getTimeDelta = function(){
 };
 
 ufo.prototype.calculateMovement = function(currentPosition, mousePosition, speedLimit, timeDelta){
-	var deltaX = mousePosition.x - currentPosition.x;
-	var deltaY = mousePosition.y - currentPosition.y;
-	var distance = helpers.distance(currentPosition, mousePosition);
-	var f = 0.25;
-	var speed = speedLimit * (timeDelta / 40);
-	if(distance > 5){
-		f = 5 / distance;
+	var result = currentPosition;
+	if(mousePosition){
+		var deltaX = mousePosition.x - currentPosition.x;
+		var deltaY = mousePosition.y - currentPosition.y;
+		var distance = helpers.distance(currentPosition, mousePosition);
+		var f = 0.25;
+		var speed = speedLimit * (timeDelta / 40);
+		if(distance > 5){
+			f = 5 / distance;
+		}
+		result = {
+			x: this.position.x + (deltaX * f),
+			y: this.position.y + (deltaY * f)
+		};
 	}
-	return {
-		x: this.position.x + (deltaX * f),
-		y: this.position.y + (deltaY * f)
-	};
+	return result;
 };
 
 ufo.prototype.handleCollisions = function(){
