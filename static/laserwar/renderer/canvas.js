@@ -16,7 +16,9 @@ engine.rendering.classic = function(suspend){
 		if(this.mode == 'standalone' || this.mode == 'client'){
 			for(var i = 0, l = this.entities.length; i < l; i++){
 				var e = this.entities[i];
-				e.render();
+				if(e.render){
+					e.render();
+				}
 				this.classicRenderer.renderEntity(e);
 			}
 		}
@@ -66,10 +68,11 @@ engine.rendering.classic.renderer = function(){
 		this.context = this.canvas.getContext('2d');
 	};
 	
-	renderer.prototype.onmousemove = function(){
+	renderer.prototype.onmousemove = function(e){
 		if(this.suspended) return;
-		this.engine.mousePosition.x = Math.ceil((event.clientX - this.offsetLeft) / this.scale);
-		this.engine.mousePosition.y = Math.ceil((event.clientY - this.offsetTop) / this.scale);
+		var evt = e || window.event;
+		this.engine.mousePosition.x = Math.ceil((evt.clientX - this.offsetLeft) / this.scale);
+		this.engine.mousePosition.y = Math.ceil((evt.clientY - this.offsetTop) / this.scale);
 	};
 	
 	renderer.prototype.onmousedown = function(){
