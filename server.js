@@ -11,7 +11,6 @@ server.listen(8001);
 var server = connect();
 var io = socketio.listen(8002); 
 var nicknames = {};
-var games = [];
 var waitingGame = null;
 
 io.set('log level', 0);
@@ -29,17 +28,17 @@ io.sockets.on('connection', function (socket) {
 					mode : 'server'
 				};
 				waitingGame = (new engine(settings));
+				waitingGame.rules.startServerGame();
 				socket.game = waitingGame;
-				games.push(socket.game);
 			}
 			else {
 				waitingGame.player2 = socket;
-				waitingGame.entities[0].initialized = false;
+				waitingGame.rules.startServerGame();
 				socket.game = waitingGame;
 				waitingGame = null;
 			}
 		} else {
-			socket.game.entities[0].initialized = false;
+			socket.game.rules.startServerGame();
 		}
 	});
 	
@@ -64,6 +63,6 @@ io.sockets.on('connection', function (socket) {
 	});
 
 	socket.on('disconnect', function () {
-
+		
 	});
 });

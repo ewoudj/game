@@ -27,14 +27,30 @@ var rules = function(config){
 	this.initialized = false;
 	this.name = 'rules';
 	this.barHeight = 30;
+	if(this.engine.mode !== 'server'){
+		var uphandler = this.keyboardHandler.bind(this);
+		if(document.addEventListener) // Opera - Firefox - Google Chrome
+		{
+	//		document.addEventListener("keydown", onKeyEvent, false);
+			document.addEventListener("keyup", uphandler, false);
+		}
+		else if(document.attachEvent) // Internet Explorer
+		{
+	//		document.attachEvent("onkeydown", onKeyEvent);
+			document.attachEvent("onkeyup", uphandler);
+		}
+		else if(!document.onkeydown && !document.onkeyup)
+		{
+	//		document.onkeydown = onKeyEvent;
+			document.onkeyup = uphandler;
+		}
+	}
 };
 rules.prototype = new entity();
 
 rules.prototype.initialize = function(){
 	this.initialized = true;
 	this.engine.canvasColor = '#000';
-	this.engine.reset();
-	this.engine.add(this);
 	this.engine.gameState = {
 		player1Ship: null,
 		player2Ship: null,
@@ -43,8 +59,7 @@ rules.prototype.initialize = function(){
 		player1Score: 0,
 		player2Score: 0
 	};
-	if(this.engine.mode == 'standalone' || this.engine.mode == 'client'){
-		document.onkeyup = this.keyboardHandler.bind(this);
+	if(this.engine.mode !== 'server'){
 		this.scoreBar = this.scoreBar || new scorebar({
 			engine: this.engine
 		});
@@ -54,43 +69,42 @@ rules.prototype.initialize = function(){
 		});
 		this.engine.add(this.menu);
 	}
-	if(this.crosshair){
-		this.add(new crosshair() );
+	if(this.engine.mode !== 'client'){
+		this.engine.add( this.engine.gameState.player1Ship = new ship({
+			name        : 'Player 1',
+			type		: this.engine.mode == 'standalone' ? (this.engine.playerCount === 0 ? 'computer' : 'player') : (this.engine.player1 ? 'player' : 'computer'),
+			direction   : 1,
+			colorIndex  : 0,
+			position    : { x: 10, y : 10 }
+		}) );
+		// Player 2
+		this.engine.add( this.engine.gameState.player2Ship = new ship({
+			name        : 'Player 2',
+			type        : this.engine.mode == 'standalone' ? (this.engine.playerCount !== 2 ? 'computer' : 'player') : (this.engine.player2 ? 'player' : 'computer'),
+			colorIndex  : 3,
+			direction   : -1,
+			position    : { x: this.engine.width - 40, y : (this.engine.height - 50 - this.barHeight) }
+		}) );
+		// Stars 
+		this.engine.add( new star({
+			name        	: 'Star 1',
+			type        	: 'star',
+			colorIndex  	: 0,
+			direction   	: -1,
+			starId			: 0,
+			position    	: { x: this.engine.width / 2, y : (this.engine.height * 0.25) - this.barHeight },
+			bottomOffset	: this.barHeight
+		}) );
+		this.engine.add( new star({
+			name        	: 'Star 2',
+			type        	: 'star',
+			colorIndex  	: 3,
+			direction   	: -1,
+			starId			: 5,
+			position    	: { x: (this.engine.width / 2) , y : (this.engine.height * 0.75) - this.barHeight },
+			bottomOffset	: this.barHeight
+		}) );
 	}
-	this.engine.add( this.engine.gameState.player1Ship = new ship({
-		name        : 'Player 1',
-		type		: this.engine.mode == 'standalone' ? (this.engine.playerCount === 0 ? 'computer' : 'player') : (this.engine.player1 ? 'player' : 'computer'),
-		direction   : 1,
-		colorIndex  : 0,
-		position    : { x: 10, y : 10 }
-	}) );
-	// Player 2
-	this.engine.add( this.engine.gameState.player2Ship = new ship({
-		name        : 'Player 2',
-		type        : this.engine.mode == 'standalone' ? (this.engine.playerCount !== 2 ? 'computer' : 'player') : (this.engine.player2 ? 'player' : 'computer'),
-		colorIndex  : 3,
-		direction   : -1,
-		position    : { x: this.engine.width - 40, y : (this.engine.height - 50 - this.barHeight) }
-	}) );
-	// Stars 
-	this.engine.add( new star({
-		name        	: 'Star 1',
-		type        	: 'star',
-		colorIndex  	: 0,
-		direction   	: -1,
-		starId			: 0,
-		position    	: { x: this.engine.width / 2, y : (this.engine.height * 0.25) - this.barHeight },
-		bottomOffset	: this.barHeight
-	}) );
-	this.engine.add( new star({
-		name        	: 'Star 2',
-		type        	: 'star',
-		colorIndex  	: 3,
-		direction   	: -1,
-		starId			: 5,
-		position    	: { x: (this.engine.width / 2) , y : (this.engine.height * 0.75) - this.barHeight },
-		bottomOffset	: this.barHeight
-	}) );
 };
 
 // Checks to see if the players mouse pointer is over a star
@@ -168,39 +182,40 @@ rules.prototype.ensureUserRespawn = function(ship, mousePosition, buttonDown, pl
 };
 
 rules.prototype.update = function(time){
-	if(this.engine.mode == 'client'){return;}
 	if(!this.initialized){
 		this.initialize();
 	}
-	this.engine.gameState.player1Ship = this.ensureUserRespawn(
-			this.engine.gameState.player1Ship, 
-			this.engine.mousePosition, this.engine.buttonDown, 'Player 1', 1, 0);
-	
-	this.engine.gameState.player2Ship = this.ensureUserRespawn(
-			this.engine.gameState.player2Ship, 
-			this.engine.mousePosition2, this.engine.buttonDown2, 'Player 2', -1, 3);
-	
-	// Randomly create UFOs when they do not exist
-	if((!(this.engine.gameState.player3) || (this.engine.gameState.player3 && this.engine.gameState.player3.finished)) && 6 == Math.floor(Math.random()*200)){
-		this.engine.add( this.engine.gameState.player3 = new ufo({
-			name        : 'Player 3',
-			type        : 'computer',
-			colorIndex  : 2,
-			direction   : -1,
-			position    : { x: this.engine.width - 40, y : 10 }
-		}));		
-	}
-	if((!(this.engine.gameState.player4) || (this.engine.gameState.player4 && this.engine.gameState.player4.finished)) && 6 == Math.floor(Math.random()*200)){
-		this.engine.add( this.engine.gameState.player4 = new ufo({
-			name        : 'Player 4',
-			type        : 'computer',
-			colorIndex  : 4,
-			direction   : -1,
-			position    : { x: 10, y : (this.engine.height - 50 - this.barHeight) }
-		}));		
-	}
-	if(this.engine.mode == 'standalone' || this.engine.mode == 'client'){
-		this.scoreBar.setScore(this.engine.gameState.player1Score, this.engine.gameState.player2Score);
+	if(this.engine.mode !== 'client'){
+		this.engine.gameState.player1Ship = this.ensureUserRespawn(
+				this.engine.gameState.player1Ship, 
+				this.engine.mousePosition, this.engine.buttonDown, 'Player 1', 1, 0);
+		
+		this.engine.gameState.player2Ship = this.ensureUserRespawn(
+				this.engine.gameState.player2Ship, 
+				this.engine.mousePosition2, this.engine.buttonDown2, 'Player 2', -1, 3);
+		
+		// Randomly create UFOs when they do not exist
+		if((!(this.engine.gameState.player3) || (this.engine.gameState.player3 && this.engine.gameState.player3.finished)) && 6 == Math.floor(Math.random()*200)){
+			this.engine.add( this.engine.gameState.player3 = new ufo({
+				name        : 'Player 3',
+				type        : 'computer',
+				colorIndex  : 2,
+				direction   : -1,
+				position    : { x: this.engine.width - 40, y : 10 }
+			}));		
+		}
+		if((!(this.engine.gameState.player4) || (this.engine.gameState.player4 && this.engine.gameState.player4.finished)) && 6 == Math.floor(Math.random()*200)){
+			this.engine.add( this.engine.gameState.player4 = new ufo({
+				name        : 'Player 4',
+				type        : 'computer',
+				colorIndex  : 4,
+				direction   : -1,
+				position    : { x: 10, y : (this.engine.height - 50 - this.barHeight) }
+			}));		
+		}
+		if(this.engine.mode == 'standalone' || this.engine.mode == 'client'){
+			this.scoreBar.setScore(this.engine.gameState.player1Score, this.engine.gameState.player2Score);
+		}
 	}
 };
 
@@ -230,10 +245,7 @@ rules.prototype.renderRemoteData = function(remoteData, offset){
 rules.prototype.startSinglePlayerGame = function(){
 	this.engine.mode = 'standalone';
 	this.engine.playerCount = 1;
-	if(this.engine.entities.length == 0){
-		this.engine.add(this);
-	}
-    this.initialized = false;
+	this.engine.reset();
     this.hideMenu();
 };
 
@@ -241,17 +253,30 @@ rules.prototype.startMultiPlayerGame = function () {
     // Sends request game message to the server (the server will start an engine on the server in 'server' mode)
     this.engine.socket.emit('start game', 'foo', 'bar');
     this.engine.mode = 'client';
-    this.engine.reset();
     this.hideMenu();
+};
+
+rules.prototype.startServerGame = function () {
+    this.engine.mode = 'server';
+    if(this.engine.player1 && this.engine.player2){
+    	//this.engine.playerCount = 2;
+    	this.engine.player1.emit('reset', 0);
+    	this.engine.player2.emit('reset', 0);
+    }
+    else{
+    	// this.engine.playerCount = 1;
+    	this.engine.player1.emit('reset', 0);
+    }
+    if (this.engine.entities.length === 0) {
+        //this.engine.add(this);
+    }
+    this.engine.reset();
 };
 
 rules.prototype.startZeroPlayerGame = function () {
     this.engine.mode = 'standalone';
     this.engine.playerCount = 0;
-    if (this.engine.entities.length == 0) {
-        this.engine.add(this);
-    }
-    this.initialized = false;
+    this.engine.reset();
     this.hideMenu();
 };
 
@@ -275,36 +300,38 @@ rules.prototype.toggleSettings = function () {
 };
 
 rules.prototype.keyboardHandler = function (evt) {
+	var evt = evt || window.event;
+	var keyCode = evt.keyCode || evt.which;
     // F1: Restart game single player mode, standalone (all runs on the client)
-    if (event.keyCode == 112) {
+    if (keyCode == 112) {
         this.startSinglePlayerGame();
     }
     // F2: restart game multi player mode, 'client' only renders on the client, game logic runs on the server
-    if (event.keyCode == 113) {
+    if (keyCode == 113) {
     	this.startMultiPlayerGame();
     }
     // F3: Audio volume down
-    if (event.keyCode == 114) {
+    if (keyCode == 114) {
         audio.decreaseVolume();
     }
     // F4: Audio volume up
-    if (event.keyCode == 115) {
+    if (keyCode == 115) {
         audio.increaseVolume();
     }
     // F5: Mute
-    if (event.keyCode == 116) {
+    if (keyCode == 116) {
         audio.mute();
     }
     // F6: Restart game in zero player mode
-    if (event.keyCode == 117) {
+    if (keyCode == 117) {
     	this.startZeroPlayerGame();
     }
     // F8: Toggle settings
-    if (event.keyCode === 119 || event.keyCode === 192) {
+    if (keyCode === 119 || keyCode === 192) {
         DAT.GUI.toggleHide();
     }
     // F8: Toggle menu
-    if (event.keyCode === 27) {
+    if (keyCode === 27) {
         this.toggleMenu();
     }
 };

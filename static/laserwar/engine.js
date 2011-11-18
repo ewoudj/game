@@ -45,6 +45,9 @@ var engine = function(config){
 		var self = this;
 		this.socket.on('game state', function(msg){
 			self.remoteDataString.push(msg);
+		});
+		this.socket.on('reset', function(msg){
+			self.reset();
 		}); 
 	}
 	if(this.mode == 'standalone' || this.mode === 'client'){
@@ -102,6 +105,12 @@ engine.prototype.calculateCollisions = function(){
 engine.prototype.reset = function(){
 	this.entities = [];
 	this.startTime = new Date().getTime();
+	this.previousControllerMessageTime = 0;
+	this.previousGameStateMessageTime = 0;
+	this.remoteData = [];
+	this.remoteDataString = [];
+	this.add(this.rules);
+	this.rules.initialized = false;
 };
 
 engine.prototype.update = function(){
@@ -179,7 +188,7 @@ engine.prototype.sendGameStateToClient = function(time){
 
 engine.prototype.prepareRemoteData = function(time){
 	var remoteData = '';
-	if((this.mode === "server") && ((time - this.previousGameStateMessageTime) >= 50)){
+	if((this.mode === "server") && (((time - this.previousGameStateMessageTime) >= 50) || (this.previousGameStateMessageTime > time))){
 		this.previousGameStateMessageTime = time;
 		remoteData = this.appendRemoteData(this.entities, remoteData);
 		remoteData = this.appendRemoteData(this.finishedEntities, remoteData);
@@ -228,7 +237,7 @@ engine.prototype.processRemoteData = function(){
 		var dataFromServer = s.split(",");
 		var offset = 0;
 		// First item in the array is always the server time for the data
-		this.lastServerTime = dataFromServer[0];
+		this.lastServerTimedate = dataFromServer[0];
 		offset++;
 		var l = dataFromServer.length;
 		var i = 0;
