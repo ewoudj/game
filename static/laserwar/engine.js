@@ -42,6 +42,7 @@ var engine = function(config){
 		this.serverUpdateLoop();
 	}
 	else{
+		this.initializeControllers();
 		var self = this;
 		this.socket.on('game state', function(msg){
 			self.remoteDataString.push(msg);
@@ -53,6 +54,14 @@ var engine = function(config){
 	if(this.mode == 'standalone' || this.mode === 'client'){
 		this.animate();
 	}
+};
+
+engine.prototype.initializeControllers = function(){
+	this.controllers = [];
+	this.touchController = new touchController({engine: this});
+	this.controllers.push( this.touchController );
+	this.mouseController = new mouseController({engine: this});
+	this.controllers.push( this.mouseController );
 };
 
 engine.prototype.serverUpdateLoop = function(){

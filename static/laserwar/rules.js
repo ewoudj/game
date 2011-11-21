@@ -29,19 +29,13 @@ var rules = function(config){
 	this.barHeight = 30;
 	if(this.engine.mode !== 'server'){
 		var uphandler = this.keyboardHandler.bind(this);
-		if(document.addEventListener) // Opera - Firefox - Google Chrome
-		{
-	//		document.addEventListener("keydown", onKeyEvent, false);
+		if(document.addEventListener) { // Opera - Firefox - Google Chrome
 			document.addEventListener("keyup", uphandler, false);
 		}
-		else if(document.attachEvent) // Internet Explorer
-		{
-	//		document.attachEvent("onkeydown", onKeyEvent);
+		else if(document.attachEvent) { // Internet Explorer
 			document.attachEvent("onkeyup", uphandler);
 		}
-		else if(!document.onkeydown && !document.onkeyup)
-		{
-	//		document.onkeydown = onKeyEvent;
+		else if(!document.onkeydown && !document.onkeyup) {
 			document.onkeyup = uphandler;
 		}
 	}

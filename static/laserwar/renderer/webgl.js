@@ -31,7 +31,6 @@ engine.rendering.webgl = function(suspend){
 				this.webglRenderer.renderEntity(e);
 			}
 			this.webglRenderer.renderScene();
-
 		}
 	}
 };
@@ -50,6 +49,7 @@ engine.rendering.webgl.webglRenderer = function(){
 		}, this);
 		this.renderer.setSize( window.innerWidth, window.innerHeight );
 		this.canvas = this.renderer.domElement;
+		this.context2d = this.canvas.getContext('2d');
 	    document.body.appendChild( this.canvas );
 		this.canvas.onmousedown = this.onmousedown.bind(this);
 		this.canvas.onmouseup = this.onmouseup.bind(this);
@@ -265,6 +265,7 @@ engine.rendering.webgl.webglRenderer = function(){
 					t.entity.modelIndex = text;
 					t.entity.geometry = this.to3dText( text );
 				}
+				t.entity.color = t.color;
 			}
 		}
 	};
@@ -380,6 +381,7 @@ engine.rendering.webgl.webglRenderer = function(){
 		this.renderer.render( this.scene, this.camera );
 		//this.composer.render();
 		this.lastFrameNumber++;
+		
 	};
 	
 	webglRenderer.prototype.loadModelGeometries = function(configModels, callback){

@@ -149,10 +149,8 @@ ufo.prototype.handleLaser = function(time){
 };
 
 ufo.prototype.handleAnimation = function(time){
-	if(this.position.x > this.mousePosition.x){
-		this.direction = 1;
-	}
-	else if(this.position.x < this.mousePosition.x){
+	this.direction = 1;
+	if(this.mousePosition && this.position.x < this.mousePosition.x){
 		this.direction = -1;
 	}
 	if(!this.lastTimeFrameChanged){

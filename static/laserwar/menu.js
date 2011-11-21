@@ -4,6 +4,7 @@ var menu = function (config) {
         selectedColor: '#FFF',
         mousePlaneOffset: 250,
         mousePlane: 'z',
+        topMost: true,
         onmouseup: this.onmouseup.bind(this)
     }, this);
     helpers.apply(config, this);
@@ -43,7 +44,7 @@ menu.prototype.gotoRoot = function () {
 };
 
 menu.prototype.onmouseup = function(entity, hit){
-	if(this.selected){
+	if(this.selected && this.selected.onMousePlaneUp){
 		this.selected.onMousePlaneUp(this, this);
 	}
 };
@@ -96,11 +97,11 @@ menu.prototype.select = function(entity){
 };
 
 menu.prototype.update = function(time){
-	if(this.mousePosition && this.subEntities){
+	if(this.mousePosition && this.texts){
 		// Calculate item on the same height as the mouse
 		var index = Math.floor( (this.mousePosition.y - (this.engine.height / 3)) / 60 ) + 1;
-		if(index > -1 && index < this.subEntities.length){
-			this.select(this.subEntities[index]);
+		if(index > -1 && index < this.texts.length){
+			this.select(this.texts[index]);
 		}
 		else{
 			this.select(null);

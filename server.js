@@ -61,6 +61,10 @@ io.sockets.on('connection', function (socket) {
 			}
 		}
 	});
+	
+	socket.on('debug', function (msg) {
+		console.log(msg);
+	});
 
 	socket.on('disconnect', function () {
 		

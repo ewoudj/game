@@ -2,8 +2,9 @@
 <html>
 	<head>
 		<title>Laser War</title> 
-		
-		<meta name = "viewport" content = "width = device-width, initial-scale = 1.0, user-scalable = no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+		<meta name="viewport" content="width = device-width, initial-scale = 1.0, user-scalable = no">
 		<meta charset="utf-8" />
 	    
 	    <link rel="stylesheet" href="resources/css/style.css" type="text/css"/>
@@ -43,6 +44,8 @@
 		<script src="laserwar/ai/ufo.js"></script>
 		<script src="laserwar/renderer/canvas.js"></script>
 		<script src="laserwar/renderer/webgl.js"></script>
+		<script src="laserwar/controller/touch.js"></script>
+		<script src="laserwar/controller/mouse.js"></script>
 		
 		<!-- <script src="js/ShaderExtras.js"></script>
 		<script src="js/postprocessing/EffectComposer.js"></script>
@@ -55,6 +58,7 @@
 		<script src="js/postprocessing/MaskPass.js"></script>  -->
 		
 		<script type="text/javascript">
+			document.ontouchmove = function(e){ e.preventDefault(); }
 			var onBodyLoad = function(){
 				// Start the game
 				var settings = {

@@ -14,12 +14,24 @@ engine.rendering.classic = function(suspend){
 		this.classicRenderer.context.fillRect(0, 0, window.innerWidth, window.innerHeight);
 		// Render
 		if(this.mode == 'standalone' || this.mode == 'client'){
+			var topMost = [];
 			for(var i = 0, l = this.entities.length; i < l; i++){
 				var e = this.entities[i];
-				if(e.render){
-					e.render();
+				if(e.topMost){
+					topMost.push(e);
 				}
-				this.classicRenderer.renderEntity(e);
+				else {
+					this.classicRenderer.renderEntity(e);
+				}
+			}
+			for(var i = 0, l = topMost.length; i < l; i++){
+				this.classicRenderer.renderEntity(topMost[i]);
+			}
+			for(var i = 0, l = this.controllers.length; i < l; i++){
+				var controller = this.controllers[i];
+				if(controller.render){
+					controller.render(this.classicRenderer.context);
+				}
 			}
 		}
 	}
@@ -66,6 +78,22 @@ engine.rendering.classic.renderer = function(){
 		this.offsetTop = Math.ceil((this.canvas.height - (this.engine.height * this.scale)) / 2);
 		this.offsetLeft = Math.ceil((this.canvas.width - (this.engine.width * this.scale)) / 2);
 		this.context = this.canvas.getContext('2d');
+		for(var i = 0, l = this.engine.controllers.length; i < l; i++){
+			var controller = this.engine.controllers[i];
+			if(controller.render){
+				controller.resize();
+			}
+		}
+	};
+	
+	renderer.prototype.notify = function(eventName, entities){
+		if(entities && eventName){
+			for(var i = 0, l = entities.length; i < l; i++ ){
+	    		if(entities[i][eventName]){
+	    			entities[i][eventName](entities[i], entities[i]);
+	    		}
+	    	}
+		}
 	};
 	
 	renderer.prototype.onmousemove = function(e){
@@ -73,20 +101,35 @@ engine.rendering.classic.renderer = function(){
 		var evt = e || window.event;
 		this.engine.mousePosition.x = Math.ceil((evt.clientX - this.offsetLeft) / this.scale);
 		this.engine.mousePosition.y = Math.ceil((evt.clientY - this.offsetTop) / this.scale);
+		var items = this.engine.entities;
+		this.mouseEntities = [];
+	    for(var i = 0, l = items.length; i < l; i++){
+	    	var item = items[i];
+	    	if(item.mousePlane){
+	    		item.mousePosition = this.engine.mousePosition;
+	    		this.mouseEntities.push(item);
+	    	}
+	    }
+	    this.notify('onmousemove', this.mouseEntities);
 	};
 	
 	renderer.prototype.onmousedown = function(){
 		if(this.suspended) return;
 		this.engine.buttonDown = true;
+		this.notify('onmousedown', this.mouseEntities);
 	};
 	
 	renderer.prototype.onmouseup = function(){
 		if(this.suspended) return;
 		this.engine.buttonDown = false;
+		this.notify('onmouseup', this.mouseEntities);
 	};
 	
 	renderer.prototype.renderEntity = function(e){
 		if(this.suspended) return;
+		if(e.render){
+			e.render();
+		}
 		if(e.classicModel) {
 			this.drawRects(helpers.ceilPoint({x: e.position.x, y: e.position.y}), e.classicModel, e.color, true);
 		}

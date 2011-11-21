@@ -24,7 +24,7 @@ var laserbeam = function(config){
 laserbeam.prototype = new entity();
 
 laserbeam.prototype.render = function(){
-	if(!this.audioDone){
+	if(audio && !this.audioDone){
 		this.audioDone = true;
 		audio.laserAudio.play();
 	}
