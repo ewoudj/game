@@ -65,15 +65,7 @@ ship.prototype.update = function(time){
 				this.invulerability = 0;
 			}
 		}
-		var maxScore = this.engine.playerCount === 0 ? engine.maxAiScore : engine.maxScore;
-		if(this.engine.gameState.player1Score === maxScore || this.engine.gameState.player2Score === maxScore){
-			this.engine.canvasColor = this.colors[this.colorLoop];
-			this.colorLoop++;
-			if(!(this.colorLoop < this.colors.length)){
-				this.colorLoop = 0;
-			}
-		}
-		else if(this.collisions && this.collisions.length){
+		if(!this.engine.gameState.gameOver && (this.collisions && this.collisions.length)){
 			for(var i = 0; i < this.collisions.length; i++){
 				if(this.collisions[i].owner != this && !(this.invulerability && this.collisions[i] == this.spawnStar)){
 					if(!this.finished && this.collisions[i].owner == this.engine.gameState.player1Ship && this == this.engine.gameState.player2Ship){

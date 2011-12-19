@@ -72,8 +72,12 @@ engine.prototype.serverUpdateLoop = function(){
 engine.prototype.animate = function(){
 	requestAnimationFrame(this.animate.bind(this));
 	this.update();
+	// If the renderer is configured incorrectly fall back to classic
+	if(!engine.rendering[engine.renderer]){
+		engine.renderer = 'classic';
+	}
 	// Check to see if the renderer changed, 
-	// if so, suspend the previous renderer (if it exists at all) 
+	// if so, suspend the previous renderer (if it exists at all)
 	if(engine.previousRenderer && engine.previousRenderer !== engine.renderer){
 		engine.rendering[engine.previousRenderer].call(this, true);
 	}
@@ -111,8 +115,8 @@ engine.prototype.calculateCollisions = function(){
 	}
 };
 
-engine.prototype.reset = function(){
-	this.entities = [];
+engine.prototype.reset = function(menu){
+	this.entities = menu ? [menu] : [];
 	this.startTime = new Date().getTime();
 	this.previousControllerMessageTime = 0;
 	this.previousGameStateMessageTime = 0;
@@ -322,7 +326,7 @@ engine.player2ai = engine.getItem("player2ai", 'heuristic');
 engine.ufoai = engine.getItem("player2ai", 'heuristic');
 engine.rendering = {};
 engine.renderer = engine.getItem("renderer",'classic');
-engine.effectsVolume = parseInt(engine.getItem("effectsVolume", 25));
+engine.effectsVolume = parseInt(engine.getItem("effectsVolume", 10));
 engine.musicVolume = parseInt(engine.getItem("musicVolume", 40));
 engine.maxScore = parseInt(engine.getItem("maxScore", 10));
 engine.maxAiScore = parseInt(engine.getItem("maxAiScore", 10));

@@ -8,33 +8,6 @@ var menu = function (config) {
         onmouseup: this.onmouseup.bind(this)
     }, this);
     helpers.apply(config, this);
-    this.mainMenu = {
-        'SINGLE PLAYER': {
-            onMousePlaneUp: function (entity, evt) {
-                entity.engine.rules.startSinglePlayerGame();
-            }
-        },
-        'MULTI  PLAYER': {
-//            submenu: {
-//                'LOCAL': {},
-//                'ONLINE': {}
-            //            }
-            onMousePlaneUp: function (entity, evt) {
-                entity.engine.rules.startMultiPlayerGame();
-            }
-        },
-        'ZERO   PLAYER': {
-            onMousePlaneUp: function (entity, evt) {
-                entity.engine.rules.startZeroPlayerGame();
-            }
-        },
-        'SETTINGS': {
-            onMousePlaneUp: function (entity, evt) {
-                entity.engine.rules.toggleSettings();
-            }
-        },
-        'CREDITS': {}
-    };
     this.setItems(this.mainMenu);
 };
 menu.prototype = new entity();
@@ -44,21 +17,33 @@ menu.prototype.gotoRoot = function () {
 };
 
 menu.prototype.onmouseup = function(entity, hit){
-	if(this.selected && this.selected.onMousePlaneUp){
-		this.selected.onMousePlaneUp(this, this);
+	if(this.ignoreNextButtonUp){
+		this.ignoreNextButtonUp = false;
+	}
+	else{
+		if(this.selected && this.selected.onMousePlaneUp){
+			this.selected.onMousePlaneUp(this, this);
+		}
 	}
 };
 
 menu.prototype.setItems = function(items){
+	if(this.engine.buttonDown){
+		this.ignoreNextButtonUp = true;
+	}
 	this.clear();
 	this.texts = [];
 	var i = 0;
 	for(var s in items){
+		var text = s;
+		if(items[s].getText){
+			text = items[s].getText(this);
+		}
 		var config = helpers.apply(items[s],{
 			font: '50px CBM64', 
 			color: this.color,
 			engine: this.engine,
-			text: s, 
+			text: text, 
 			position: { 
 				x: this.engine.width / 5, 
 				y: (this.engine.height / 3) + ( i * 60),
@@ -100,7 +85,7 @@ menu.prototype.update = function(time){
 	if(this.mousePosition && this.texts){
 		// Calculate item on the same height as the mouse
 		var index = Math.floor( (this.mousePosition.y - (this.engine.height / 3)) / 60 ) + 1;
-		if(index > -1 && index < this.texts.length){
+		if(index > -1 && index < this.texts.length && this.texts[index].onMousePlaneUp){
 			this.select(this.texts[index]);
 		}
 		else{

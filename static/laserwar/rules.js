@@ -18,6 +18,109 @@ var colors = [
    '#AAA' // 'Grey'
 ];
 
+var mainMenu = {
+    'SINGLE PLAYER': {
+        onMousePlaneUp: function (entity, evt) {
+            entity.engine.rules.startSinglePlayerGame();
+        }
+    },
+    'MULTI  PLAYER': {
+//            submenu: {
+//                'LOCAL': {},
+//                'ONLINE': {}
+        //            }
+        onMousePlaneUp: function (entity, evt) {
+            entity.engine.rules.startMultiPlayerGame();
+        }
+    },
+    '':{},
+//    'ZERO   PLAYER': {
+//        onMousePlaneUp: function (entity, evt) {
+//            entity.engine.rules.startZeroPlayerGame();
+//        }
+//    },
+    'SETTINGS': {
+        onMousePlaneUp: function (entity, evt) {
+            //entity.engine.rules.toggleSettings();
+        	entity.engine.rules.menu.setItems(settingsMenu);
+        }
+    }//,
+    //'CREDITS': {}
+};
+
+var settingsMenu = {
+	'AUDIO': {
+		onMousePlaneUp: function (entity, evt) {
+    		if(engine.getItem("effectsVolume",'0') === '0'){
+        		engine.effectsVolume = 10;
+        	}
+        	else{
+        		engine.effectsVolume = 0;
+        	}
+    		// Persist the setting
+    		engine.setItem('effectsVolume', engine.effectsVolume);
+    		window.audio.setVolume(engine.effectsVolume);
+    		// Update the menu (so it now correctly says 2d/3d)
+    		entity.engine.rules.menu.setItems(settingsMenu);
+        },
+        getText: function(menu){
+        	var result;
+        	if(engine.getItem("effectsVolume",'0') === '0'){
+        		result = '  AUDIO: OFF';
+        	}
+        	else{
+        		result = '  AUDIO:  ON';
+        	}
+        	return result; 
+        }
+    },
+    'VIDEO': {
+    	onMousePlaneUp: function (entity, evt) {
+    		if(engine.getItem("renderer",'classic') === 'classic'){
+        		engine.renderer = 'webgl';
+        	}
+        	else{
+        		engine.renderer = 'classic';
+        	}
+    		// Persist the setting
+    		engine.setItem('renderer', engine.renderer);
+    		// Update the menu (so it now correctly says 2d/3d)
+    		entity.engine.rules.menu.setItems(settingsMenu);
+        },
+        getText: function(menu){
+        	var result;
+        	if(engine.getItem("renderer",'classic') === 'classic'){
+        		result = '  VIDEO:  2D';
+        	}
+        	else{
+        		result = '  VIDEO:  3D';
+        	}
+        	return result; 
+        }
+    },
+    '': {},
+    '  MAIN  MENU': {
+        onMousePlaneUp: function (entity, evt) {
+            entity.engine.rules.menu.setItems(mainMenu);
+        }
+    }
+};
+
+var gameOverMenu = {
+    '  GAME  OVER': {},
+    '': {},
+    '  PLAY AGAIN': {
+        onMousePlaneUp: function (entity, evt) {
+            entity.engine.rules[entity.engine.rules.currentGameType]();
+        }
+    },
+    '  MAIN  MENU': {
+        onMousePlaneUp: function (entity, evt) {
+            entity.engine.rules.menu.setItems(mainMenu);
+        }
+    }
+};
+
 if(typeof(exports) !== 'undefined'){
 	exports.colors = colors;
 }
@@ -51,17 +154,21 @@ rules.prototype.initialize = function(){
 		player3Ship: null,
 		player4Ship: null,
 		player1Score: 0,
-		player2Score: 0
+		player2Score: 0,
+		gameOver: false
 	};
 	if(this.engine.mode !== 'server'){
-		this.scoreBar = this.scoreBar || new scorebar({
+		this.scoreBar = new scorebar({
 			engine: this.engine
 		});
 		this.engine.add(this.scoreBar);
-		this.menu = this.menu || new menu({
-			engine: this.engine
-		});
-		this.engine.add(this.menu);
+		if(!this.menu){
+			this.menu = this.menu || new menu({
+				engine: this.engine,
+				mainMenu: mainMenu
+			});
+			this.engine.add(this.menu);
+		}
 	}
 	if(this.engine.mode !== 'client'){
 		this.engine.add( this.engine.gameState.player1Ship = new ship({
@@ -179,7 +286,30 @@ rules.prototype.update = function(time){
 	if(!this.initialized){
 		this.initialize();
 	}
+	if(this.engine.mode !== 'server'){
+		if(this.engine.gameState.gameOver !== this.previousGameOverState){
+			this.previousGameOverState = this.engine.gameState.gameOver;
+			if(this.engine.gameState.gameOver && this.engine.playerCount > 0){
+				this.showGameOver();
+			}
+			else if(this.engine.gameState.gameOver && this.engine.playerCount === 0){
+				if(this.menu.finished){
+					this.engine.reset();
+				}
+				else{
+					this.engine.reset(this.menu);
+				}
+				return;
+			}
+			else if(this.engine.mode === 'client'){
+				this.hideMenu();
+			}
+		}
+	}
 	if(this.engine.mode !== 'client'){
+		var maxScore = this.engine.playerCount === 0 ? engine.maxAiScore : engine.maxScore;
+		this.engine.gameState.gameOver = (this.engine.gameState.player1Score === maxScore 
+										|| this.engine.gameState.player2Score === maxScore);
 		this.engine.gameState.player1Ship = this.ensureUserRespawn(
 				this.engine.gameState.player1Ship, 
 				this.engine.mousePosition, this.engine.buttonDown, 'Player 1', 1, 0);
@@ -217,7 +347,7 @@ rules.prototype.getRemoteData = function(){
 	var result = null;
 	var newMessage = "5," + this.engine.gameState.player1Score + "," +
 	        this.engine.gameState.player2Score + "," +
-	        this.engine.canvasColor;
+	        (this.engine.gameState.gameOver ? 1 : 0);
 	if(newMessage !== this.previousMessage){
 		result = this.previousMessage = newMessage;
 	}
@@ -232,11 +362,12 @@ rules.prototype.renderRemoteData = function(remoteData, offset){
 		this.engine.add(this.scoreBar);
 	}
 	this.scoreBar.setScore(parseInt(remoteData[offset + 1]), parseInt(remoteData[offset + 2]));
-	this.engine.canvasColor = remoteData[offset + 3];
+	this.engine.gameState.gameOver = (remoteData[offset + 3] === "1");
 	return offset + 4;
 };
 
 rules.prototype.startSinglePlayerGame = function(){
+	this.currentGameType = "startSinglePlayerGame";
 	this.engine.mode = 'standalone';
 	this.engine.playerCount = 1;
 	this.engine.reset();
@@ -244,6 +375,7 @@ rules.prototype.startSinglePlayerGame = function(){
 };
 
 rules.prototype.startMultiPlayerGame = function () {
+	this.currentGameType = "startMultiPlayerGame";
     // Sends request game message to the server (the server will start an engine on the server in 'server' mode)
     this.engine.socket.emit('start game', 'foo', 'bar');
     this.engine.mode = 'client';
@@ -268,10 +400,26 @@ rules.prototype.startServerGame = function () {
 };
 
 rules.prototype.startZeroPlayerGame = function () {
+	this.currentGameType = "startZeroPlayerGame";
     this.engine.mode = 'standalone';
     this.engine.playerCount = 0;
     this.engine.reset();
     this.hideMenu();
+};
+
+rules.prototype.showGameOver = function () {
+    this.showMenu(gameOverMenu);
+};
+
+rules.prototype.showMenu = function (items) {
+    if (this.menu.finished) {
+        this.menu.finished = false;
+        this.engine.add(this.menu);
+        this.menu.gotoRoot();
+    }
+    if(items){
+    	this.menu.setItems(items);
+    }
 };
 
 rules.prototype.toggleMenu = function () {

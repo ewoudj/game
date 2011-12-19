@@ -273,7 +273,7 @@ engine.rendering.webgl.webglRenderer = function(){
 	webglRenderer.prototype.to3dText = function(text){
 		var result = null;
 		if(this.engine.mode == 'standalone' || this.engine.mode == 'client'){
-			result = new THREE.TextGeometry( text, {
+			result = (text === '') ? new THREE.Geometry() : new THREE.TextGeometry( text, {
 				size: 90,
 				height: 30,
 				curveSegments: 1,
