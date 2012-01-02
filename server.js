@@ -67,6 +67,20 @@ io.sockets.on('connection', function (socket) {
 	});
 
 	socket.on('disconnect', function () {
-		
+		if(socket.game){
+			console.log('disconnect');
+			if(socket.game.player1 === socket){
+				socket.game.player1 = null;
+			}
+			else if(socket.game.player2 === socket){
+				socket.game.player2 = null;
+			}
+			if(waitingGame === socket.game){
+				waitingGame = null;
+			}
+			else {
+				
+			}
+		}
 	});
 });

@@ -41,7 +41,19 @@ var engine = function(config){
 	if(this.mode === 'server'){
 		this.serverUpdateLoop();
 	}
-	else{
+	else{		
+		// http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+		if ( !window.requestAnimationFrame ) {
+			window.requestAnimationFrame = ( function() {
+				return window.webkitRequestAnimationFrame ||
+				window.mozRequestAnimationFrame ||
+				window.oRequestAnimationFrame ||
+				window.msRequestAnimationFrame ||
+				function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element ) {
+					window.setTimeout( callback, 1000 / 60 );
+				};
+			})();
+		}
 		this.initializeControllers();
 		var self = this;
 		this.socket.on('game state', function(msg){
@@ -49,10 +61,9 @@ var engine = function(config){
 		});
 		this.socket.on('reset', function(msg){
 			self.reset();
-		}); 
-	}
-	if(this.mode == 'standalone' || this.mode === 'client'){
+		});
 		this.animate();
+		document.body.oncontextmenu = function(){return false;};
 	}
 };
 
@@ -95,6 +106,17 @@ engine.prototype.add = function(entity){
 	}
 	this.entities.push(entity);
 	entity.engine = this;
+};
+
+engine.prototype.contains = function(entity){
+	var result = false;
+	for(var i = 0, l = this.entities.length; i < l; i++){
+		if(this.entities[i] === entity){
+			result = true;
+			break;
+		}
+	}
+	return result;
 };
 
 engine.prototype.calculateCollisions = function(){
@@ -328,7 +350,7 @@ engine.rendering = {};
 engine.renderer = engine.getItem("renderer",'classic');
 engine.effectsVolume = parseInt(engine.getItem("effectsVolume", 10));
 engine.musicVolume = parseInt(engine.getItem("musicVolume", 40));
-engine.maxScore = parseInt(engine.getItem("maxScore", 10));
+engine.maxScore = 3;//parseInt(engine.getItem("maxScore", 10));
 engine.maxAiScore = parseInt(engine.getItem("maxAiScore", 10));
 
 if(typeof(exports) !== 'undefined'){

@@ -4,73 +4,433 @@
 		<title>Laser War</title> 
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-		<meta name="viewport" content="width = device-width, initial-scale = 1.0, user-scalable = no">
+		<meta name="viewport" content="width = 800">
 		<meta charset="utf-8" />
 	    
-	    <link rel="stylesheet" href="resources/css/style.css" type="text/css"/>
+
 	    <style type="text/css">
-		    @font-face {
-				font-family: 'CBM64';
-				src: url('resources/fonts/cbm-64-webfont.eot');
-				src: local('☺'), url('resources/fonts/cbm-64-webfont.woff') format('woff'), url('resources/fonts/cbm-64-webfont.ttf') format('truetype'), url('resources/fonts/cbm-64-webfont.svg#webfontf6naK8pD') format('svg');
-				font-weight: normal;
-				font-style: normal;
+			@font-face {
+			    font-family: 'CaptureitRegular';
+			    src: url('resources/fonts/capture_it-webfont.eot');
+			    src: url('resources/fonts/capture_it-webfont.eot?#iefix') format('embedded-opentype'),
+			         url('resources/fonts/capture_it-webfont.woff') format('woff'),
+			         url('resources/fonts/capture_it-webfont.ttf') format('truetype'),
+			         url('resources/fonts/capture_it-webfont.svg#CaptureitRegular') format('svg');
+			    font-weight: normal;
+			    font-style: normal;
+			
 			}
+			
+			body{
+				background-color: #555;
+				font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+				font-size: 13px;
+				text-align: center;
+			}
+			
+			.maincontainer{
+				background-color: #fff;
+				width: 700px;
+				text-align: left;
+				display: inline-block;
+				padding: 20px;
+				height: 800px;
+				margin-bottom: 20px;
+			}
+			
+			.multicolumn {
+				-moz-column-count: 3;
+				-moz-column-gap: 20px;
+				-webkit-column-count: 3;
+				-webkit-column-gap: 20px;
+				column-count: 3;
+				column-gap: 20px;
+				border-top: 2px solid #F00;
+				display: block;
+				padding-top: 20px;
+				padding-bottom: 20px;
+			}
+			
+			h1 {
+				font-size: 15px;
+				font-weight: bold;
+				margin-top: 0px;
+				margin-bottom: 8px;
+			}
+			
+			h2 {
+				font-size: 13px;
+				font-weight: bold;
+				margin-top: 0px;
+				margin-bottom: 0px;
+			}
+			
+			p {
+				margin-top: 0px;
+				margin-bottom: 8px;
+			}
+			
+			.language{
+				color: #F00;
+				text-transform: uppercase;
+				font-size: 15px;
+				font-weight: bold;
+				margin-top: 0px;
+				margin-bottom: 0px;
+				writing-mode: lr-tb;
+				display:inline-block;
+				-webkit-transform: rotate(-90deg);	
+				-moz-transform: rotate(-90deg);
+				-ms-transform: rotate(-90deg);
+				-o-transform: rotate(-90deg);
+				transform: rotate(-90deg);
+				height:70px;
+			}
+			
+			.page2header {
+				color: #F00;
+				text-transform: uppercase;
+				font-size: 15px;
+				font-weight: bold;
+				text-align: right;
+				height: 88px;
+			}
+			
+			.instructionsheader{
+				font-size: 16px;
+				text-align: center;
+				margin-top: 10px;
+				margin-bottom: 10px;
+			}
+			
+			.front{
+				background-color: #000;
+				background-image: url('resources/images/frontbackground.png');
+				color: #FFF;
+				font-size: 74px;
+				font-weight: bold;
+				width: 700px;
+				display:inline-block;
+				padding: 20px;
+				text-align: left;
+				margin-top: 10px;
+				margin-bottom: 10px;
+				height: 800px;
+			}
+			
+			.back{
+				background-color: #000;
+				color: #FFF;
+				font-weight: bold;
+				width: 700px;
+				display:inline-block;
+				padding: 20px;
+				text-align: left;
+				margin-top: 10px;
+				margin-bottom: 10px;
+				height: 800px;
+			}
+			
+			.front .multicolumn {
+				font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+				font-size: 12px;
+				border-top:0px;
+				font-weight: normal;
+				-moz-column-count: 2;
+				-moz-column-gap: 10px;
+				-moz-column-width: 200px;
+				-webkit-column-count: 2;
+				-webkit-column-gap: 10px;
+				-webkit-column-width: 200px;
+				column-count: 2;
+				column-gap: 10px;
+				column-width: 200px;
+				width: 440px;
+				padding-left: 10px;
+				padding-top: 0px;
+			}
+			
+			.fronttitle{
+				font-family: 'CaptureitRegular';
+				margin-top: 0px;
+				margin-botton: 0px;
+				line-height: 58px;
+				padding: 10px;
+				display: inline-block;
+			}
+			
+			.version{
+				font-family: 'CaptureitRegular';
+				text-transform: uppercase;
+				color: #F00;
+				display: inline-block;
+				font-size: 150px;
+				padding-left: 0px;
+			}
+			
+			.image{
+				width: 190px;
+				height: 140px;
+				margin-bottom: 20px;
+			}
+			
+			.mousecontrolsimage {
+				width: 80px;
+				height: 124px;
+				margin: 0px 0px 0px 60px;
+			}
+			
+			.touchcontrolsimage {
+				width: 128px;
+				height: 83px;
+				margin: 5px 0px 0px 40px;
+			}
+			
+			.touchcontrolsimage2 {
+				width: 128px;
+				height: 74px;
+				margin: 5px 0px 0px 40px;
+			}
+			
+			.actionscreen {
+				width: 210px;
+				heigth: 195px;
+				margin: 10px 0px 10px 10px;
+			}
+			
+			ul {
+				margin-top: 5px;
+				margin-bottom: 5px;
+				padding-left: 20px;
+			}
+			
+			table {
+				display: block;
+				border-top: 2px solid #F00;
+				padding-top: 20px;
+				margin-bottom: 20px;
+			}
+			
+			tbody, tr {
+				width: 100%;
+			}
+			
+			td {
+				vertical-align: top;
+				width: 223px;
+				padding-right: 10px;
+			}
+			
+			.actionscreencolumn {
+				vertical-align: middle;
+			}
+			
+			.back h1 {
+				font-size: 22px;
+				padding-top: 110px;
+				margin-left: 50px;
+			}
+			
+			.back table {
+				font-size: 15px;
+				margin-left: 50px;
+				border: 0px;
+			}
+			
+			.back .disclaimer{
+				margin-left: 50px;
+				margin-right: 50px;
+			}
+			
+			a:link 		{color:#FFF; text-decoration: none; }
+			a:visited 	{color:#FFF; text-decoration: none; }
+			a:hover		{color:#FFF; text-decoration: underline; }
+			a:active	{color:#FFF; text-decoration: none; }
 		</style>
 		
-		<script src="http://192.168.1.100:8002/socket.io/socket.io.js"></script>
-		<script src="resources/script/jquery.js"></script>
-		<script src="resources/script/soundmanager/script/soundmanager2.js"></script>
-		<script src="resources/script/Three.js"></script>
-		<script src="resources/script/DAT.GUI.min.js"></script>
-		<script src="resources/script/RequestAnimationFrame.js"></script>
-		<script src="resources/fonts/cbm-64_normal.typeface.js"></script>
-		<script src="laserwar/audio.js"></script>
-		<script src="laserwar/helpers.js"></script>
-		<script src="laserwar/entity.js"></script>
-		<script src="laserwar/explosion.js"></script>
-		<script src="laserwar/ship.js"></script>
-		<script src="laserwar/crosshair.js"></script>
-		<script src="laserwar/ufo.js"></script>
-		<script src="laserwar/star.js"></script>
-		<script src="laserwar/laserbeam.js"></script>
-		<script src="laserwar/scorebar.js"></script>
-		<script src="laserwar/rules.js"></script>
-		<script src="laserwar/engine.js"></script>
-		<script src="laserwar/settings.js"></script>
-		<script src="laserwar/menu.js"></script>
-		<script src="laserwar/ai/prioritizing.js"></script>
-		<script src="laserwar/ai/heuristic.js"></script>
-		<script src="laserwar/ai/ufo.js"></script>
-		<script src="laserwar/renderer/canvas.js"></script>
-		<script src="laserwar/renderer/webgl.js"></script>
-		<script src="laserwar/controller/touch.js"></script>
-		<script src="laserwar/controller/mouse.js"></script>
-		
-		<!-- <script src="js/ShaderExtras.js"></script>
-		<script src="js/postprocessing/EffectComposer.js"></script>
-		<script src="js/postprocessing/RenderPass.js"></script>
-		<script src="js/postprocessing/BloomPass.js"></script>
-		<script src="js/postprocessing/FilmPass.js"></script>
-		<script src="js/postprocessing/DotScreenPass.js"></script>
-		<script src="js/postprocessing/TexturePass.js"></script>
-		<script src="js/postprocessing/ShaderPass.js"></script>
-		<script src="js/postprocessing/MaskPass.js"></script>  -->
-		
-		<script type="text/javascript">
-			document.ontouchmove = function(e){ e.preventDefault(); }
-			var onBodyLoad = function(){
-				// Start the game
-				var settings = {
-					socket: io.connect('http://' + document.domain + ':8002'),
-					rulesType: rules,
-					mode : 'standalone' // 'client', 'server', 'standalone'
-				};
-				window.game = new engine(settings);
-			};
-		</script>
-		
 	</head>
-  	<body onload="onBodyLoad()">
-  </body>
+  	<body>
+		<div class="front">
+			<div class="fronttitle">UFO Laser<br>Wars in Space</div>
+			<div class="version">1</div>
+			<div class="multicolumn">
+				<p>
+					<a href="game.html">
+						<img class="image" src="resources/images/screenshottv.png"/><br>
+						Click to play<br>
+						Klik om te spelen<br>
+						Klicken um zu spielen<br>
+						Clique pour jouer<br>
+						Kliek om te speel<br>
+						Pelaa napsauttamalla tätä<br>
+						点击播放<br>
+						再生する]をクリックし<br>
+						انقر لتلعب
+					</a>
+				</p>
+				<p>
+					<a href="#Page1">
+						<img class="image" src="resources/images/instructionstv.png"/><br>
+						Instructions for use<br>
+						Gebruiksaanwijzing<br>
+						Gebrauchsanleitung<br>
+						Mode d'emploi<br>
+						Instruksies vir die gebruik<br>
+						Käyttöohjeet<br>
+						使用说明<br>
+						使用するための手順について<br>
+						إرشادات للاستخدام
+					</a>
+				</p>
+			</div>
+		</div>
+  		<div id="Page1" class="maincontainer">
+  			<div class="instructionsheader">Instructions for Use</div>
+  			<div class="language">English</div>
+  			<table>
+  				<tr>
+  					<td><h2>UFO Laser Wars in Space</h2></td>
+ 					<td>
+ 						<h2>Introduction</h2>
+ 						<p>
+ 							In this game you work for the Pan Galactic Mining Corp. You and a colleague have been tasked 
+	 						to protect some rare material astroids from invading UFOs. As these astroids are in a far away 
+	 						galaxy you will use remote controlled spaceships.
+ 						</p> 
+	 					<p>
+	 						Your employer encourages healthy competition 
+	 						between it's workers and will reward who destroys most invading UFOs.
+ 						</p>
+	 				</td>
+  					<td>
+  						<h2>How to play</h2>
+						<ul>
+							<li>Destroy enemy UFOs with your laser to score points.</li>
+							<li>The first player to reach ten points wins.</li>
+							<li>Shooting an astroid will change it's color.</li> 
+							<li>Claim astroids by changing them to your color.</li>
+							<li>You can land on your astroids by flying into them.</li>
+							<li>Flying into other astroids will destroy both your spaceship and the astroid. The central astroids of both astroid clusters can not be destroyed.</li>
+							<li>When your spaceship is destroyed or if you have landed your spaceship, you can take off from any of your astroids. If there is no astroid in your color you will have to wait for one to turn your color.</li>
+						</ul>
+					</td>
+  				</tr>
+  			</table>
+  			<table>
+  				<tr>
+  					<td>
+  						Show or hide the menu using:
+  						<ul>
+  							<li>Mouse: right button</li>
+  							<li>Touch: two finger tap</li>
+  							<li>Keyboard: M key</li>
+  						</ul>
+  					</td>
+  					<td>
+  						<h2>Main menu</h2>
+						<ul>
+							<li>Single player: starts a single player game, you play against the computer.</li>
+							<li>
+								Multi player: starts a multi player game, you play against a random human over the internet.<br>
+								If no random human is available, you will play against the computer till an opponent becomes available.
+							</li>
+							<li>Settings: displays the settings menu.</li>
+						</ul>
+  					</td>
+  					<td>
+  						<h2>Settings menu</h2>
+						<ul>
+							<li>Audio: toggle sound effect on or off.</li>
+							<li>Video: toggle between 2D or 3D graphics (when available).</li>
+							<li>Main menu: displays the main menu.</li>
+						</ul>
+  					</td>
+  				</tr>
+  			</table>
+		</div>
+		<div id="Page2" class="maincontainer">
+			<div class="page2header">UFO Laser Wars in Space 1</div>
+			<table>
+				<tr>
+					<td>
+						<h2>Playing the game with a mouse</h2>
+						<img class="mousecontrolsimage" src="resources/images/mousecontrols.png"/>
+						<ul>
+							<li>Your spaceship will fly towards the mouse pointer (the arrow on the screen).</li>
+							<li>The left button fires your laser.</li>
+							<li>Take off by clicking one of your astroids.</li>
+						</ul>
+						<img class="mousecontrolsimage" src="resources/images/mousemenu.png"/>
+						<ul><li>The right button toggles the game menu.</li></ul>`
+					</td>
+					<td class="actionscreencolumn">
+						<img class="actionscreen" src="resources/images/actionscreen.png"/>
+					</td>
+					<td>
+						<h2>Playing the game with a touch screen</h2>
+						<img class="touchcontrolsimage" src="resources/images/touchcontrols.png"/>
+						<ul>
+							<li>Use the left part of the screen as a joystick to steer your spaceship.</li>
+							<li>Use the right part of the screen as a button to fire your laser.</li>
+							<li>To take off from one of your astroids click the fire button.</li>
+						</ul>
+						<img class="touchcontrolsimage2" src="resources/images/touchmenu.png"/>
+						<ul><li>A two fingers tap toggles the game menu.</li></ul>
+					</td>
+				</tr>
+			</table>
+			<div class="multicolumn">
+				<h2>About this game</h2>
+				<p>
+					This game is a tribute to the Videopac game console. The Videopac G7000 was a game console from 
+					the late 70's early 80's, competing with machines like the Atari 2600 and the ColecoVision. The 
+					Videopac hardware, games and booklets were highly innovative and stylized products.
+				</p>
+				<p>
+					In particular this game pays homage to Laser War, a Videopac game from 1980. This is not a port or a clone of
+					Laser War but an impressionist remake, it's art and concept reduced to their essence, while, at a technical 
+					level, bringing the game forward 32 years by introducing technology like internet based multiplayer gaming and 
+					support for touch based user interfaces.  
+				</p>
+				<p>
+					Although this game is aesthetically more 8 bit than it's original, it is build using the latest web technology. On the
+					client it uses WebGL for 3D graphics, Canvas for 2D graphics, HTML5 audio for sound effects, WebSockets for 
+					remoting, and much more. The back end runs on node.js, cutting edge technology that allows JavaScript to run
+					on the server: the same code runs on the client and the server.
+				</p>
+			</div>
+		</div>
+		<div class="back">
+			<h1>This game was build using (in no particular order):</h1>
+			<table>
+				<tr><td>Server runtime:</td><td><a href="http://nodejs.org/">Node.js</a></td></tr>
+				<tr><td>Server middleware:</td><td><a href="http://senchalabs.github.com/connect/">Connect</a></td></tr>
+				<tr><td>Development runtime:</td><td><a href="https://github.com/fgnass/node-dev">Node-dev</a></td></tr>
+				<tr><td>WebSockets API:</td><td><a href="http://socket.io/">Socket.IO</a></td></tr>
+				<tr><td>Audio API:</td><td><a href="http://www.schillmania.com/projects/soundmanager2/">SoundManager 2</a></td></tr>
+				<tr><td>WebGL API:</td><td><a href="https://github.com/mrdoob/three.js/">Three.js</a></td></tr>
+				<tr><td>In game GUI:</td><td><a href="http://code.google.com/p/dat-gui/">dat.GUI</a></td></tr>
+				<tr><td>CBM-64 font:</td><td><a href="http://kofler.dot.at/c64/">Peter Kofler</a></td></tr>
+				<tr><td>Capture it font:</td><td><a href="http://www.fontsquirrel.com/foundry/Cpr.Sparhelt">Cpr.Sparhelt</a></td></tr>
+				<tr><td>Web fonts:</td><td><a href="http://www.fontsquirrel.com/">Font Squirrel</a></td></tr>
+				<tr><td>Javascript fonts:</td><td><a href="http://typeface.neocracy.org/">typeface.js</a></td></tr>
+				<tr><td>Sound effects:</td><td><a href="http://www.freesound.org/people/HardPCM/">HardPCM</a></td></tr>
+				<tr><td>Sound effects library:</td><td><a href="http://www.freesound.org/">Freesound.org</a></td></tr>
+				<tr><td>Galaxy image:</td><td><a href="http://www.eso.org/public/images/eso1137_hubble_dark/">ESO</a></td></tr>
+				<tr><td>Vector art:</td><td><a href="http://inkscape.org/">Inkscape</a></td></tr>
+				<tr><td>Raster art:</td><td><a href="http://www.gimp.org/">GIMP</a></td></tr>
+				<tr><td>3D Modelling:</td><td><a href="http://www.blender.org/">Blender</a></td></tr>
+				<tr><td>IDE:</td><td><a href="http://eclipse.org/">Eclipse</a></td></tr>
+				<tr><td>Client debugger:</td><td><a href="http://code.google.com/chrome/devtools/docs/overview.html">Chrome Developer Tools</a></td></tr>
+				<tr><td>Server debugger:</td><td><a href="https://github.com/dannycoates/node-inspector">Inspector.js</a></td></tr>
+				<tr><td>Javascript compressor:</td><td><a href="http://code.google.com/closure/compiler/docs/overview.html">Google Closure Compiler</a></td></tr>
+				<tr><td>Package manager:</td><td><a href="http://npmjs.org/">npm</a></td></tr>
+				<tr><td>Source Control:</td><td><a href="http://github.com/">Github</a></td></tr>
+			</table>
+			<div class="disclaimer">
+				The source code for this game is available under MIT License and can be downloaded from <a href="http://github.com/ewoudj/game">http://github.com/ewoudj/game</a>. If there are any issues with this game please get in contact using: <a href="https://github.com/ewoudj/game/issues">http://github.com/ewoudj/game/issues</a>.<br> 
+				Copyright 2012. All rights reserved. All trademarks are the property of their respective owners.
+			</div>
+		</div>
+	</body>
 </html>

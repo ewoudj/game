@@ -31,6 +31,7 @@ menu.prototype.setItems = function(items){
 	if(this.engine.buttonDown){
 		this.ignoreNextButtonUp = true;
 	}
+	this.currentItems = items;
 	this.clear();
 	this.texts = [];
 	var i = 0;
@@ -45,7 +46,7 @@ menu.prototype.setItems = function(items){
 			engine: this.engine,
 			text: text, 
 			position: { 
-				x: this.engine.width / 5, 
+				x: 0, // this.engine.width / 5, 
 				y: (this.engine.height / 3) + ( i * 60),
 				z: this.mousePlaneOffset
 			}
@@ -59,6 +60,36 @@ menu.prototype.setItems = function(items){
 		this.texts.push(config);
 		i++;
 	}
+};
+
+menu.prototype.show = function (items) {
+    if (this.finished) {
+        this.finished = false;
+        if(!this.engine.contains(this)){
+        	this.engine.add(this);
+        }
+        this.gotoRoot();
+    }
+    if(items){
+    	this.setItems(items);
+    }
+};
+
+menu.prototype.toggle = function () {
+    if (this.finished) {
+        this.finished = false;
+        if(!this.engine.contains(this)){
+        	this.engine.add(this);
+        }
+        this.gotoRoot();
+    }
+    else {
+        this.finished = true;
+    }
+};
+
+menu.prototype.hide = function () {
+    this.finished = true;
 };
 
 menu.prototype.clear = function(){

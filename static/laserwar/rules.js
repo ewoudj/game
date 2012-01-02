@@ -19,27 +19,18 @@ var colors = [
 ];
 
 var mainMenu = {
-    'SINGLE PLAYER': {
+    '    SINGLE PLAYER': {
         onMousePlaneUp: function (entity, evt) {
             entity.engine.rules.startSinglePlayerGame();
         }
     },
-    'MULTI  PLAYER': {
-//            submenu: {
-//                'LOCAL': {},
-//                'ONLINE': {}
-        //            }
+    '    MULTI  PLAYER': {
         onMousePlaneUp: function (entity, evt) {
             entity.engine.rules.startMultiPlayerGame();
         }
     },
     '':{},
-//    'ZERO   PLAYER': {
-//        onMousePlaneUp: function (entity, evt) {
-//            entity.engine.rules.startZeroPlayerGame();
-//        }
-//    },
-    'SETTINGS': {
+    '    SETTINGS': {
         onMousePlaneUp: function (entity, evt) {
             //entity.engine.rules.toggleSettings();
         	entity.engine.rules.menu.setItems(settingsMenu);
@@ -66,10 +57,10 @@ var settingsMenu = {
         getText: function(menu){
         	var result;
         	if(engine.getItem("effectsVolume",'0') === '0'){
-        		result = '  AUDIO: OFF';
+        		result = '      AUDIO: OFF';
         	}
         	else{
-        		result = '  AUDIO:  ON';
+        		result = '      AUDIO:  ON';
         	}
         	return result; 
         }
@@ -90,16 +81,16 @@ var settingsMenu = {
         getText: function(menu){
         	var result;
         	if(engine.getItem("renderer",'classic') === 'classic'){
-        		result = '  VIDEO:  2D';
+        		result = '      VIDEO:  2D';
         	}
         	else{
-        		result = '  VIDEO:  3D';
+        		result = '      VIDEO:  3D';
         	}
         	return result; 
         }
     },
     '': {},
-    '  MAIN  MENU': {
+    '      MAIN MENU': {
         onMousePlaneUp: function (entity, evt) {
             entity.engine.rules.menu.setItems(mainMenu);
         }
@@ -107,18 +98,25 @@ var settingsMenu = {
 };
 
 var gameOverMenu = {
-    '  GAME  OVER': {},
+    '      GAME OVER': {},
     '': {},
-    '  PLAY AGAIN': {
+    '      PLAY AGAIN': {
         onMousePlaneUp: function (entity, evt) {
             entity.engine.rules[entity.engine.rules.currentGameType]();
         }
     },
-    '  MAIN  MENU': {
+    '      MAIN MENU': {
         onMousePlaneUp: function (entity, evt) {
             entity.engine.rules.menu.setItems(mainMenu);
         }
     }
+};
+
+var introMenu = {
+    '  LASER WAR': {},
+    '': {},
+    '  RIGHT CLICK': {},
+    '  FOR MENU': {}
 };
 
 if(typeof(exports) !== 'undefined'){
@@ -128,6 +126,7 @@ if(typeof(exports) !== 'undefined'){
 var rules = function(config){
 	helpers.apply(config, this);
 	this.initialized = false;
+	this.engineId = 0; // This is important, if it is not 0 an new rules object gets created on the client
 	this.name = 'rules';
 	this.barHeight = 30;
 	if(this.engine.mode !== 'server'){
@@ -146,6 +145,7 @@ var rules = function(config){
 rules.prototype = new entity();
 
 rules.prototype.initialize = function(){
+	this.previousRightButtonDown = false;
 	this.initialized = true;
 	this.engine.canvasColor = '#000';
 	this.engine.gameState = {
@@ -163,11 +163,12 @@ rules.prototype.initialize = function(){
 		});
 		this.engine.add(this.scoreBar);
 		if(!this.menu){
-			this.menu = this.menu || new menu({
+			this.menu = new menu({
 				engine: this.engine,
 				mainMenu: mainMenu
 			});
 			this.engine.add(this.menu);
+			this.menu.setItems(mainMenu);
 		}
 	}
 	if(this.engine.mode !== 'client'){
@@ -289,7 +290,7 @@ rules.prototype.update = function(time){
 	if(this.engine.mode !== 'server'){
 		if(this.engine.gameState.gameOver !== this.previousGameOverState){
 			this.previousGameOverState = this.engine.gameState.gameOver;
-			if(this.engine.gameState.gameOver && this.engine.playerCount > 0){
+			if(this.engine.gameState.gameOver && (this.engine.playerCount > 0 || this.engine.mode === 'client')){
 				this.showGameOver();
 			}
 			else if(this.engine.gameState.gameOver && this.engine.playerCount === 0){
@@ -304,6 +305,13 @@ rules.prototype.update = function(time){
 			else if(this.engine.mode === 'client'){
 				this.hideMenu();
 			}
+		}
+		this.scoreBar.setScore(this.engine.gameState.player1Score, this.engine.gameState.player2Score);
+		if(this.previousRightButtonDown !== this.engine.rightButtonDown){
+			if(this.engine.rightButtonDown === false){
+				this.toggleMenu();
+			}
+			this.previousRightButtonDown = this.engine.rightButtonDown;
 		}
 	}
 	if(this.engine.mode !== 'client'){
@@ -337,9 +345,6 @@ rules.prototype.update = function(time){
 				position    : { x: 10, y : (this.engine.height - 50 - this.barHeight) }
 			}));		
 		}
-		if(this.engine.mode == 'standalone' || this.engine.mode == 'client'){
-			this.scoreBar.setScore(this.engine.gameState.player1Score, this.engine.gameState.player2Score);
-		}
 	}
 };
 
@@ -355,13 +360,8 @@ rules.prototype.getRemoteData = function(){
 };
 
 rules.prototype.renderRemoteData = function(remoteData, offset){
-	if(!this.scoreBar){
-		this.scoreBar = new scorebar({
-			engine: this.engine
-		});
-		this.engine.add(this.scoreBar);
-	}
-	this.scoreBar.setScore(parseInt(remoteData[offset + 1]), parseInt(remoteData[offset + 2]));
+	this.engine.gameState.player1Score = remoteData[offset + 1];
+	this.engine.gameState.player2Score = remoteData[offset + 2];
 	this.engine.gameState.gameOver = (remoteData[offset + 3] === "1");
 	return offset + 4;
 };
@@ -384,17 +384,11 @@ rules.prototype.startMultiPlayerGame = function () {
 
 rules.prototype.startServerGame = function () {
     this.engine.mode = 'server';
-    if(this.engine.player1 && this.engine.player2){
-    	//this.engine.playerCount = 2;
+    if(this.engine.player1){
     	this.engine.player1.emit('reset', 0);
+    }
+    if(this.engine.player2){
     	this.engine.player2.emit('reset', 0);
-    }
-    else{
-    	// this.engine.playerCount = 1;
-    	this.engine.player1.emit('reset', 0);
-    }
-    if (this.engine.entities.length === 0) {
-        //this.engine.add(this);
     }
     this.engine.reset();
 };
@@ -412,29 +406,15 @@ rules.prototype.showGameOver = function () {
 };
 
 rules.prototype.showMenu = function (items) {
-    if (this.menu.finished) {
-        this.menu.finished = false;
-        this.engine.add(this.menu);
-        this.menu.gotoRoot();
-    }
-    if(items){
-    	this.menu.setItems(items);
-    }
+	return this.menu.show(items);
 };
 
 rules.prototype.toggleMenu = function () {
-    if (this.menu.finished) {
-        this.menu.finished = false;
-        this.engine.add(this.menu);
-        this.menu.gotoRoot();
-    }
-    else {
-        this.menu.finished = true;
-    }
+    return this.menu.toggle();
 };
 
 rules.prototype.hideMenu = function () {
-    this.menu.finished = true;
+    return this.menu.hide();
 };
 
 rules.prototype.toggleSettings = function () {
@@ -472,9 +452,14 @@ rules.prototype.keyboardHandler = function (evt) {
     if (keyCode === 119 || keyCode === 192) {
         DAT.GUI.toggleHide();
     }
-    // F8: Toggle menu
-    if (keyCode === 27) {
-        this.toggleMenu();
+    // M: Toggle menu
+    if (keyCode === 77) {
+    	if(this.menu.currentItems === introMenu){
+    		this.menu.gotoRoot();
+    	}
+    	else{
+    		this.toggleMenu();
+    	}
     }
 };
 

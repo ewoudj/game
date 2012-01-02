@@ -65,7 +65,7 @@ engine.rendering.webgl.webglRenderer = function(){
 	    this.backgroundPlane.position.z = -50;
 	    this.scene.add(this.backgroundPlane);
 		// Initial camera position and look at
-		this.camera.position.z = 1000;
+		this.camera.position.z = 1100;
 		this.camera.position.x = 0;
 		this.camera.position.y = 0;
 		this.camera.lookAt({x:0,y:0,z:0});
@@ -159,15 +159,25 @@ engine.rendering.webgl.webglRenderer = function(){
 		};
 	};
 	
-	webglRenderer.prototype.onmousedown = function(){
+	webglRenderer.prototype.onmousedown = function(e){
 		if(this.suspended) return;
-		this.engine.buttonDown = true;
+		if(( e || window.event).button === 2){
+			this.engine.rightButtonDown = true;
+		}
+		else{
+			this.engine.buttonDown = true;
+		}
 		this.notify('onmousedown', this.mouseEntities);
 	};
 	
 	webglRenderer.prototype.onmouseup = function(e){
 		if(this.suspended) return;
-		this.engine.buttonDown = false;
+		if(( e || window.event).button === 2){
+			this.engine.rightButtonDown = false;
+		}
+		else{
+			this.engine.buttonDown = false;
+		}
 		this.notify('onmouseup', this.mouseEntities);
 	};
 	
@@ -319,7 +329,7 @@ engine.rendering.webgl.webglRenderer = function(){
 				this.setEntityMesh(e);
 			}
 			if(e.mesh.gameColor !== e.color){
-				e.mesh.materials[0] = this.createMaterial(e.color);
+				e.mesh.material = this.createMaterial(e.color);
 				e.mesh.gameColor = e.color;
 			}
 			e.mesh.position.x = (e.position.x - this.centerOffset.x) * this.gameScale ;
@@ -398,12 +408,16 @@ engine.rendering.webgl.webglRenderer = function(){
 		}
 		else{
 			var self = this;
-			this.loader.load( { 
-				model: m, 
-				callback: function( geometry ) { 
-					self.geometries.push( geometry );
-					self.loadNextModel(models, callback);
-				}
+//			this.loader.load( { 
+//				model: m, 
+//				callback: function( geometry ) { 
+//					self.geometries.push( geometry );
+//					self.loadNextModel(models, callback);
+//				}
+//			});
+			this.loader.load( m, function( geometry ) { 
+				self.geometries.push( geometry );
+				self.loadNextModel(models, callback);
 			});
 		}
 	};
