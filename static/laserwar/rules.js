@@ -377,8 +377,13 @@ rules.prototype.startSinglePlayerGame = function(){
 rules.prototype.startMultiPlayerGame = function () {
 	this.currentGameType = "startMultiPlayerGame";
     // Sends request game message to the server (the server will start an engine on the server in 'server' mode)
-    this.engine.socket.emit('start game', 'foo', 'bar');
-    this.engine.mode = 'client';
+	if(this.engine.socket){
+		this.engine.socket.emit('start game', 'foo', 'bar');
+		this.engine.mode = 'client';
+	}
+	else{
+		alert('Multiplayer is currently nor available.');
+	}
     this.hideMenu();
 };
 
