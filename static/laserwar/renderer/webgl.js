@@ -7,13 +7,13 @@ engine.rendering.webgl = function(suspend){
 		var self = this;
 		this.webglRenderer = new engine.rendering.webgl.webglRenderer({
 			models: [
-				'/resources/models/ship.js', 
-				'/resources/models/star.js',
-				'/resources/models/ufo1.js',
-				'/resources/models/ufo2.js',
-				'/resources/models/ufo3.js',
-				'/resources/models/laser.js',
-				'/resources/models/cube.js'
+				'resources/models/ship.js', 
+				'resources/models/star.js',
+				'resources/models/ufo1.js',
+				'resources/models/ufo2.js',
+				'resources/models/ufo3.js',
+				'resources/models/laser.js',
+				'resources/models/cube.js'
 	        ],
 			centerOffset: {x: this.width / 2, y: this.height / 2},
 			engine: this,
