@@ -111,14 +111,23 @@ ufo.prototype.calculateMovement = function(currentPosition, mousePosition, speed
 	return result;
 };
 
-ufo.prototype.handleCollisions = function(){
+ufo.prototype.handleCollisions = function(){	
 	if(this.invulerability){
 		this.invulerability--;
 	}
 	if(this.collisions && this.collisions.length){
 		for(var i = 0; i < this.collisions.length; i++){
 			if(this.collisions[i].owner != this && !this.invulerability){
+				if(!this.engine.gameState.gameOver && !this.finished){
+					if(this.collisions[i].owner == this.engine.gameState.player1Ship){
+						this.engine.gameState.player1Score++;
+					}
+					if(this.collisions[i].owner == this.engine.gameState.player2Ship){
+						this.engine.gameState.player2Score++;
+					}
+				}
 				this.finished = true;
+				break;
 			}
 		}
 	}	

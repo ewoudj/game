@@ -65,16 +65,28 @@ ship.prototype.update = function(time){
 				this.invulerability = 0;
 			}
 		}
-		if(!this.engine.gameState.gameOver && (this.collisions && this.collisions.length)){
+//		if(!this.engine.gameState.gameOver && (this.collisions && this.collisions.length)){
+//			for(var i = 0; i < this.collisions.length; i++){
+//				if(this.collisions[i].owner != this && !(this.invulerability && this.collisions[i] == this.spawnStar)){
+//					if(!this.finished && this.collisions[i].owner == this.engine.gameState.player1Ship && this == this.engine.gameState.player2Ship){
+//						this.engine.gameState.player1Score++;
+//					}
+//					if(!this.finished && this.collisions[i].owner == this.engine.gameState.player2Ship && this == this.engine.gameState.player1Ship){
+//						this.engine.gameState.player2Score++;
+//					}
+//					this.finished = true;
+//				}
+//			}
+//		}
+		if(this.collisions && this.collisions.length){
 			for(var i = 0; i < this.collisions.length; i++){
-				if(this.collisions[i].owner != this && !(this.invulerability && this.collisions[i] == this.spawnStar)){
-					if(!this.finished && this.collisions[i].owner == this.engine.gameState.player1Ship && this == this.engine.gameState.player2Ship){
-						this.engine.gameState.player1Score++;
-					}
-					if(!this.finished && this.collisions[i].owner == this.engine.gameState.player2Ship && this == this.engine.gameState.player1Ship){
-						this.engine.gameState.player2Score++;
+				var collider = this.collisions[i];
+				if(collider.owner != this && !(this.invulerability && collider == this.spawnStar)){
+					if(collider.parent && collider.type === 'star' && collider.color !== this.color){
+						collider.finished = true;
 					}
 					this.finished = true;
+					break;
 				}
 			}
 		}
