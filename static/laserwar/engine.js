@@ -56,12 +56,14 @@ var engine = function(config){
 		}
 		this.initializeControllers();
 		var self = this;
-		this.socket.on('game state', function(msg){
-			self.remoteDataString.push(msg);
-		});
-		this.socket.on('reset', function(msg){
-			self.reset();
-		});
+		if(this.socket){
+			this.socket.on('game state', function(msg){
+				self.remoteDataString.push(msg);
+			});
+			this.socket.on('reset', function(msg){
+				self.reset();
+			});
+		}
 		this.animate();
 		document.body.oncontextmenu = function(){return false;};
 	}
@@ -350,7 +352,7 @@ engine.rendering = {};
 engine.renderer = engine.getItem("renderer",'classic');
 engine.effectsVolume = parseInt(engine.getItem("effectsVolume", 10));
 engine.musicVolume = parseInt(engine.getItem("musicVolume", 40));
-engine.maxScore = 3;//parseInt(engine.getItem("maxScore", 10));
+engine.maxScore = parseInt(engine.getItem("maxScore", 10));
 engine.maxAiScore = parseInt(engine.getItem("maxAiScore", 10));
 
 if(typeof(exports) !== 'undefined'){
