@@ -18,8 +18,7 @@
 			}
 		</style>
 		
-		<script src="http://192.168.1.100:8002/socket.io/socket.io.js"></script>
-		<script src="resources/script/soundmanager/script/soundmanager2.js"></script>
+		<script src="resources/script/soundmanager/script/soundmanager2-nodebug-jsmin.js"></script>
 		<script src="resources/script/Three.js"></script>
 		<script src="resources/script/DAT.GUI.min.js"></script>
 		<script src="resources/fonts/cbm-64_normal.typeface.js"></script>
@@ -48,9 +47,10 @@
 		<script type="text/javascript">
 			document.ontouchmove = function(e){ e.preventDefault(); }
 			var onBodyLoad = function(){
+				var socket = null;
 				// Start the game
 				var settings = {
-					socket: io.connect('http://' + document.domain + ':8002'),
+					socket: socket,
 					rulesType: rules,
 					mode : 'standalone' // 'client', 'server', 'standalone'
 				};
