@@ -32,67 +32,39 @@ By wrapping and extending HTML5 and Flash Audio APIs, SoundManager 2 brings reli
     * console.log()-style debug output and troubleshooting tools
     * Community-based discussion/support
 
-== As heard on The Internets
+== As Heard On The Internets
 
 A few nifty sites that have implemented SM2 for driving audio:
 
-    * Muxtape
     * SoundCloud / The Cloud Player
-    * 8tracks
-    * Last.fm
+    * last.fm
     * Opera (media player component)
+    * 8tracks
     * Discogs
-    * Mixcrate
+    * The Hype Machine
+    * nyan.cat
+    * turntable.fm
+    * AudioGalaxy
 
 == Project home, documentation, live demos etc.:
 
 http://www.schillmania.com/projects/soundmanager2/
 
+== Compiling JS builds (-nodebug, -jsmin) and Flash components, AS2/AS3 to SWF
 
-== Merged fork ( kjvarga: http://github.com/kjvarga/SoundManager2/ )
+An Ant build file defines the tasks for compiling JS and SWF components, useful if you make changes to the SM2 source and want to recompile.
+Google's Closure Compiler is used for the JS. AS2 compilation is done by MTASC, and AS3 is handled by Adobe's Open Source Flex SDK (mxmlc) compiler.
+Refer to the build.xml file for compiler downloads and path definitions.
 
-This SM2 fork contains the SoundManager2 implementation that is used on http://www.kazaa.com.
+== Versioning / Development Notes
 
-We added RTMP support to SM2 which is now part of the SM2 (experimental) branch as of V2.96a.20100606.
+Releases are versioned by date, e.g., V2.97a.20110424 and are tagged as such.*
+The latest official release is always on trunk/master.
+Post-release development builds may be available on the appropriate +DEV branch, eg., V2.97a.20110801+DEV
 
-Downloads: http://www.schillmania.com/projects/soundmanager2/doc/download/
+== Forks and Pull Requests
 
-For more background on the addition of RTMP check out  http://getsatisfaction.com/schillmania/topics/soundmanager_doesnt_support_rtmp
+Firstly, thank you for wanting to contribute! Bug fixes and tweaks are welcomed, particularly if they follow the general coding style of the project.
+If making a pull request, use the project's current +DEV development branch as the merge target instead of "master", if possible (please and thank-you.)
 
-Our old branch of development has been moved to http://github.com/kjvarga/SoundManager2/tree/pre_merge.
-
-== Changes
-
-In addition to the documented SM2 options, we have added the following.
-
-New options to SM2:
-
-* <tt>ondebuglog</tt> callback called with every debugging message.  Useful if you need to programatically have access to the debug logs.  We use this in our automated reporting of stream failures for QA.
-
-New options to createSound:
-
-* <tt>bufferTimes</tt> optional array of buffer times for double/multiple-buffering.  Just specify an array of incrementing buffer sizes (in seconds) e.g. [0.5, 2, 8] for a half-second, then 2 second, then 8 second buffer.  Buffers increment when full and reset to the smallest buffer when empty, or when starting to play an unbuffered portion of the stream.
-* <tt>onstats</tt> callback called with statistics including how long it took to connect to the server, and how long it took to play (useful for QA).
-
-Our FMS server has some peculiarities that we have to deal with:
-* bytesLoaded is always 0 for a streaming sound
-* NetStream.Play.Stop is sent when it shouldn't
-* We cannot get the stream length using a typical <tt>getStreamLength</tt> call
-* We cannot get bandwidth information
-
-== Debugging
-
-1. Set <tt>soundManager.debugFlash = true;</tt>
-2. Use a debug version of the SWF e.g. soundmanager2_flash9_debug.swf
-3. Open the Flash IDE.  Open the SM2 source code files. Start a remote debugging session.
-4. Refresh the application in the browser (make sure caching is off).
-5. The SWF should connect to Flash and allow you to step through the source.
-
-If it doesn't:
-1. Make sure that the Flash version you have installed supports debugging
-2. Make sure that the Flash debugger application is using the same version of Flash.
-
-== SM2
-
-Project home, documentation, live demos etc.:
-http://www.schillmania.com/projects/soundmanager2/
+* SoundManager 2 has been at "version" 2.97 for a long time, because 2.97 was arguably the best llama-ass-whipping version of WinAmp. (WinAmp 3 was not as good, and WinAmp 5 was "the best of 2 and 3 combined.") This MP3 player was my favourite Windows app during the 90's, and is missed as there's nothing quite like it on OS X where I spend most of my time these days.

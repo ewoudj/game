@@ -1,14 +1,14 @@
-/*
-   SoundManager 2: Javascript Sound for the Web
-   ----------------------------------------------
-   http://schillmania.com/projects/soundmanager2/
-
-   Copyright (c) 2007, Scott Schiller. All rights reserved.
-   Code licensed under the BSD License:
-   http://www.schillmania.com/projects/soundmanager2/license.txt
-
-   Flash 9 / ActionScript 3 version
-*/
+/**
+ * SoundManager 2: Javascript Sound for the Web
+ * ----------------------------------------------
+ * http://schillmania.com/projects/soundmanager2/
+ *
+ * Copyright (c) 2007, Scott Schiller. All rights reserved.
+ * Code licensed under the BSD License:
+ * http://www.schillmania.com/projects/soundmanager2/license.txt
+ *
+ * Flash 9 / ActionScript 3 version
+ */
 
 package {
 
@@ -43,8 +43,6 @@ package {
     public var useEQData: Boolean = false;
     public var sID: String;
     public var sURL: String;
-    public var justBeforeFinishOffset: int;
-    public var didJustBeforeFinish: Boolean;
     public var didFinish: Boolean;
     public var loaded: Boolean;
     public var connected: Boolean;
@@ -56,11 +54,12 @@ package {
     public var ignoreDataError: Boolean = false;
     public var autoPlay: Boolean = false;
     public var autoLoad: Boolean = false;
-    public var pauseOnBufferFull: Boolean = true;
+    public var pauseOnBufferFull: Boolean = false; // only applies to RTMP
     public var loops: Number = 1;
     public var lastValues: Object = {
       bytes: 0,
       position: 0,
+      duration: 0,
       volume: 100,
       pan: 0,
       loops: 1,
@@ -81,17 +80,12 @@ package {
     public var st: SoundTransform;
     public var useNetstream: Boolean;
     public var bufferTime: Number = 3; // previously 0.1
-    public var bufferTimes: Array;     // an array of integers (for specifying multiple buffers)
     public var lastNetStatus: String = null;
     public var serverUrl: String = null;
 
-    public var start_time: Number;
-    public var connect_time: Number;
-    public var play_time: Number;
-    public var recordStats: Boolean = false;
     public var checkPolicyFile:Boolean = false;
 
-    public function SoundManager2_SMSound_AS3(oSoundManager: SoundManager2_AS3, sIDArg: String = null, sURLArg: String = null, usePeakData: Boolean = false, useWaveformData: Boolean = false, useEQData: Boolean = false, useNetstreamArg: Boolean = false, netStreamBufferTime: Number = 1, serverUrl: String = null, duration: Number = 0, autoPlay: Boolean = false, useEvents: Boolean = false, bufferTimes: Array = null, recordStats: Boolean = false, autoLoad: Boolean = false, checkPolicyFile: Boolean = false) {
+    public function SoundManager2_SMSound_AS3(oSoundManager: SoundManager2_AS3, sIDArg: String = null, sURLArg: String = null, usePeakData: Boolean = false, useWaveformData: Boolean = false, useEQData: Boolean = false, useNetstreamArg: Boolean = false, netStreamBufferTime: Number = 1, serverUrl: String = null, duration: Number = 0, autoPlay: Boolean = false, useEvents: Boolean = false, autoLoad: Boolean = false, checkPolicyFile: Boolean = false) {
       this.sm = oSoundManager;
       this.sID = sIDArg;
       this.sURL = sURLArg;
@@ -99,9 +93,7 @@ package {
       this.useWaveformData = useWaveformData;
       this.useEQData = useEQData;
       this.urlRequest = new URLRequest(sURLArg);
-      this.justBeforeFinishOffset = 0;
-      this.didJustBeforeFinish = false;
-      this.didFinish = false; // non-MP3 formats only
+      this.didFinish = false;
       this.loaded = false;
       this.connected = false;
       this.failed = false;
@@ -111,27 +103,20 @@ package {
       this.useNetstream = useNetstreamArg;
       this.serverUrl = serverUrl;
       this.duration = duration;
-      this.recordStats = recordStats;
       this.useEvents = useEvents;
       this.autoLoad = autoLoad;
       if (netStreamBufferTime) {
         this.bufferTime = netStreamBufferTime;
-      }
-      // Use bufferTimes instead of bufferTime
-      if (bufferTimes !== null) {
-        this.bufferTimes = bufferTimes;
-      } else {
-        this.bufferTimes = [this.bufferTime];
-      }
-      setAutoPlay(autoPlay);
-      if (recordStats) {
-        this.start_time = getTimer();
       }
       this.checkPolicyFile = checkPolicyFile;
 
       writeDebug('SoundManager2_SMSound_AS3: Got duration: '+duration+', autoPlay: '+autoPlay);
 
       if (this.useNetstream) {
+        // Pause on buffer full if auto-loading an RTMP stream
+        if (this.serverUrl && this.autoLoad) {
+          this.pauseOnBufferFull = true;
+        }
 
         this.cc = new Object();
         this.nc = new NetConnection();
@@ -151,7 +136,6 @@ package {
         }
         this.nc.connect(serverUrl);
       } else {
-        this.connect_time = this.start_time;
         this.connected = true;
       }
 
@@ -166,23 +150,20 @@ package {
       switch (event.info.code) {
 
         case "NetConnection.Connect.Success":
-          writeDebug('NetConnection: connected');
           try {
             this.ns = new NetStream(this.nc);
             this.ns.checkPolicyFile = this.checkPolicyFile;
             // bufferTime reference: http://livedocs.adobe.com/flash/9.0/ActionScriptLangRefV3/flash/net/NetStream.html#bufferTime
-            this.ns.bufferTime = getStartBuffer(); // set to 0.1 or higher. 0 is reported to cause playback issues with static files.
+            this.ns.bufferTime = this.bufferTime; // set to 0.1 or higher. 0 is reported to cause playback issues with static files.
             this.st = new SoundTransform();
             this.cc.onMetaData = this.metaDataHandler;
             this.ns.client = this.cc;
             this.ns.receiveAudio(true);
             this.addNetstreamEvents();
-
             this.connected = true;
-            if (recordStats) {
-              this.recordConnectTime();
-            }
-            if (this.useEvents) {
+            // RTMP-only
+            if (this.serverUrl && this.useEvents) {
+              writeDebug('NetConnection: connected');
               writeDebug('firing _onconnect for '+this.sID);
               ExternalInterface.call(this.sm.baseJSObject + "['" + this.sID + "']._onconnect", 1);
             }
@@ -244,58 +225,39 @@ package {
 
     }
 
-    // Set the buffer size on the current NetSream instance to <tt>buffer</tt> secs
-    // Only set the buffer if it's different to the current buffer.
-    public function setBuffer(buffer: int) : void {
-      if (buffer != this.ns.bufferTime) {
-        this.ns.bufferTime = buffer;
-        writeDebug('set buffer to '+this.ns.bufferTime+' secs');
-      }
-    }
-
-    // Return the size of the starting buffer.
-    public function getStartBuffer() : int {
-      return this.bufferTimes[0];
-    }
-
-    // Return the size of the next buffer, given the size of the current buffer.
-    // If there are no more buffers, returns the current buffer size.
-    public function getNextBuffer(current_buffer: int) : int {
-      var i: int = bufferTimes.indexOf(current_buffer);
-      if (i == -1) {
-        // Couldn't find the buffer, start from the start buffer size
-        return getStartBuffer();
-      } else if (i + 1 >= bufferTimes.length) {
-        // Last (or only) buffer, keep the current buffer
-        return current_buffer;
-      } else {
-        return this.bufferTimes[i+1];
-      }
-   }
-
     public function writeDebug (s: String, bTimestamp: Boolean = false) : Boolean {
       return this.sm.writeDebug (s, bTimestamp); // defined in main SM object
     }
 
     public function metaDataHandler(infoObject: Object) : void {
-      /*
-	  var data:String = new String();
-	  for (var prop:* in infoObject) {
-		data += prop+': '+infoObject[prop]+' ';
-	  }
-	  ExternalInterface.call('soundManager._writeDebug','Metadata: '+data);
-	  */
+      var prop:String;
+      if (sm.debugEnabled) {
+        var data:String = new String();
+        for (prop in infoObject) {
+          data += prop+': '+infoObject[prop]+' \n';
+        }
+        writeDebug('Metadata: '+data);
+      }
+      this.duration = infoObject.duration * 1000;
       if (!this.loaded) {
         // writeDebug('not loaded yet: '+this.ns.bytesLoaded+', '+this.ns.bytesTotal+', '+infoObject.duration*1000);
         // TODO: investigate loaded/total values
         // ExternalInterface.call(baseJSObject + "['" + this.sID + "']._whileloading", this.ns.bytesLoaded, this.ns.bytesTotal, infoObject.duration*1000);
         ExternalInterface.call(baseJSObject + "['" + this.sID + "']._whileloading", this.bytesLoaded, this.bytesTotal, (infoObject.duration || this.duration))
       }
-      this.duration = infoObject.duration * 1000;
-      // null this out for the duration of this object's existence.
-      // it may be called multiple times.
-      this.cc.onMetaData = function(infoObject: Object) : void {}
-
+      var metaData:Array = [];
+      var metaDataProps:Array = [];
+      for (prop in infoObject) {
+        metaData.push(prop);
+        metaDataProps.push(infoObject[prop]);
+      }
+      // pass infoObject to _onmetadata, too
+      ExternalInterface.call(baseJSObject + "['" + this.sID + "']._onmetadata", metaData, metaDataProps);
+      // this handler may fire multiple times, eg., when a song changes while playing an RTMP stream.
+      if (!this.serverUrl) {
+        // disconnect for non-RTMP cases, since multiple firings may mess up duration.
+        this.cc.onMetaData = function(infoObject: Object) : void {}
+      }
     }
 
     public function getWaveformData() : void {
@@ -322,13 +284,17 @@ package {
 
         writeDebug("SMSound::start nMsecOffset "+ nMsecOffset+ ' nLoops '+nLoops + ' current bufferTime '+this.ns.bufferTime+' current bufferLength '+this.ns.bufferLength+ ' this.lastValues.position '+this.lastValues.position);
 
+        // mark for later Netstream.Play.Stop / sound completion
+        this.finished = false;
+
         this.cc.onMetaData = this.metaDataHandler;
 
         // Don't seek if we don't have to because it destroys the buffer
         var set_position:Boolean = this.lastValues.position != null && this.lastValues.position != nMsecOffset;
+
         if (set_position) {
           // Minimize the buffer so playback starts ASAP
-          this.setBuffer(this.getStartBuffer());
+          this.ns.bufferTime = this.bufferTime;
         }
 
         if (this.paused) {
@@ -341,11 +307,13 @@ package {
         } else if (!this.didLoad) {
           writeDebug('start: !didLoad - playing '+this.sURL);
           this.ns.play(this.sURL);
+          this.pauseOnBufferFull = false; // SAS: playing behaviour overrides buffering behaviour
           this.didLoad = true;
           this.paused = false;
         } else {
           // previously loaded, perhaps stopped/finished. play again?
           writeDebug('playing again (not paused, didLoad = true)');
+          this.pauseOnBufferFull = false;
           this.ns.play(this.sURL);
         }
 
@@ -374,13 +342,15 @@ package {
       this.removeEventListener(Event.SOUND_COMPLETE, _onfinish);
     }
 
-    public function loadSound(sURL: String, bStream: Boolean) : void {
+    public function loadSound(sURL: String) : void {
       if (this.useNetstream) {
         this.useEvents = true;
         if (this.didLoad != true) {
-          ExternalInterface.call('loadSound(): loading ' + this.sURL);
-          this.ns.play(this.sURL);
-          this.didLoad = true;
+          this.ns.play(this.sURL); // load streams by playing them
+          if (!this.autoPlay) {
+            this.pauseOnBufferFull = true;
+          }
+          this.paused = false;
         }
         // this.addEventListener(Event.SOUND_COMPLETE, _onfinish);
         this.applyTransform();
@@ -396,19 +366,16 @@ package {
       }
     }
 
+    // Set the value of autoPlay
     public function setAutoPlay(autoPlay: Boolean) : void {
       if (!this.serverUrl) {
-        // don't apply to non-RTMP, netstream stuff.
-        this.autoPlay = true;
-        this.pauseOnBufferFull = false;
+        this.autoPlay = autoPlay;
       } else {
         this.autoPlay = autoPlay;
         if (this.autoPlay) {
           this.pauseOnBufferFull = false;
-          // writeDebug('ignoring pauseOnBufferFull because autoPlay is on');
         } else if (!this.autoPlay) {
           this.pauseOnBufferFull = true;
-          // writeDebug('pausing on buffer full because autoPlay is off');
         }
       }
     }
@@ -434,23 +401,6 @@ package {
       } else if (this.soundChannel) {
         this.soundChannel.soundTransform = st; // new SoundTransform(this.lastValues.volume, this.lastValues.pan);
       }
-    }
-
-    public function recordPlayTime() : void {
-      this.play_time = Math.round(getTimer() - (this.start_time + this.connect_time));
-      writeDebug('Play took '+ this.play_time + ' ms');
-      // We must now have both stats, call the onstats callback
-      ExternalInterface.call(baseJSObject + "['" + this.sID + "']._onstats", {
-        play_time:    this.play_time,
-        connect_time: this.connect_time
-      });
-      // Stop tracking any stats for this object
-      this.recordStats = false;
-    }
-
-    public function recordConnectTime() : void {
-      this.connect_time = Math.round(getTimer() - this.start_time);
-      writeDebug('Connect took '+ this.connect_time + ' ms');
     }
 
     // Handle FMS bandwidth check callback.
@@ -499,22 +449,18 @@ package {
       // @see http://www.actionscript.org/forums/archive/index.php3/t-159194.html
       if (e.info.code == "NetStream.Play.Stop") {
 
-        if (!this.useNetstream) {
-          // finished playing
-          // this.didFinish = true; // will be reset via JS callback
-          this.didJustBeforeFinish = false; // reset
+        if (!this.finished && (!this.useNetstream || !this.serverUrl)) {
+
+          // finished playing, and not RTMP
           writeDebug('calling onfinish for a sound');
           // reset the sound? Move back to position 0?
           this.sm.checkProgress();
+          this.finished = true; // will be reset via JS callback
           ExternalInterface.call(baseJSObject + "['" + this.sID + "']._onfinish");
+
         }
 
       } else if (e.info.code == "NetStream.Play.Start" || e.info.code == "NetStream.Buffer.Empty" || e.info.code == "NetStream.Buffer.Full") {
-
-        // First time buffer has filled. Print debugging output.
-        if (this.recordStats && !this.play_time) {
-          this.recordPlayTime();
-        }
 
         // RTMP case..
         // We wait for the buffer to fill up before pausing the just-loaded song because only if the
@@ -525,17 +471,8 @@ package {
           this.pauseOnBufferFull = false;
           // Call pause in JS.  This will call back to us to pause again, but
           // that should be harmless.
-          writeDebug('Pausing song because buffer is full');
+          writeDebug('Pausing on buffer full');
           ExternalInterface.call(baseJSObject + "['" + this.sID + "'].pause", false);
-        }
-
-        // The buffer is full.  Increase its size if possible.
-        // Double buffering has not been shown to cause false starts, so this is safe.
-        if (e.info.code == "NetStream.Buffer.Full") {
-          var next_buffer: int = this.getNextBuffer(this.ns.bufferTime);
-          if (next_buffer != this.ns.bufferTime) {
-            this.setBuffer(next_buffer);
-          }
         }
 
         var isNetstreamBuffering: Boolean = (e.info.code == "NetStream.Buffer.Empty" || e.info.code == "NetStream.Play.Start");
@@ -549,12 +486,11 @@ package {
         // However, if you pause and let the whole song buffer, Buffer.Flush is called followed by
         // Buffer.Empty, so handle that case too.
         //
-        // Ignore this event if we are more than 5 seconds from the end of the song.
+        // Ignore this event if we are more than 3 seconds from the end of the song.
         if (e.info.code == "NetStream.Buffer.Empty" && (this.lastNetStatus == 'NetStream.Play.Stop' || this.lastNetStatus == 'NetStream.Buffer.Flush')) {
-          if (this.duration && (this.ns.time * 1000) < (this.duration - 5000)) {
+          if (this.duration && (this.ns.time * 1000) < (this.duration - 3000)) {
             writeDebug('Ignoring Buffer.Empty because this is too early to be the end of the stream! (sID: '+this.sID+', time: '+(this.ns.time*1000)+', duration: '+this.duration+')');
-          } else {
-            this.didJustBeforeFinish = false; // reset
+          } else if (!this.finished) {
             this.finished = true;
             writeDebug('calling onfinish for sound '+this.sID);
             this.sm.checkProgress();
@@ -562,9 +498,8 @@ package {
           }
 
         } else if (e.info.code == "NetStream.Buffer.Empty") {
-
           // The buffer is empty.  Start from the smallest buffer again.
-          this.setBuffer(this.getStartBuffer());
+          this.ns.bufferTime = this.bufferTime;
         }
       }
 
