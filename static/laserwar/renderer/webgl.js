@@ -69,8 +69,9 @@ engine.rendering.webgl.webglRenderer = function(){
 		this.camera.position.x = 0;
 		this.camera.position.y = 0;
 		this.camera.lookAt({x:0,y:0,z:0});
+		this.scene.add( this.camera );
 		//this.scene.add( new THREE.AmbientLight( 0x101010 ) );
-		var directionalLight = new THREE.DirectionalLight( 0x505050 );
+		var directionalLight = new THREE.DirectionalLight( 0xc0c0c0 );
 		directionalLight.position.x = 0;
 		directionalLight.position.y = 0;
 		directionalLight.position.z = 1000;
@@ -139,7 +140,7 @@ engine.rendering.webgl.webglRenderer = function(){
 		var ray = this.create_mouse_ray(mouse_pos);
 		this.worldMouse = this.planeIntersect(ray, 'z', 0);
 		this.engine.mousePosition = this.toGamePoint(this.worldMouse);
-	    this.mouseEntities = ray.intersectObjects(this.scene.objects);
+	    this.mouseEntities = ray.intersectObjects(this.scene.children);
 	    var items = this.engine.entities;
 	    for(var i = 0, l = items.length; i < l; i++){
 	    	var item = items[i];
@@ -344,12 +345,6 @@ engine.rendering.webgl.webglRenderer = function(){
 				e.mesh.rotation.y = Math.PI * (e.direction === 1 ? 1.5 : 0.5);
 			}
 			e.mesh.lastFrameNumber = this.lastFrameNumber;
-	//		if(e.name === 'Player 1'){
-	//			this.camera.position.x = e.mesh.position.x;
-	//			this.camera.position.y = e.mesh.position.y;
-	//			//this.camera.lookAt({x:0, y: 0, z: 0});
-	//			this.camera.lookAt({x: e.mesh.position.x / 2, y: e.mesh.position.y / 2, z:0});
-	//		}
 		}
 		this.processTexts(e);
 		if(e.subEntities){
