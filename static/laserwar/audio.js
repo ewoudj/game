@@ -1,5 +1,5 @@
 soundManager.debugMode = false;
-soundManager.url = '/resources/script/soundmanager/swf/';
+soundManager.url = 'resources/script/soundmanager/swf/';
 soundManager.onready( function() {
 	  window.audio = {
 		volume				: engine.effectsVolume,
