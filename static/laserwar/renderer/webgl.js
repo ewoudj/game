@@ -78,8 +78,8 @@ engine.rendering.webgl.webglRenderer = function(){
 		directionalLight.position.normalize();
 		this.scene.add( directionalLight );
 		// this.scene.add( new THREE.PointLight( 0xffffff, 1 ) );
-		this.spotlight = new THREE.SpotLight( 0xffffff, 0.5, 1000, true );
-		this.spotlight.position.set( 0, 0, 1100 );
+		this.spotlight = new THREE.SpotLight( 0xffffff, 1, 1000, true );
+		this.spotlight.position.set( 0, 0, 500 );
 		this.scene.add( this.spotlight );
 	//	this.composer = new THREE.EffectComposer( this.renderer );
 	//	var renderPass = new THREE.RenderPass( this.scene, this.camera );
