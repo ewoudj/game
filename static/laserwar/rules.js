@@ -382,7 +382,7 @@ rules.prototype.startMultiPlayerGame = function () {
 		this.engine.mode = 'client';
 	}
 	else{
-		alert('Multiplayer is currently nor available.');
+		alert('Multiplayer is currently not available.');
 	}
     this.hideMenu();
 };
