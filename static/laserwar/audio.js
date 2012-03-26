@@ -42,10 +42,10 @@ soundManager.onready( function() {
 		}
 	};
 
-	audio.explosionAudio 	= audio.getAudio('explosion', '/resources/audio/effects/explosion.mp3');
-	audio.appearAudio 		= audio.getAudio('appear', '/resources/audio/effects/appear.mp3');
-	audio.changeColorAudio	= audio.getAudio('changecolor', '/resources/audio/effects/changecolor.mp3');
-	audio.laserAudio 		= audio.getAudio('laserSound', '/resources/audio/effects/laser.mp3');
+	audio.explosionAudio 	= audio.getAudio('explosion', 'resources/audio/effects/explosion.mp3');
+	audio.appearAudio 		= audio.getAudio('appear', 'resources/audio/effects/appear.mp3');
+	audio.changeColorAudio	= audio.getAudio('changecolor', 'resources/audio/effects/changecolor.mp3');
+	audio.laserAudio 		= audio.getAudio('laserSound', 'resources/audio/effects/laser.mp3');
 	
 });
 
