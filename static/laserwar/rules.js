@@ -68,7 +68,19 @@ var settingsMenu = {
     'VIDEO': {
     	onMousePlaneUp: function (entity, evt) {
     		if(engine.getItem("renderer",'classic') === 'classic'){
-        		engine.renderer = 'webgl';
+    			var webglAvailable = ( function () { 
+    				try { 
+    					return (!! window.WebGLRenderingContext && !! document.createElement( 'canvas' ).getContext( 'experimental-webgl' )); 
+					} catch( e ) { 
+						return false; 
+					} 
+				} )();
+    			if(webglAvailable){
+    				engine.renderer = 'webgl';
+    			}
+    			else{
+    				alert('Sorry, 3D is not support by your bowser.');
+    			}
         	}
         	else{
         		engine.renderer = 'classic';
