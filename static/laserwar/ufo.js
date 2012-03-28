@@ -100,8 +100,8 @@ ufo.prototype.calculateMovement = function(currentPosition, mousePosition, speed
 		var distance = helpers.distance(currentPosition, mousePosition);
 		var f = 0.25;
 		var speed = speedLimit * (timeDelta / 40);
-		if(distance > 5){
-			f = 5 / distance;
+		if(distance > speed){
+			f = speed / distance;
 		}
 		result = {
 			x: this.position.x + (deltaX * f),

@@ -173,9 +173,9 @@ ship.prototype.calculateMovement = function(currentPosition, mousePosition, spee
 	var deltaY = mousePosition.y - currentPosition.y;
 	var distance = helpers.distance(currentPosition, mousePosition);
 	var f = 0.25;
-	var speed = speedLimit * (timeDelta / 40);
-	if(distance > 5){
-		f = 5 / distance;
+	var speed = speedLimit * (timeDelta / 35);
+	if(distance > speed){
+		f = speed / distance;
 	}
 	return {
 		x: this.position.x + (deltaX * f),
