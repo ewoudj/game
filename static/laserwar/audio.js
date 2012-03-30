@@ -1,4 +1,6 @@
 soundManager.debugMode = false;
+soundManager.preferFlash = true;
+soundManager.useHTML5Audio = true;
 soundManager.url = 'resources/script/soundmanager/swf/';
 soundManager.onready( function() {
 	  window.audio = {
@@ -27,8 +29,15 @@ soundManager.onready( function() {
 			audio.volume = 0;
 			audio.setVolume(audio.volume);
 		},
+		iOS					: function(){
+			return (
+					(navigator.userAgent.match(/iPhone/i)) || 
+					(navigator.userAgent.match(/iPod/i)) || 
+					(navigator.userAgent.match(/iPad/i)) 
+			);
+		},
 		getAudio			: function(id, url){
-			var result = soundManager.createSound({id:id, url:url, volume: engine.effectsVolume});
+			var result = !audio.iOS() ? soundManager.createSound({id:id, url:url, volume: engine.effectsVolume}) : null;
 			// In some cases it is just not going to work (e.g old IE without flash)
 			// createSound will return false.
 			if(!result){

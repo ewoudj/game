@@ -3,8 +3,12 @@ var socketio = require('socket.io');
 var engine = require("./static/laserwar/engine").engine;
 var rules = require("./static/laserwar/rules").rules;
 
-var server = connect.createServer(
-    connect.static(__dirname + '/static')
+var server = connect()
+//	.use(function(req, res, next){
+//		console.log(req.originalUrl);
+//		next();
+//	})
+	.use(connect.static(__dirname + '/static')
 );
 server.listen(8001);
 
