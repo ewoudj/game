@@ -246,10 +246,63 @@
 			a:visited 	{color:#FFF; text-decoration: none; }
 			a:hover		{color:#FFF; text-decoration: underline; }
 			a:active	{color:#FFF; text-decoration: none; }
+			
+			.quickstart {
+				padding: 80px 40px 80px 40px;
+				color: #fff;
+				width: 700px;
+				display:inline-block;
+				font-size: 20px;
+			}
+
+			.playgamebutton {
+				display: inline-block;
+				text-align: center;
+				width: 264px;
+				height:80px;
+				padding: 18px 20px 20px 20px;
+				margin: 40px;
+				color: #000 !important;
+				background-color: #fff;
+				font-weight: normal;
+				font-size: 64px;
+				text-transform: uppercase;
+				border: solid 8px #FF0000;
+				border-radius: 30px;
+				-moz-border-radius: 30px; 
+				box-shadow: 0px 2px 4px #444;
+				letter-spacing: 8px;
+				cursor:pointer;
+			}
+			
+			.playgamebutton:hover {
+				color: #000;
+				text-decoration: none;
+			}
+			
+			.quickstart a:hover {
+				text-decoration: none;
+			}
+			
+			.instructionslink{
+				text-decoration: underline!important;
+			}
+			
 		</style>
 		
 	</head>
   	<body>
+  		<div class="block">
+  			<div class="quickstart">
+  				<a class="playgamebutton" href="game.html">Play</a>
+  				<br>
+  				<a>First ship to destroy 10 UFOs wins,</a>
+  				<br>
+  				<a>click on stars in your color to respawn.</a>
+  				<br><br>
+  				<a class="instructionslink" href="#Page1" >Full instructions</a>
+  			</div>
+  		</div>
   		<div class="block">
 	  		<div class="front">
 				<div class="fronttitle">UFO Laser<br>Wars in Space</div>
