@@ -66,7 +66,7 @@ engine.rendering.classic.renderer = function(){
 	};
 	
 	renderer.prototype.resize = function(){
-		if(this.suspended) return;
+		//if(this.suspended) return;
 		this.canvas.style.top = '0px';
 		this.canvas.style.left = '0px';
 		this.canvas.width = window.innerWidth;

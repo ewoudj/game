@@ -224,7 +224,7 @@ engine.rendering.webgl.webglRenderer = function(){
 	};
 	
 	webglRenderer.prototype.resize = function( event ) {
-		if(this.suspended) return;
+		//if(this.suspended) return;
 		this.renderer.setSize( window.innerWidth, window.innerHeight );
 		this.camera.aspect = window.innerWidth / window.innerHeight;
 		this.camera.updateProjectionMatrix();
