@@ -392,11 +392,11 @@ rules.prototype.startMultiPlayerGame = function () {
 	if(this.engine.socket){
 		this.engine.socket.emit('start game', 'foo', 'bar');
 		this.engine.mode = 'client';
+		this.hideMenu();
 	}
 	else{
 		alert('Multiplayer is currently not available.');
 	}
-    this.hideMenu();
 };
 
 rules.prototype.startServerGame = function () {
@@ -441,34 +441,34 @@ rules.prototype.toggleSettings = function () {
 rules.prototype.keyboardHandler = function (evt) {
 	var evt = evt || window.event;
 	var keyCode = evt.keyCode || evt.which;
-    // F1: Restart game single player mode, standalone (all runs on the client)
-    if (keyCode == 112) {
+    // 1: Restart game single player mode, standalone (all runs on the client)
+    if (keyCode == 49) {
         this.startSinglePlayerGame();
     }
-    // F2: restart game multi player mode, 'client' only renders on the client, game logic runs on the server
-    if (keyCode == 113) {
+    // 2: restart game multi player mode, 'client' only renders on the client, game logic runs on the server
+    if (keyCode == 50) {
     	this.startMultiPlayerGame();
     }
-    // F3: Audio volume down
-    if (keyCode == 114) {
+    // 3: Audio volume down
+    if (keyCode == 51) {
         audio.decreaseVolume();
     }
-    // F4: Audio volume up
-    if (keyCode == 115) {
+    // 4: Audio volume up
+    if (keyCode == 52) {
         audio.increaseVolume();
     }
-    // F5: Mute
-    if (keyCode == 116) {
+    // 5: Mute
+    if (keyCode == 53) {
         audio.mute();
     }
-    // F6: Restart game in zero player mode
-    if (keyCode == 117) {
+    // 6: Restart game in zero player mode
+    if (keyCode == 54) {
     	this.startZeroPlayerGame();
     }
-    // F8: Toggle settings
-    if (keyCode === 119 || keyCode === 192) {
-        DAT.GUI.toggleHide();
-    }
+//    // F8: Toggle settings
+//    if (keyCode === 119 || keyCode === 192) {
+//        DAT.GUI.toggleHide();
+//    }
     // M: Toggle menu
     if (keyCode === 77) {
     	if(this.menu.currentItems === introMenu){
