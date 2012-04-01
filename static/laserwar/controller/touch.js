@@ -26,13 +26,14 @@ touchController.prototype.render = function(c) { // c is the canvas' context 2D
 	if(this.touchable) {
 		for(var i = 0, l = this.touches.length; i < l; i++){
 			var touch = this.touches[i];
+			var circleColor = 'rgba(255,255,255,0.3)';
 			if(touch.identifier === this.leftTouchID){
-				this.drawCircle(c, 'cyan', 6, this.leftTouchStartPos, 40);
-				this.drawCircle(c, 'cyan', 2, this.leftTouchStartPos, 60);
-				this.drawCircle(c, 'cyan', 2, this.leftTouchPos, 40); 
+				this.drawCircle(c, circleColor, 6, this.leftTouchStartPos, 40);
+				this.drawCircle(c, circleColor, 2, this.leftTouchStartPos, 60);
+				this.drawCircle(c, circleColor, 2, this.leftTouchPos, 40); 
 			} 
 			else {
-				this.drawCircle(c, 'red', 6, {x: touch.clientX, y: touch.clientY}, 40);
+				this.drawCircle(c, circleColor, 6, {x: touch.clientX, y: touch.clientY}, 50);
 			}
 		}
 	}
