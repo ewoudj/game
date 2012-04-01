@@ -118,6 +118,9 @@ menu.prototype.update = function(time){
 		var index = Math.floor( (this.mousePosition.y - (this.engine.height / 3)) / 60 ) + 1;
 		if(index > -1 && index < this.texts.length && this.texts[index].onMousePlaneUp){
 			this.select(this.texts[index]);
+		    if(this.engine.touchController.touchable){
+		    	this.onmouseup(this.texts[index], true);
+		    }
 		}
 		else{
 			this.select(null);

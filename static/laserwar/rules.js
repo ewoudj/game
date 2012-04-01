@@ -269,7 +269,7 @@ rules.prototype.ensureUserRespawn = function(ship, mousePosition, buttonDown, pl
 		var playerstar;
 		// If the player is a computer (AI) help it start a new ship.
 		// This should be replaced by the AI doing a proper mouseposition and button click
-		if(ship.type === 'computer'){
+		if(ship.type === 'computer' || this.engine.touchController.touchable){
 			// See if there is a star in the ship's color
 			playerstar = this.getStar(ship, false);
 			if(playerstar){

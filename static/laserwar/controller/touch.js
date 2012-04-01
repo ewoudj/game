@@ -3,7 +3,8 @@ var touchController = function(config){
 		this.engine = config.engine;
 	}
 	this.resize();
-	this.leftTouchID = -1; 
+	this.leftTouchID = -1;
+	this.rightTouchID = -1;
 	this.leftTouchPos = {x: 0, y: 0};
 	this.leftTouchStartPos = {x: 0, y: 0};
 	this.leftVector = {x: 0, y: 0};
@@ -52,11 +53,12 @@ touchController.prototype.onTouchStart = function(e) {
 			this.leftTouchID = touch.identifier; 
 			this.leftTouchStartPos = {x: touch.clientX, y: touch.clientY}; 	
 			this.leftTouchPos = {x: touch.clientX, y: touch.clientY}; 
-			this.leftVector = {x: 0, y: 0}; 
-			continue; 		
+			this.leftVector = {x: 0, y: 0};	
 		} 
-		else {	
-			// Button down event 
+		else if(this.rightTouchID < 0){	
+			// Button down event
+			this.rightTouchID = touch.identifier;
+			this.engine.buttonDown = true;
 		}	
 	}
 	this.touches = e.touches; 
@@ -68,7 +70,12 @@ touchController.prototype.onTouchMove = function(e) {
 		var touch = e.changedTouches[i]; 
 		if(this.leftTouchID === touch.identifier){
 			this.leftTouchPos = {x: touch.clientX, y: touch.clientY}; 
-			this.leftVector = {x: touch.clientX - this.leftTouchStartPos.x, y: touch.clientY - this.leftTouchStartPos.y}; 	
+			this.leftVector = {x: touch.clientX - this.leftTouchStartPos.x, y: touch.clientY - this.leftTouchStartPos.y};
+			this.engine.mousePosition = {
+				x: Math.floor(this.leftVector.x / 5),
+				y: Math.floor(this.leftVector.y / 5)
+			};
+			this.engine.absoluteController = false;
 			break; 		
 		}		
 	}
@@ -76,14 +83,19 @@ touchController.prototype.onTouchMove = function(e) {
 };
 
 touchController.prototype.onTouchEnd = function(e) { 
-	this.touches = e.touches; 
+	this.touches = e.touches;
 	for(var i = 0, l = e.changedTouches.length; i < l; i++){
 		var touch = e.changedTouches[i];
 		if(this.leftTouchID === touch.identifier){
 			this.leftTouchID = -1; 
-			this.leftVector = {x: 0, y: 0}; 
-			break; 		
-		}		
+			this.leftVector = {x: 0, y: 0};
+			this.engine.mousePosition = this.leftVector;
+			this.engine.absoluteController = false; 		
+		}
+		else if(this.rightTouchID === touch.identifier){
+			this.rightTouchID = -1;
+			this.engine.buttonDown = false;
+		}
 	}
 };
 

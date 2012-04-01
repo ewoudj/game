@@ -146,7 +146,7 @@ ship.prototype.updateControllerState = function(){
 		// This works the same for the server and the stand-alone modes.
 		if(this.engine.mode == 'standalone' || (this.name == "Player 1" && this.engine.player1)){
 			this.shoot = this.engine.buttonDown;
-			this.mousePosition = this.engine.mousePosition;
+			this.mousePosition = this.correctMousePosition( this.engine.mousePosition, this.engine.absoluteController );
 			
 		}
 		else if(this.name == "Player 2" && this.engine.player2){
@@ -165,6 +165,18 @@ ship.prototype.updateControllerState = function(){
 		}
 		this.mousePosition = controls.mousePosition;
 		this.shoot = controls.shoot;
+	}
+};
+
+ship.prototype.correctMousePosition = function(newPosition, absolute){
+	if(absolute){
+		return newPosition;
+	}
+	else {
+		return {
+			x: newPosition.x + this.position.x,
+			y: newPosition.y + this.position.y
+		};
 	}
 };
 

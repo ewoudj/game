@@ -76,6 +76,9 @@ engine.rendering.classic.renderer = function(){
 		var scalev = this.canvas.height / this.engine.height;
 		this.scale = (scaleh < scalev) ? scaleh : scalev;
 		this.offsetTop = Math.ceil((this.canvas.height - (this.engine.height * this.scale)) / 2);
+		if(this.engine.touchController.touchable && this.offsetTop > 40){
+			this.offsetTop = 40;
+		}
 		this.offsetLeft = Math.ceil((this.canvas.width - (this.engine.width * this.scale)) / 2);
 		this.context = this.canvas.getContext('2d');
 		for(var i = 0, l = this.engine.controllers.length; i < l; i++){
@@ -99,14 +102,20 @@ engine.rendering.classic.renderer = function(){
 	renderer.prototype.onmousemove = function(e){
 		if(this.suspended) return;
 		var evt = e || window.event;
-		this.engine.mousePosition.x = Math.ceil((evt.clientX - this.offsetLeft) / this.scale);
-		this.engine.mousePosition.y = Math.ceil((evt.clientY - this.offsetTop) / this.scale);
+		var newPosition = {
+			x: Math.ceil((evt.clientX - this.offsetLeft) / this.scale),
+			y: Math.ceil((evt.clientY - this.offsetTop) / this.scale)
+		};
+		if(!this.engine.touchController.touchable){
+			this.engine.mousePosition = newPosition;
+			this.engine.absoluteController = true;
+		}
 		var items = this.engine.entities;
 		this.mouseEntities = [];
 	    for(var i = 0, l = items.length; i < l; i++){
 	    	var item = items[i];
 	    	if(item.mousePlane){
-	    		item.mousePosition = this.engine.mousePosition;
+	    		item.mousePosition = newPosition;
 	    		this.mouseEntities.push(item);
 	    	}
 	    }
@@ -115,13 +124,17 @@ engine.rendering.classic.renderer = function(){
 	
 	renderer.prototype.onmousedown = function(){
 		if(this.suspended) return;
-		this.engine.buttonDown = true;
+		if(!this.engine.touchController.touchable){
+			this.engine.buttonDown = true;
+		}
 		this.notify('onmousedown', this.mouseEntities);
 	};
 	
 	renderer.prototype.onmouseup = function(){
 		if(this.suspended) return;
-		this.engine.buttonDown = false;
+		if(!this.engine.touchController.touchable){
+			this.engine.buttonDown = false;
+		}
 		this.notify('onmouseup', this.mouseEntities);
 	};
 	
