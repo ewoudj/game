@@ -45,6 +45,7 @@ engine.rendering.classic.renderer = function(){
 		this.canvas = document.createElement('canvas');
 		document.body.appendChild(this.canvas);
 		this.canvas.style.position = 'absolute';
+		this.canvas.style.backgroundColor = '#000';
 		this.canvas.onmousedown = this.onmousedown.bind(this);
 		this.canvas.onmouseup = this.onmouseup.bind(this);
 		window.onmousemove = this.onmousemove.bind(this);
