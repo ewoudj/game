@@ -139,7 +139,10 @@ engine.rendering.webgl.webglRenderer = function(){
 		var mouse_pos = new THREE.Vector2(e.clientX, e.clientY);
 		var ray = this.create_mouse_ray(mouse_pos);
 		this.worldMouse = this.planeIntersect(ray, 'z', 0);
-		this.engine.mousePosition = this.toGamePoint(this.worldMouse);
+		if(!this.engine.touchController.touchable){
+			this.engine.mousePosition = this.toGamePoint(this.worldMouse);
+			this.engine.absoluteController = true;
+		}
 	    this.mouseEntities = ray.intersectObjects(this.scene.children);
 	    var items = this.engine.entities;
 	    for(var i = 0, l = items.length; i < l; i++){
@@ -162,22 +165,26 @@ engine.rendering.webgl.webglRenderer = function(){
 	
 	webglRenderer.prototype.onmousedown = function(e){
 		if(this.suspended) return;
-		if(( e || window.event).button === 2){
-			this.engine.rightButtonDown = true;
-		}
-		else{
-			this.engine.buttonDown = true;
+		if(!this.engine.touchController.touchable){
+			if(( e || window.event).button === 2){
+				this.engine.rightButtonDown = true;
+			}
+			else{
+				this.engine.buttonDown = true;
+			}
 		}
 		this.notify('onmousedown', this.mouseEntities);
 	};
 	
 	webglRenderer.prototype.onmouseup = function(e){
 		if(this.suspended) return;
-		if(( e || window.event).button === 2){
-			this.engine.rightButtonDown = false;
-		}
-		else{
-			this.engine.buttonDown = false;
+			if(!this.engine.touchController.touchable){
+			if(( e || window.event).button === 2){
+				this.engine.rightButtonDown = false;
+			}
+			else{
+				this.engine.buttonDown = false;
+			}
 		}
 		this.notify('onmouseup', this.mouseEntities);
 	};
