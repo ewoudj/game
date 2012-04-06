@@ -120,6 +120,7 @@ menu.prototype.update = function(time){
 			this.select(this.texts[index]);
 		    if(this.engine.touchController.touchable){
 		    	this.onmouseup(this.texts[index], true);
+		    	this.ignoreNextButtonUp = true;
 		    }
 		}
 		else{
