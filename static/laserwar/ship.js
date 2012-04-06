@@ -189,9 +189,23 @@ ship.prototype.calculateMovement = function(currentPosition, mousePosition, spee
 	if(distance > speed){
 		f = speed / distance;
 	}
+	var newX = this.position.x + (deltaX * f);
+	var newY = this.position.y + (deltaY * f);
+	if(newX < 0){
+		newX = 0;
+	}
+	if(newX > this.engine.width){
+		newX = this.engine.width;
+	}
+	if(newY < 0){
+		newY = 0;
+	}
+	if(newY > this.engine.height){
+		newY = this.engine.height;
+	}
 	return {
-		x: this.position.x + (deltaX * f),
-		y: this.position.y + (deltaY * f)
+		x: newX,
+		y: newY
 	};
 };
 
