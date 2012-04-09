@@ -5,6 +5,7 @@ var touchController = function(config){
 	this.resize();
 	this.leftTouchID = -1;
 	this.rightTouchID = -1;
+	this.secondRightTouchID = -1;
 	this.leftTouchPos = {x: 0, y: 0};
 	this.leftTouchStartPos = {x: 0, y: 0};
 	this.leftVector = {x: 0, y: 0};
@@ -24,6 +25,7 @@ touchController.prototype.resize = function (e) {
 
 touchController.prototype.render = function(c) { // c is the canvas' context 2D
 	if(this.touchable) {
+		var circleColor = 'rgba(255,255,255,0.3)';
 		for(var i = 0, l = this.touches.length; i < l; i++){
 			var touch = this.touches[i];
 			var circleColor = 'rgba(255,255,255,0.3)';
@@ -60,6 +62,11 @@ touchController.prototype.onTouchStart = function(e) {
 			// Button down event
 			this.rightTouchID = touch.identifier;
 			this.engine.buttonDown = true;
+		}
+		else if(this.secondRightTouchID < 0){	
+			// Button down event
+			this.secondRightTouchID = touch.identifier;
+			this.engine.rightButtonDown = true;
 		}	
 	}
 	this.touches = e.touches; 
@@ -96,6 +103,10 @@ touchController.prototype.onTouchEnd = function(e) {
 		else if(this.rightTouchID === touch.identifier){
 			this.rightTouchID = -1;
 			this.engine.buttonDown = false;
+		}
+		else if(this.secondRightTouchID === touch.identifier){
+			this.secondRightTouchID = -1;
+			this.engine.rightButtonDown = false;
 		}
 	}
 };
