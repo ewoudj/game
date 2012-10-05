@@ -104,8 +104,8 @@ engine.rendering.classic.renderer = function(){
 		if(this.suspended) return;
 		var evt = e || window.event;
 		var newPosition = {
-			x: Math.ceil((evt.clientX - this.offsetLeft) / this.scale),
-			y: Math.ceil((evt.clientY - this.offsetTop) / this.scale)
+			x: ((evt.clientX - this.offsetLeft) / this.scale),
+			y: ((evt.clientY - this.offsetTop) / this.scale)
 		};
 		if(!this.engine.touchController.touchable){
 			this.engine.mousePosition = newPosition;
@@ -145,7 +145,7 @@ engine.rendering.classic.renderer = function(){
 			e.render();
 		}
 		if(e.classicModel) {
-			this.drawRects(helpers.ceilPoint({x: e.position.x, y: e.position.y}), e.classicModel, e.color, true);
+			this.drawRects({x: e.position.x, y: e.position.y}, e.classicModel, e.color, true);
 		}
 		if(e.texts){
 			for(var j = 0, l = e.texts.length; j < l; j++ ){
@@ -169,19 +169,19 @@ engine.rendering.classic.renderer = function(){
 		if(fill){
 			this.context.fillStyle = color;
 			this.context.fillRect(
-				Math.ceil((rect.x + offset.x) * this.scale) + this.offsetLeft ,
-				Math.ceil((rect.y + offset.y) * this.scale) + this.offsetTop  ,
-				Math.ceil(rect.w * this.scale) ,
-				Math.ceil(rect.h * this.scale) 
+				((rect.x + offset.x) * this.scale) + this.offsetLeft ,
+				((rect.y + offset.y) * this.scale) + this.offsetTop  ,
+				(rect.w * this.scale) ,
+				((rect.h + 2) * this.scale) 
 			);
 		}
 		else {
 			this.context.strokeStyle = color;
 			this.context.strokeRect(
-				Math.ceil((rect.x + offset.x) * this.scale) ,
-				Math.ceil((rect.y + offset.y) * this.scale) ,
-				Math.ceil(rect.w * this.scale) ,
-				Math.ceil(rect.h * this.scale) 
+				((rect.x + offset.x) * this.scale) ,
+				((rect.y + offset.y) * this.scale) ,
+				(rect.w * this.scale) ,
+				(rect.h * this.scale) 
 			);
 		}
 	};

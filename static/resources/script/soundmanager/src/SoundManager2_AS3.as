@@ -40,7 +40,7 @@ package {
 
   public class SoundManager2_AS3 extends Sprite {
 
-    public var version:String = "V2.97a.20120318";
+    public var version:String = "V2.97a.20120916";
     public var version_as:String = "(AS3/Flash 9)";
 
     /**
@@ -208,9 +208,10 @@ package {
           var d: Date = new Date();
           ExternalInterface.call(baseJSController + "._externalInterfaceOK", d.getTime(), version);
           flashDebug('Flash -&gt; JS OK');
+          flashDebug('Waiting for JS -&gt; Flash...');
         } else {
           writeDebug('SM2 SWF ' + version + ' ' + version_as);
-          flashDebug('JS -> Flash OK');
+          flashDebug('JS -&gt; Flash OK');
           ExternalInterface.call(baseJSController + "._setSandboxType", sandboxType);
           writeDebug('JS to/from Flash OK');
         }
@@ -416,7 +417,7 @@ package {
       isPlaying = (oSound.didLoad && !oSound.paused && (!oSound.useNetstream || (oSound.useNetstream && oSound.lastNetStatus != "NetStream.Play.Stop"))); // don't update if stream has ended
 
       // raw waveform + EQ spectrum data
-      if (isPlaying && oSoundChannel) { // || oSound.useNetstream)) {
+      if (isPlaying && (oSoundChannel || oSound.useNetstream)) {
 
         if (oSound.useWaveformData) {
           if (!areSoundsInaccessible && !oSound.handledDataError && !oSound.ignoreDataError) {
@@ -579,7 +580,7 @@ package {
       // a crossdomain.xml file would fix the problem easily
     }
 
-    public function _setPosition(sID:String, nSecOffset:Number, isPaused: Boolean) : void {
+    public function _setPosition(sID:String, nSecOffset:Number, isPaused: Boolean, allowMultiShot: Boolean) : void {
       var s: SoundManager2_SMSound_AS3 = soundObjects[sID];
       if (!s) return void;
       // writeDebug('_setPosition()');
@@ -591,7 +592,7 @@ package {
       if (s.useNetstream) {
         // Minimize the buffer so playback starts ASAP
         s.ns.bufferTime = s.bufferTime;
-        writeDebug('setPosition: setting buffer to '+s.ns.bufferTime+' secs');
+        writeDebug('setPosition ('+ sID + '): setting buffer to '+s.ns.bufferTime+' secs');
 
         nSecOffset = nSecOffset > 0 ? nSecOffset / 1000 : 0;
         s.ns.seek(nSecOffset);
@@ -600,13 +601,13 @@ package {
         if (s.soundChannel) {
           s.soundChannel.stop();
         }
-        writeDebug('setPosition: ' + nSecOffset); // +', '+(s.lastValues.loops?s.lastValues.loops:1));
+        writeDebug('setPosition ('+ sID + '): ' + nSecOffset); // +', '+(s.lastValues.loops?s.lastValues.loops:1));
         if (s.lastValues.loops > 1 && nSecOffset != 0) {
           writeDebug('Warning: Looping functionality being disabled due to Flash limitation.');
           s.lastValues.loops = 1;
         }
         try {
-          s.start(nSecOffset, s.lastValues.loops || 1); // start playing at new position
+          s.start(nSecOffset, s.lastValues.loops || 1, allowMultiShot); // start playing at new position
         } catch(e: Error) {
           writeDebug('Warning: Could not set position on ' + sID + ': ' + e.toString());
         }
@@ -821,10 +822,11 @@ package {
       }
     }
 
-    public function _start(sID:String, nLoops: int, nMsecOffset: int) : void {
+    public function _start(sID:String, nLoops: int, nMsecOffset: int, allowMultiShot: Boolean) : Boolean {
       var s: SoundManager2_SMSound_AS3 = soundObjects[sID];
-      if (!s) return void;
-      writeDebug('start: ' + nMsecOffset + (nLoops > 1 ? ', loops: ' + nLoops : ''));
+      var result: Boolean;
+      if (!s) return true;
+      writeDebug('start (' + sID + '): ' + nMsecOffset + (nLoops > 1 ? ', loops: ' + nLoops : ''));
       s.lastValues.paused = false; // reset pause if applicable
       s.lastValues.loops = (nLoops || 1);
       if (!s.useNetstream) {
@@ -832,7 +834,7 @@ package {
       }
       s.handledDataError = false; // reset this flag
       try {
-        s.start(nMsecOffset, nLoops);
+        result = s.start(nMsecOffset, nLoops, allowMultiShot);
       } catch(e: Error) {
         writeDebug('Could not start ' + sID + ': ' + e.toString());
       }
@@ -841,10 +843,11 @@ package {
       } catch(e: Error) {
         writeDebug('_start(): registerOnComplete failed');
       }
+      return result;
     }
 
-    public function _pause(sID:String) : void {
-      // writeDebug('_pause()');
+    public function _pause(sID:String, allowMultiShot: Boolean) : void {
+      // writeDebug('_pause(): ' + sID);
       var s: SoundManager2_SMSound_AS3 = soundObjects[sID];
       if (!s) return void;
       // writeDebug('s.paused: '+s.paused);
@@ -872,7 +875,7 @@ package {
         if (s.useNetstream) {
           s.ns.resume();
         } else {
-          s.start(s.lastValues.position, s.lastValues.loops);
+          s.start(s.lastValues.position, s.lastValues.loops, allowMultiShot);
         }
         try {
           registerOnComplete(sID);

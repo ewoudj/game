@@ -157,6 +157,7 @@ package {
             this.ns.bufferTime = this.bufferTime; // set to 0.1 or higher. 0 is reported to cause playback issues with static files.
             this.st = new SoundTransform();
             this.cc.onMetaData = this.metaDataHandler;
+            this.cc.setCaption = this.captionHandler;
             this.ns.client = this.cc;
             this.ns.receiveAudio(true);
             this.addNetstreamEvents();
@@ -243,7 +244,7 @@ package {
         // writeDebug('not loaded yet: '+this.ns.bytesLoaded+', '+this.ns.bytesTotal+', '+infoObject.duration*1000);
         // TODO: investigate loaded/total values
         // ExternalInterface.call(baseJSObject + "['" + this.sID + "']._whileloading", this.ns.bytesLoaded, this.ns.bytesTotal, infoObject.duration*1000);
-        ExternalInterface.call(baseJSObject + "['" + this.sID + "']._whileloading", this.bytesLoaded, this.bytesTotal, (infoObject.duration || this.duration))
+        ExternalInterface.call(baseJSObject + "['" + this.sID + "']._whileloading", this.bytesLoaded, this.bytesTotal, (this.duration || infoObject.duration))
       }
       var metaData:Array = [];
       var metaDataProps:Array = [];
@@ -258,6 +259,27 @@ package {
         // disconnect for non-RTMP cases, since multiple firings may mess up duration.
         this.cc.onMetaData = function(infoObject: Object) : void {}
       }
+    }
+
+    public function captionHandler(infoObject: Object) : void {
+
+      if (sm.debugEnabled) {
+        var data:String = new String();
+        for (var prop:* in infoObject) {
+          data += prop+': '+infoObject[prop]+' \n';
+        }
+        writeDebug('Caption: '+data);
+      }
+
+      // null this out for the duration of this object's existence.
+      // it may be called multiple times.
+      // this.cc.setCaption = function(infoObject: Object) : void {}
+    
+      // writeDebug('Caption\n'+infoObject['dynamicMetadata']);
+      // writeDebug('firing _oncaptiondata for '+this.sID);
+
+      ExternalInterface.call(this.sm.baseJSObject + "['" + this.sID + "']._oncaptiondata", infoObject['dynamicMetadata']);
+
     }
 
     public function getWaveformData() : void {
@@ -278,8 +300,10 @@ package {
       }
     }
 
-    public function start(nMsecOffset: int, nLoops: int) : void {
+    public function start(nMsecOffset: int, nLoops: int, allowMultiShot:Boolean) : Boolean {
+
       this.useEvents = true;
+
       if (this.useNetstream) {
 
         writeDebug("SMSound::start nMsecOffset "+ nMsecOffset+ ' nLoops '+nLoops + ' current bufferTime '+this.ns.bufferTime+' current bufferLength '+this.ns.bufferLength+ ' this.lastValues.position '+this.lastValues.position);
@@ -331,10 +355,25 @@ package {
 
       } else {
         // writeDebug('start: seeking to '+nMsecOffset+', '+nLoops+(nLoops==1?' loop':' loops'));
-        this.soundChannel = this.play(nMsecOffset, nLoops);
-        this.addEventListener(Event.SOUND_COMPLETE, _onfinish);
-        this.applyTransform();
+        if (!this.soundChannel || allowMultiShot) {
+          this.soundChannel = this.play(nMsecOffset, nLoops);
+          this.addEventListener(Event.SOUND_COMPLETE, _onfinish);
+          this.applyTransform();
+        } else {
+          // writeDebug('start: was already playing, no-multishot case. Seeking to '+nMsecOffset+', '+nLoops+(nLoops==1?' loop':' loops'));
+          // already playing and no multi-shot allowed, so re-start and set position
+          if (this.soundChannel) {
+            this.soundChannel.stop();
+          }
+          this.soundChannel = this.play(nMsecOffset, nLoops); // start playing at new position
+          this.addEventListener(Event.SOUND_COMPLETE, _onfinish);
+          this.applyTransform();
+        }
       }
+
+      // if soundChannel is null (and not a netStream), there is no sound card (or 32-channel ceiling has been hit.)
+      // http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/media/Sound.html#play%28%29
+      return (!this.useNetstream && this.soundChannel === null ? false : true);
 
     }
 
