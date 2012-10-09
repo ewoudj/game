@@ -25,20 +25,49 @@ touchController.prototype.resize = function (e) {
 
 touchController.prototype.render = function(c) { // c is the canvas' context 2D
 	if(this.touchable) {
-		var circleColor = 'rgba(255,255,255,0.3)';
+		var circleColor = 'rgba(255,255,255,0.18)';
+		var renderedStick = false;
+		var renderedButton = false;
 		for(var i = 0, l = this.touches.length; i < l; i++){
 			var touch = this.touches[i];
-			var circleColor = 'rgba(255,255,255,0.3)';
 			if(touch.identifier === this.leftTouchID){
-				this.drawCircle(c, circleColor, 6, this.leftTouchStartPos, 40);
+				this.drawCircle(c, circleColor, 6, this.leftTouchPos, 40);
 				this.drawCircle(c, circleColor, 2, this.leftTouchStartPos, 60);
-				this.drawCircle(c, circleColor, 2, this.leftTouchPos, 40); 
+				this.drawCircle(c, circleColor, 2, this.leftTouchStartPos, 40);
+				renderedStick = true;
 			} 
 			else {
 				this.drawCircle(c, circleColor, 6, {x: touch.clientX, y: touch.clientY}, 50);
+				renderedButton = true;
 			}
 		}
+		if(!renderedStick){
+			var position = {x: 70, y: window.innerHeight - 70};
+			this.drawCircle(c, circleColor, 6, position, 40);
+			this.drawCircle(c, circleColor, 2, position, 60);
+		}
+		if(!renderedButton){
+			this.drawCircle(c, circleColor, 6, {x: window.innerWidth - 70, y: window.innerHeight - 70}, 50);
+		}
+		this.drawCircle(c, circleColor, 3, {x: window.innerWidth - 20, y: 40}, 15);
+		this.drawLine(c, circleColor, 3, {x: window.innerWidth - 27, y: 35}, {x: window.innerWidth - 13, y: 35});
+		this.drawLine(c, circleColor, 3, {x: window.innerWidth - 27, y: 40}, {x: window.innerWidth - 13, y: 40});
+		this.drawLine(c, circleColor, 3, {x: window.innerWidth - 27, y: 45}, {x: window.innerWidth - 13, y: 45});
 	}
+};
+
+touchController.prototype.inMenuArea = function(touchX, touchY) {
+	return (touchX > (window.innerWidth - 45) && touchY < 55);
+};
+
+touchController.prototype.drawLine = function(c, color, lineWidth, start, end) { // c is the canvas' context 2D
+	c.beginPath(); 
+	c.strokeStyle = color; 
+	c.lineWidth = lineWidth; 
+    c.moveTo(start.x, start.y);
+    c.lineTo(end.x, end.y);
+    c.closePath();
+    c.stroke(); 
 };
 
 touchController.prototype.drawCircle = function(c, color, lineWidth, center, radius) { // c is the canvas' context 2D
@@ -57,16 +86,16 @@ touchController.prototype.onTouchStart = function(e) {
 			this.leftTouchStartPos = {x: touch.clientX, y: touch.clientY}; 	
 			this.leftTouchPos = {x: touch.clientX, y: touch.clientY}; 
 			this.leftVector = {x: 0, y: 0};	
-		} 
+		}
+		else if(this.inMenuArea(touch.clientX, touch.clientY)){	
+			// Button down event
+			this.secondRightTouchID = touch.identifier;
+			this.engine.rightButtonDown = true;
+		}
 		else if(this.rightTouchID < 0){	
 			// Button down event
 			this.rightTouchID = touch.identifier;
 			this.engine.buttonDown = true;
-		}
-		else if(this.secondRightTouchID < 0){	
-			// Button down event
-			this.secondRightTouchID = touch.identifier;
-			this.engine.rightButtonDown = true;
 		}	
 	}
 	this.touches = e.touches; 
@@ -104,7 +133,7 @@ touchController.prototype.onTouchEnd = function(e) {
 			this.rightTouchID = -1;
 			this.engine.buttonDown = false;
 		}
-		else if(this.secondRightTouchID === touch.identifier){
+		else if(this.secondRightTouchID === touch.identifier && this.inMenuArea(touch.clientX, touch.clientY)){
 			this.secondRightTouchID = -1;
 			this.engine.rightButtonDown = false;
 		}
