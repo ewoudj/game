@@ -12,7 +12,6 @@ var engine = function(config){
 		height : 600,
 		pageColor : '#555',
 		canvasColor : '#000',
-		crosshair : true,
 		playerCount : 0
 	}, this);
 	helpers.apply(config, this);
@@ -45,13 +44,13 @@ var engine = function(config){
 		// http://paulirish.com/2011/requestanimationframe-for-smart-animating/
 		if ( !window.requestAnimationFrame ) {
 			window.requestAnimationFrame = ( function() {
-				return window.webkitRequestAnimationFrame ||
+				return (window.webkitRequestAnimationFrame ||
 				window.mozRequestAnimationFrame ||
 				window.oRequestAnimationFrame ||
 				window.msRequestAnimationFrame ||
 				function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element ) {
 					window.setTimeout( callback, 1000 / 60 );
-				};
+				});
 			})();
 		}
 		this.initializeControllers();
@@ -78,12 +77,18 @@ engine.prototype.initializeControllers = function(){
 };
 
 engine.prototype.serverUpdateLoop = function(){
-	setTimeout( this.serverUpdateLoop.bind(this), 1000 / 50 );
+	var self = this;
+	setTimeout( function() {
+		self.serverUpdateLoop();
+	}, 1000 / 50 );
 	this.update();
 };
 
 engine.prototype.animate = function(){
-	requestAnimationFrame(this.animate.bind(this));
+	var self = this;
+	requestAnimationFrame(function(){
+		self.animate();
+	});
 	this.update();
 	// If the renderer is configured incorrectly fall back to classic
 	if(!engine.rendering[engine.renderer]){
@@ -126,7 +131,6 @@ engine.prototype.calculateCollisions = function(){
 		var e1 = this.entities[i];
 		e1.collisions = [];
 		for(var j = 0; j < l; j++){
-			var e2 = this.entities[j];
 			var e2 = this.entities[j];
 			if(e1 != e2 && e1.collidesWith(e2)){
 				e1.collisions.push(e2);
@@ -277,7 +281,6 @@ engine.prototype.processRemoteData = function(){
 		this.lastServerTimedate = dataFromServer[0];
 		offset++;
 		var l = dataFromServer.length;
-		var i = 0;
 		while(offset < l){
 			var e = null;
 			// For each entity, the first array item contains it's id  
