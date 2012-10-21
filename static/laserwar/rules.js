@@ -142,7 +142,8 @@ var rules = function(config){
 	this.name = 'rules';
 	this.barHeight = 30;
 	if(this.engine.mode !== 'server'){
-		var uphandler = this.keyboardHandler.bind(this);
+		var self = this;
+		var uphandler = function(){self.keyboardHandler();};
 		if(document.addEventListener) { // Opera - Firefox - Google Chrome
 			document.addEventListener("keyup", uphandler, false);
 		}
@@ -266,7 +267,7 @@ rules.prototype.ensureUserRespawn = function(ship, mousePosition, buttonDown, pl
 	var result = ship;
 	if(ship && ship.finished){
 		var position = { x: mousePosition.x, y : mousePosition.y };
-		var playerstar;
+		var playerstar = null;
 		// If the player is a computer (AI) help it start a new ship.
 		// This should be replaced by the AI doing a proper mouseposition and button click
 		if(ship.type === 'computer' || this.engine.touchController.touchable){
@@ -439,7 +440,7 @@ rules.prototype.toggleSettings = function () {
 };
 
 rules.prototype.keyboardHandler = function (evt) {
-	var evt = evt || window.event;
+	evt = evt || window.event;
 	var keyCode = evt.keyCode || evt.which;
     // 1: Restart game single player mode, standalone (all runs on the client)
     if (keyCode == 49) {
