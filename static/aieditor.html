@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Editor</title>
+    <script src="resources/script/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+    <style>
+        html {
+            height: 100%;
+            overflow: hidden;
+        }
+        body{
+            height: 100%;
+            overflow: hidden;
+            margin: 0px;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#c0c0c0), color-stop(100%,#a0a0a0));
+            font-size: 11px;
+            font-family: "Helvetica Neue";
+        }
+        ul.toolbar{
+            margin: 0px;
+            padding: 3px 0px 3px 3px;
+            display: block;
+            width: 100%;
+            background-color: #f8f8f8;
+            background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f0f0f0), color-stop(100%,#c5c5c5));
+            border-bottom: 1px solid #a0a0a0;
+            list-style-type: none;
+        }
+        ul.toolbar li{
+            display: inline-block;
+            border: 1px solid #a0a0a0;
+            border-radius: 4px;
+            padding: 4px 8px 4px 8px;
+            margin: 2px 1px 2px 0px;
+            background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#c5c5c5));
+        }
+        ul.toolbar li:hover{
+            background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#d5d5d5));
+        }
+
+        #maineditor{
+            position: absolute;
+            left: 0px;
+            top: 33px;
+            width: 400px;
+            height: 800px;
+            margin: 0px;
+            font-family: monospace;
+            font-size: 12px;
+            resize: none;
+            border-width: 0px 1px 0px 0px;
+            border-style: solid;
+            border-color: #a0a0a0;
+            outline: none;
+            overflow: scroll;
+            white-space:nowrap;
+        }
+
+        #shim{
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            height: 100%;
+            z-index: 10000;
+            display: none;
+            cursor: ew-resize!important;
+        }
+
+        #gameframe{
+            position: absolute;
+            left: 400px;
+            top: 33px;
+            width: 400px;
+            height: 800px;
+            margin: 0px;
+            border: 0px;
+            vertical-align: top;
+        }
+
+        .resizable:hover{
+            cursor: ew-resize;
+        }
+    </style>
+    <script>
+        function init(){
+            var editorEl = document.getElementById("maineditor");
+            var gameEl = document.getElementById("gameframe");
+            var shim = document.getElementById("shim");
+            var percentage = 50;
+            var resizing = false;
+            var resizeHandler = function(){
+                editorEl.style.height = (document.body.clientHeight - (editorEl.offsetTop)) + "px";
+                editorEl.style.width = Math.ceil((document.body.clientWidth / 100) * percentage) + "px";
+                gameEl.style.height = (document.body.clientHeight - (gameEl.offsetTop)) + "px";
+                gameEl.style.left = (editorEl.offsetWidth) + "px";
+                gameEl.style.width = document.body.clientWidth - (editorEl.offsetWidth) + "px";
+            };
+            window.onresize = resizeHandler;
+            resizeHandler();
+//            document.onmousemove = function(e){
+//                var evt = e || window.event;
+//                if(evt.clientX >= (editorEl.offsetWidth - 3)){
+//                    editorEl.className = "resizable";
+//                }
+//                else {
+//                    editorEl.className = "";
+//                }
+//            };
+//            shim.onmousemove = function(e){
+//                var evt = e || window.event;
+//                if(resizing){
+//                    var newPercentage = evt.clientX / (document.body.clientWidth / 100);
+//                    if(percentage !== newPercentage){
+//                        percentage = newPercentage;
+//                        resizeHandler();
+//                    }
+//                }
+//            };
+//            editorEl.onmousedown = function(){
+//                resizing = (editorEl.className == "resizable");
+//                shim.style.display = "block";
+//            };
+//            shim.onmouseup = function(){
+//                resizing = false;
+//                shim.style.display = "none";
+//            };
+            var editor = ace.edit("maineditor");
+            editor.setTheme("ace/theme/xcode");
+            editor.getSession().setMode("ace/mode/javascript");
+        }
+    </script>
+</head>
+<body onload="init();">
+<div id="shim"></div>
+<ul class="toolbar">
+    <li>New</li>
+    <li>Open</li>
+    <li>Save</li>
+    <li>Run</li>
+    <li>Help</li>
+</ul>
+<div id="maineditor"></div>
+<iframe id="gameframe" src="game.html"></iframe>
+</body>
+</html>
