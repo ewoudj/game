@@ -63,22 +63,3 @@ var helpers = {
 if(typeof(exports) !== 'undefined'){
 	exports.helpers = helpers;
 }
-
-Function.prototype.bind = function() {
-    var __method = this, args = $A(arguments), object = args.shift();
-    return function() {
-      return __method.apply(object, args.concat($A(arguments)));
-    };
-};
-
-function $A(iterable) {
-  if (!iterable) return [];
-  if (iterable.toArray) {
-    return iterable.toArray();
-  } else {
-    var results = [];
-    for (var i = 0, length = iterable.length; i < length; i++)
-      results.push(iterable[i]);
-    return results;
-  }
-}
