@@ -9,9 +9,7 @@ if(typeof(require) !== 'undefined'){
 
 engine.ai.prioritizing = function(){
 	var myStars = 0;
-	var maxDistance = Math.sqrt(Math.pow(this.engine.width,2) + Math.pow(this.engine.width,2));
 	var highestValue = 0;
-	var mousePosition = null;
 	this.shoot = false;
 	var shootable = false;
 	if(!this.responseDelay){
@@ -64,21 +62,17 @@ engine.ai.prioritizing = function(){
 			if( avoidCollision ){
 				value = 100;
 			}
-			var f = maxDistance / distance;
-			//value = value + (2 * f);
 			if(value > highestValue){
 				highestValue = value;
-				//if(this.responseDelay == 0){
-					this.responseDelay = 1;
-					this.mousePosition = {
-						x: this.engine.entities[i].position.x + 110,
-						y: this.engine.entities[i].position.y
-					};
-					if(avoidCollision){
-						this.mousePosition.x = (this.mousePosition.x - this.position.x) * -100000;
-						this.mousePosition.y = (this.mousePosition.y - this.position.y) * -100000;
-					}
-				//}
+				this.responseDelay = 1;
+				this.mousePosition = {
+					x: this.engine.entities[i].position.x + 110,
+					y: this.engine.entities[i].position.y
+				};
+				if(avoidCollision){
+					this.mousePosition.x = (this.mousePosition.x - this.position.x) * -100000;
+					this.mousePosition.y = (this.mousePosition.y - this.position.y) * -100000;
+				}
 				var deltay = Math.abs(this.position.y - this.engine.entities[i].position.y);
 				if(shootable && deltay < 30){
 					this.shoot = shootable;
