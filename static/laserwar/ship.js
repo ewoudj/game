@@ -220,6 +220,7 @@ ship.prototype.render = function(){
 };
 
 ship.prototype.getRemoteData = function(){
+	var result = null;
 	if(this.mousePosition){
 		var mouseX = Math.ceil(this.mousePosition.x);
 		var mouseY = Math.ceil(this.mousePosition.y);
@@ -228,7 +229,7 @@ ship.prototype.getRemoteData = function(){
 				x: mouseX,
 				y: mouseY
 			};
-			var result = "0," + Math.ceil(this.position.x) + "," +
+			result = "0," + Math.ceil(this.position.x) + "," +
 			              Math.ceil(this.position.y) + "," +
 			              this.colorIndex + "," + 
 		        		  mouseX + "," +
