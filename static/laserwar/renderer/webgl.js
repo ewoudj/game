@@ -218,7 +218,7 @@ engine.rendering.webgl.webglRenderer = function(){
 		var vector = ray.direction;
 		if(vector[plane]){
 			var time = (planeOffset - start[plane]) / vector[plane];
-			var result = {
+			result = {
 				x: start.x + (vector.x * time),
 				y: start.y + (vector.y * time),
 				z: start.z + (vector.z * time)
