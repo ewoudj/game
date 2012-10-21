@@ -15,7 +15,8 @@
   "engines": { "node": ">= 0.4.1" },
   "dependencies": {
   	"socket.io": "*",
-  	"connect": "1.x.x"
+  	"connect": "1.x.x",
+    "authom": "*"
   },
   "licenses" : [ { "type" : "MIT"
     , "url" : "http://github.com/ewoudj/game/raw/master/LICENSE"
