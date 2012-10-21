@@ -4,8 +4,7 @@ var menu = function (config) {
         selectedColor: '#FFF',
         mousePlaneOffset: 250,
         mousePlane: 'z',
-        topMost: true,
-        onmouseup: this.onmouseup.bind(this)
+        topMost: true
     }, this);
     helpers.apply(config, this);
     this.setItems(this.mainMenu);
