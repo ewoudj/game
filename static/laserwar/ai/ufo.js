@@ -8,8 +8,6 @@ if(typeof(require) !== 'undefined'){
 
 engine.ai.ufo = function(){
 	var previousPosition = this.position;
-	var shoot = false;
-
 	// AI
 	// Priority 1: staying alive
 	// Avoid collisions
