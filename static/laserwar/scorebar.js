@@ -6,7 +6,9 @@ var scorebar = function(config){
 	helpers.apply(config, this);
 	this.name = 'scorebar';
 	if(this.engine.mode == 'standalone' || this.engine.mode == 'client'){
-		this.geometry = new THREE.CubeGeometry(1, (50 * 2.5 / 12), ((this.engine.width - 30) * 2.5) / 12);
+		if(window.THREE){
+			this.geometry = new THREE.CubeGeometry(1, (50 * 2.5 / 12), ((this.engine.width - 30) * 2.5) / 12);
+		}
 	}
 	this.position = {
 		x: this.engine.width / 2 , 
