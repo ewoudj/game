@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Log in to continue...</title>
+        <style>
+            html{
+                height: 100%;
+            }
+            body{
+                text-align: center;
+                height: 100%;
+                font-family: "Helvetica Neue";
+                font-size: 14px;
+                background-color: #f5f5f5;
+            }
+            .title {
+                font-size: 24px;
+            }
+            .provider, .provider a {
+                display: inline-block;
+                color: black!important;
+                text-decoration: none!important;
+            }
+            img{
+                display: inline-block;
+                clear: both;
+                margin: 20px;
+            }
+        </style>
+        <script>
+            function resizeHandler(){
+                var div = document.getElementById("maincontainer");
+                div.style.marginTop = Math.floor((window.document.body.offsetHeight - div.offsetHeight) / 2.5) + 'px';
+            }
+            window.onresize = resizeHandler;
+        </script>
+    </head>
+    <body onload="resizeHandler()">
+        <div id="maincontainer">
+            <p class="title">Please log in using:</p>
+            <div class="provider"><a href='/auth/github'><img src="../resources/images/github.png"/><br>Github</a></div>
+            <div class="provider"><a href='/auth/google'><img src="../resources/images/google.png"/><br>Google</a></div>
+            <div class="provider"><a href='/auth/twitter'><img src="../resources/images/twitter.png"/><br>Twitter</a></div>
+        </div>
+    </body>
+</html>

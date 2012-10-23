@@ -1,47 +1,38 @@
-var UglifyJS = require("./static/resources/script/uglifyjs2/tools/node");
 var connect = require('connect');
 var socketio = require('socket.io');
 var engine = require("./static/laserwar/engine").engine;
 var rules = require("./static/laserwar/rules").rules;
-var fs = require('fs');
-
-var clientSet = [
-    "./static/laserwar/audio.js",
-    "./static/laserwar/helpers.js",
-    "./static/laserwar/entity.js",
-    "./static/laserwar/explosion.js",
-    "./static/laserwar/ship.js",
-    "./static/laserwar/ufo.js",
-    "./static/laserwar/star.js",
-    "./static/laserwar/laserbeam.js",
-    "./static/laserwar/scorebar.js",
-    "./static/laserwar/rules.js",
-    "./static/laserwar/engine.js",
-    "./static/laserwar/settings.js",
-    "./static/laserwar/menu.js",
-    "./static/laserwar/ai/prioritizing.js",
-    "./static/laserwar/ai/heuristic.js",
-    "./static/laserwar/ai/ufo.js",
-    "./static/laserwar/renderer/canvas.js",
-    "./static/laserwar/controller/touch.js",
-    "./static/laserwar/controller/mouse.js"
-];
-
-var webGlSet = [
-    "./static/resources/script/Three.js",
-    "./static/resources/fonts/cbm-64_normal.typeface.js",
-    "./static/laserwar/renderer/webgl.js"
-];
-
-var fullClientSet = clientSet.concat(webGlSet);
-var result = UglifyJS.minify(clientSet);
-fs.writeFileSync('./static/all.js', result.code);
+var questions = Buffer(
+    "<html>" +
+        "<body style='font: 300% sans-serif'>" +
+            "<div><a href='/auth/github'>Who am I on Github?</a></div>" +
+            "<div><a href='/auth/google'>Who am I on Google?</a></div>" +
+            "<div><a href='/auth/twitter'>Who am I on Twitter?</a></div>" +
+        "</body>" +
+    "</html>"
+);
 
 var server = connect()
-//	.use(function(req, res, next){
-//		console.log(req.originalUrl);
-//		next();
-//	})
+	.use(function(req, res, next){
+		console.log(req.originalUrl);
+		next();
+	})
+    .use(connect.cookieParser())
+    .use(connect.session({ secret: 'keyboard cat', cookie: { maxAge: 60000 }}))
+    .use(function(req, res, next){
+        if(req.originalUrl.indexOf("/editor/") == 0 && !req.session.hasIndentity){
+//            res.writeHead(200, {
+//                "Content-Type": "text/html",
+//                "Content-Length": questions.length
+//            });
+//            res.end(questions);
+            req.url = req.originalUrl = "/editor/signin.html";
+            next();
+        }
+        else {
+            next();
+        }
+    })
 	.use(connect.static(__dirname + '/static')
 );
 server.listen(8001);
