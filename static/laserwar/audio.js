@@ -103,7 +103,7 @@ function initSound(url){
 	return result;
 }
 
-audio.explosionAudio 	= initSound('resources/audio/effects/explosion.mp3');
-audio.appearAudio 		= initSound('resources/audio/effects/appear.mp3');
-audio.changeColorAudio	= initSound('resources/audio/effects/changecolor.mp3');
-audio.laserAudio 		= initSound('resources/audio/effects/laser.mp3');
+audio.explosionAudio 	= initSound('/resources/audio/effects/explosion.mp3');
+audio.appearAudio 		= initSound('/resources/audio/effects/appear.mp3');
+audio.changeColorAudio	= initSound('/resources/audio/effects/changecolor.mp3');
+audio.laserAudio 		= initSound('/resources/audio/effects/laser.mp3');
