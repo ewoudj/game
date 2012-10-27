@@ -20,7 +20,7 @@
         }
         ul.toolbar{
             margin: 0px;
-            padding: 3px 0px 3px 3px;
+            padding: 3px 3px 3px 3px;
             display: block;
             width: 100%;
             background-color: #f8f8f8;
@@ -80,12 +80,23 @@
             vertical-align: top;
         }
 
+        .alignright{
+            float: right;
+            margin-right: 10px!important;
+        }
+
         .resizable:hover{
             cursor: ew-resize;
         }
     </style>
+    <script src="/editor/behaviour.js"></script>
     <script>
         function init(){
+            editorbehaviour.getUserDetails(function(err, result){
+                //alert(result.name);
+                var userButton = document.getElementById('userButton');
+                userButton.innerHTML = result.name;
+            });
             var editorEl = document.getElementById("maineditor");
             var gameEl = document.getElementById("gameframe");
             var shim = document.getElementById("shim");
@@ -141,6 +152,7 @@
     <li>Save</li>
     <li>Run</li>
     <li>Help</li>
+    <li id="userButton" class="alignright">Sign in</li>
 </ul>
 <div id="maineditor"></div>
 <iframe id="gameframe" src="../game.html"></iframe>
