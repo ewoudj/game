@@ -1,5 +1,6 @@
 var config = {
     debug: true,
+    mountPoint: "",
     debugUser: {
         "token": "1234567890abcdef",
         "secret": "1234567890abcdef",
