@@ -21,9 +21,9 @@ var server = connect()
         }
 		next();
 	})
-    .use(authentication('/auth', config.mountPoint || "", config.identityProviders))
     .use(connect.cookieParser())
     .use(connect.session({ secret: 'keyboard cat', cookie: { maxAge: 60000 }}))
+    .use(authentication('/auth', config.mountPoint || "", config.identityProviders))
     .use(connect.bodyParser())
     .use(function(req, res, next){
         if(config.debug && !req.session.hasIndentity){
