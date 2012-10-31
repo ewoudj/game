@@ -45,7 +45,6 @@ var server = connect()
             callback(null, {name: this.session.identity.data.name || this.session.identity.data.screen_name});
         }
     }}))
-    .use(connect.staticCache())
 	.use(connect.static(__dirname + '/static')
 );
 
