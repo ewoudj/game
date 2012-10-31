@@ -45,8 +45,10 @@ var server = connect()
             callback(null, {name: this.session.identity.data.name || this.session.identity.data.screen_name});
         }
     }}))
+    .use(connect.staticCache())
 	.use(connect.static(__dirname + '/static')
 );
 
+console.log('Game server listening at port 8001');
 server.listen(8001);
 
