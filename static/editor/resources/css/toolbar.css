@@ -1,0 +1,27 @@
+.controlToolbar{
+    padding: 3px 3px 1px 3px;
+    background-color: #f8f8f8;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f0f0f0), color-stop(100%,#c5c5c5));
+    border-bottom: 1px solid #a0a0a0;
+    cursor: default;
+}
+
+.controlToolbar .controlButton{
+    background: transparent;
+    border: 1px solid transparent;
+    min-width: 0px;
+    text-align: right;
+    margin: 0px 0px 0px 0px;
+}
+
+.controlToolbar .controlButton:hover{
+    border: 1px solid #a0a0a0;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f0f0f0), color-stop(100%,#d5d5d5));
+    cursor: pointer;
+}
+
+.controlToolbar .controlButton:active, .controlToolbar .controlButtonSelected{
+    border: 1px solid #808080;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#d0d0d0), color-stop(100%,#b5b5b5))!important;
+    cursor: pointer;
+}

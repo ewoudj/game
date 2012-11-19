@@ -1,0 +1,17 @@
+.controlDialog {
+    display: block;
+    z-index: 100;
+    top: 150px;
+    left: 150px;
+    width: 500px;
+    height: 350px;
+    position: absolute;
+    background-color: #f0f0f0;
+    border: 1px solid rgba(0,0,0,0.3);
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+    padding: 5px 0px 5px 0px;
+    -webkit-box-shadow: 0px 5px 15px rgba(0,0,0,0.5);
+}

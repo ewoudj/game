@@ -1,0 +1,33 @@
+.bNew {
+    background-image: url(../images/new.png);
+}
+
+.bSave {
+    background-image: url(../images/save.png);
+}
+
+.bOpen {
+    background-image: url(../images/folder.png);
+}
+
+.bHelp {
+    background-image: url(../images/help.png);
+}
+
+.bSignIn {
+    background-image: url(../images/user.png);
+}
+
+.bSignOut {
+    background-image: url(../images/lock.png);
+}
+
+.bPreferences {
+    background-image: url(../images/application_form.png);
+}
+
+/* App specific*/
+
+.bNewScript {
+    background-image: url(../images/script_add.png);
+}

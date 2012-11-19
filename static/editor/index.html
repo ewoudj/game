@@ -1,160 +1,276 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AI Editor</title>
-    <script src="../resources/script/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+    <title>Editor</title>
+    <link rel="stylesheet" href="resources/css/button.css">
+    <link rel="stylesheet" href="resources/css/toolbar.css">
+    <link rel="stylesheet" href="resources/css/editor.css">
+    <link rel="stylesheet" href="resources/css/menu.css">
+    <link rel="stylesheet" href="resources/css/separator.css">
+    <link rel="stylesheet" href="resources/css/dialog.css">
+    <link rel="stylesheet" href="resources/css/grid.css">
     <style>
         html {
             height: 100%;
             overflow: hidden;
         }
+
         body{
+            overflow: hidden;
+            margin: 0px;
             height: 100%;
+            font-size: 12px;
+            font-family: "Lucida Grande";
+        }
+
+        .controlPanel, .controlWorkbench {
             overflow: hidden;
             margin: 0px;
             background-repeat: no-repeat;
             background-attachment: fixed;
             background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#c0c0c0), color-stop(100%,#a0a0a0));
-            font-size: 11px;
-            font-family: "Helvetica Neue";
-        }
-        ul.toolbar{
-            margin: 0px;
-            padding: 3px 3px 3px 3px;
-            display: block;
-            width: 100%;
-            background-color: #f8f8f8;
-            background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f0f0f0), color-stop(100%,#c5c5c5));
-            border-bottom: 1px solid #a0a0a0;
-            list-style-type: none;
-        }
-        ul.toolbar li{
-            display: inline-block;
-            border: 1px solid #a0a0a0;
-            border-radius: 4px;
-            padding: 4px 8px 4px 8px;
-            margin: 2px 1px 2px 0px;
-            background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#c5c5c5));
-        }
-        ul.toolbar li:hover{
-            background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#d5d5d5));
         }
 
-        #maineditor{
-            position: absolute;
-            left: 0px;
-            top: 33px;
-            width: 400px;
-            height: 800px;
-            margin: 0px;
-            font-family: monospace;
-            font-size: 12px;
-            resize: none;
-            border-width: 0px 1px 0px 0px;
-            border-style: solid;
-            border-color: #a0a0a0;
-            outline: none;
-            overflow: scroll;
-            white-space:nowrap;
-        }
-
-        #shim{
-            position: absolute;
-            top: 0px;
-            left: 0px;
-            width: 100%;
+        .controlWorkbench{
             height: 100%;
-            z-index: 10000;
-            display: none;
-            cursor: ew-resize!important;
         }
 
-        #gameframe{
-            position: absolute;
-            left: 400px;
-            top: 33px;
-            width: 400px;
-            height: 800px;
+        .controlEditor{
+            background-color: #ffffff;
+        }
+
+        .controlTitle{
+            text-align: center;
+            padding: 3px 3px 3px 3px;
+            background-color: #f0f0f0;
+            font-size: 13px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            border-bottom: 1px solid #a0a0a0;
+        }
+
+        .controlGame, .controlGame iframe{
             margin: 0px;
             border: 0px;
-            vertical-align: top;
+            vertical-align: middle;
+            background-color: #000;
+        }
+
+        .controlGame iframe{
+            height: 100%;
         }
 
         .alignright{
             float: right;
-            margin-right: 10px!important;
         }
 
-        .resizable:hover{
-            cursor: ew-resize;
+        .controlHidden{
+            display: none;
         }
+
+        .disabled, .disabled:hover, .disabled:active{
+            filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#grayscale"); /* Firefox 10+, Firefox on Android */
+            filter: gray; /* IE6-9 */
+            -webkit-filter: grayscale(100%); /* Chrome 19+, Safari 6+, Safari 6+ iOS */
+            color: #888;
+            background: transparent!important;
+            border: 1px solid transparent;
+        }
+
+        .leftPanel{
+            background-color: #d0d0d0;
+            border-right: 1px solid #a0a0a0;
+        }
+
+        .rightPanel{
+            background-color: #f0f0f0;
+            border-left: 1px solid #a0a0a0;
+        }
+
+        .bottomPanel{
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-top: 1px solid #a0a0a0;
+        }
+
+        .centerPanel{
+            background-color: #fff;
+        }
+
     </style>
+    <script src="../resources/script/ace/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="behaviour.js"></script>
+    <script src="controls/async.js"></script>
+    <script src="controls/control.js"></script>
+    <script src="controls/panel.js"></script>
+    <script src="controls/button.js"></script>
+    <script src="controls/toolbar.js"></script>
+    <script src="controls/editor.js"></script>
+    <script src="controls/game.js"></script>
+    <script src="controls/menu.js"></script>
+    <script src="controls/separator.js"></script>
+    <script src="controls/text.js"></script>
+    <script src="controls/dialog.js"></script>
+    <script src="controls/grid.js"></script>
     <script>
         function init(){
-            editorbehaviour.getUserDetails(function(err, result){
-                //alert(result.name);
-                var userButton = document.getElementById('userButton');
-                userButton.innerHTML = result.name;
+            document.onselectstart = function() {return false;};
+            new control.registry.panel({
+                parentEl: document.body,
+                cls: 'controlWorkbench',
+                title: 'untitled.js',
+                topBar: [{
+                    text: 'File',
+                    iconCls: 'bNew',
+                    menu: [{
+                        text: 'New',
+                        menu: [{
+                            text: 'Game AI',
+                            iconCls: 'bNewScript',
+                            listeners: {
+                                click: function(){
+                                    if(!window.testDialog){
+                                        new control.registry.dialog({
+                                            title: 'New Game AI'
+                                        }, function(err, dialog){
+                                            window.testDialog = dialog;
+                                            dialog.show();
+                                        } );
+                                    }
+                                    else{
+                                        window.testDialog.show();
+                                    }
+                                }
+                            }
+                        }]
+                    }, '-',{
+                        text: 'Open...',
+                        iconCls: 'bOpen'
+                    }, '-', {
+                        text: 'Save',
+                        iconCls: 'bSave'
+                    },{
+                        text: 'Save As...'
+                    }]
+                }, {
+                    //text: 'Help',
+                    name: 'helpButton',
+                    iconCls: 'bHelp',
+                    menu: [{
+                        text: 'Preferences',
+                        iconCls: 'bPreferences',
+                        menu: [{
+                            text: 'Editor settings',
+                            iconCls: 'bPreferences'
+                        }, {
+                            text: 'Account settings',
+                            iconCls: 'bPreferences',
+                            menu: [{
+                                text: 'Editor settings',
+                                iconCls: 'bPreferences'
+                            }, {
+                                text: 'Account settings',
+                                iconCls: 'bPreferences'
+                            }]
+                        }]
+                    }, {
+                        controlType: 'separator'
+                    }, {
+                        text: 'Sign out',
+                        iconCls: 'bSignOut'
+                    }]
+                }, {
+                    text: 'Sign in',
+                    name: 'signInButton',
+                    iconCls: 'bSignIn',
+                    align: 'right',
+                    menu: [{
+                        text: 'Preferences',
+                        iconCls: 'bPreferences',
+                        menu: [{
+                            text: 'Editor settings',
+                            iconCls: 'bPreferences'
+                        }, {
+                            text: 'Account very long name',
+                            iconCls: 'bPreferences',
+                            menu: [{
+                                text: 'Editor settings',
+                                iconCls: 'bPreferences'
+                            }, {
+                                text: 'Account settings',
+                                iconCls: 'bPreferences'
+                            }]
+                        }, {
+                            text: 'Account short',
+                            iconCls: 'bPreferences',
+                            menu: [{
+                                text: 'Editor settings',
+                                iconCls: 'bPreferences'
+                            }, {
+                                text: 'Account settings',
+                                iconCls: 'bPreferences'
+                            }]
+                        }]
+                    }, {
+                        controlType: 'separator'
+                    }, {
+                        text: 'Sign out',
+                        iconCls: 'bSignOut'
+                    }]
+                }],
+                items: [{
+                    controlType: 'editor',
+                    dock: 'center'
+                } , {
+                    controlType: 'game',
+                    dock: 'right',
+                    split: true,
+                    width: 300
+                }]
+            }, function(err, workbench){
+                editorbehaviour.getUserDetails(function(err, userDetails){
+                    workbench.topBar.signInButton.setText( userDetails.name );
+                    new control.registry.dialog({
+                        title: 'New Game AI',
+                        items: [{
+                            dock: 'left',
+                            width: 50,
+                            cls: 'leftPanel',
+                            resizable: true
+                        }, {
+                            controlType: 'grid',
+                            dock: 'center',
+                            cls: 'centerPanel'
+                        }, {
+                            dock: 'right',
+                            width: 50,
+                            cls: 'rightPanel',
+                            resizable: true
+
+                        }, {
+                            dock: 'bottom',
+                            resizable: true,
+                            height: 24,
+                            cls: 'bottomPanel',
+                            items: [{
+                                controlType: 'button',
+                                text: 'OK',
+                                align: 'right'
+                            }, {
+                                controlType: 'button',
+                                text: 'Cancel',
+                                align: 'right'
+                            }]
+                        }]
+                    }, function(err, dialog){
+                        window.testDialog = dialog;
+                        dialog.show();
+                    } );
+                });
             });
-            var editorEl = document.getElementById("maineditor");
-            var gameEl = document.getElementById("gameframe");
-            var shim = document.getElementById("shim");
-            var percentage = 50;
-            var resizing = false;
-            var resizeHandler = function(){
-                editorEl.style.height = (document.body.clientHeight - (editorEl.offsetTop)) + "px";
-                editorEl.style.width = Math.ceil((document.body.clientWidth / 100) * percentage) + "px";
-                gameEl.style.height = (document.body.clientHeight - (gameEl.offsetTop)) + "px";
-                gameEl.style.left = (editorEl.offsetWidth) + "px";
-                gameEl.style.width = document.body.clientWidth - (editorEl.offsetWidth) + "px";
-            };
-            window.onresize = resizeHandler;
-            resizeHandler();
-//            document.onmousemove = function(e){
-//                var evt = e || window.event;
-//                if(evt.clientX >= (editorEl.offsetWidth - 3)){
-//                    editorEl.className = "resizable";
-//                }
-//                else {
-//                    editorEl.className = "";
-//                }
-//            };
-//            shim.onmousemove = function(e){
-//                var evt = e || window.event;
-//                if(resizing){
-//                    var newPercentage = evt.clientX / (document.body.clientWidth / 100);
-//                    if(percentage !== newPercentage){
-//                        percentage = newPercentage;
-//                        resizeHandler();
-//                    }
-//                }
-//            };
-//            editorEl.onmousedown = function(){
-//                resizing = (editorEl.className == "resizable");
-//                shim.style.display = "block";
-//            };
-//            shim.onmouseup = function(){
-//                resizing = false;
-//                shim.style.display = "none";
-//            };
-            var editor = ace.edit("maineditor");
-            editor.setTheme("ace/theme/xcode");
-            editor.getSession().setMode("ace/mode/javascript");
         }
     </script>
 </head>
 <body onload="init();">
-<div id="shim"></div>
-<ul class="toolbar">
-    <li>New</li>
-    <li>Open</li>
-    <li>Save</li>
-    <li>Run</li>
-    <li>Help</li>
-    <li id="userButton" class="alignright">Sign in</li>
-</ul>
-<div id="maineditor"></div>
-<iframe id="gameframe" src="../game.html"></iframe>
 </body>
 </html>

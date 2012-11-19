@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Editor</title>
+    <link rel="stylesheet" href="resources/css/button.css">
+    <link rel="stylesheet" href="resources/css/toolbar.css">
+    <link rel="stylesheet" href="resources/css/editor.css">
+    <link rel="stylesheet" href="resources/css/menu.css">
+    <link rel="stylesheet" href="resources/css/separator.css">
+    <style>
+        html {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body{
+            overflow: hidden;
+            margin: 0px;
+            height: 100%;
+            font-size: 12px;
+            font-family: "Lucida Grande";
+        }
+
+        .controlPanel, .controlWorkbench {
+            overflow: hidden;
+            margin: 0px;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#c0c0c0), color-stop(100%,#a0a0a0));
+            cursor: pointer;
+        }
+
+        .controlPanel:hover, .controlWorkbench:hover {
+            cursor: ew-resize;
+        }
+
+        .controlWorkbench{
+            height: 100%;
+        }
+
+        .controlEditor{
+            background-color: #ffffff;
+        }
+
+        .controlTitle{
+            text-align: center;
+            padding: 3px 3px 3px 3px;
+            background-color: #f0f0f0;
+            font-size: 13px;
+        }
+
+        .controlGame, .controlGame iframe{
+            margin: 0px;
+            border: 0px;
+            vertical-align: middle;
+            background-color: #000;
+        }
+
+        .controlGame iframe{
+            height: 100%;
+        }
+
+        .alignright{
+            float: right;
+        }
+
+        .controlHidden{
+            display: none;
+        }
+
+        .disabled, .disabled:hover, .disabled:active{
+            filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#grayscale"); /* Firefox 10+, Firefox on Android */
+            filter: gray; /* IE6-9 */
+            -webkit-filter: grayscale(100%); /* Chrome 19+, Safari 6+, Safari 6+ iOS */
+            color: #888;
+            background: transparent!important;
+            border: 1px solid transparent;
+        }
+
+    </style>
+    <script src="../resources/script/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="behaviour.js"></script>
+    <script src="controls/async.js"></script>
+    <script src="controls/control.js"></script>
+    <script src="controls/panel.js"></script>
+    <script src="controls/button.js"></script>
+    <script src="controls/toolbar.js"></script>
+    <script src="controls/editor.js"></script>
+    <script src="controls/game.js"></script>
+    <script src="controls/menu.js"></script>
+    <script src="controls/separator.js"></script>
+    <script src="controls/text.js"></script>
+    <script>
+        function init(){
+            document.onselectstart = function() {return false;};
+            new control.registry.panel({
+                parentEl: document.body,
+                cls: 'controlWorkbench',
+                items: [{
+                    cls: 'controlTitle',
+                    controlValue: 'untitled.js',
+                    height: 16,
+                    dock: 'top'
+                }, {
+                    controlType: 'toolbar',
+                    name: 'toolbar',
+                    dock: 'top',
+                    height: 23,
+                    items: [{
+                        text: 'New',
+                        iconCls: 'bNew'
+                    }, {
+                        text: 'Save As',
+                        iconCls: 'bSaveAs'
+                    }, {
+                        text: 'Open',
+                        iconCls: 'bOpen'
+                    }, {
+                        text: 'Help',
+                        name: 'helpButton',
+                        iconCls: 'bHelp',
+                        menu: [{
+                            text: 'Preferences',
+                            iconCls: 'bPreferences',
+                            menu: [{
+                                text: 'Editor settings',
+                                iconCls: 'bPreferences'
+                            }, {
+                                text: 'Account settings',
+                                iconCls: 'bPreferences',
+                                menu: [{
+                                    text: 'Editor settings',
+                                    iconCls: 'bPreferences'
+                                }, {
+                                    text: 'Account settings',
+                                    iconCls: 'bPreferences'
+                                }]
+                            }]
+                        }, {
+                            controlType: 'separator'
+                        }, {
+                            text: 'Sign out',
+                            iconCls: 'bSignOut'
+                        }]
+                    }, {
+                        text: 'Sign in',
+                        name: 'signInButton',
+                        iconCls: 'bSignIn',
+                        align: 'right',
+                        menu: [{
+                            text: 'Preferences',
+                            iconCls: 'bPreferences',
+                            menu: [{
+                                text: 'Editor settings',
+                                iconCls: 'bPreferences'
+                            }, {
+                                text: 'Account very long name',
+                                iconCls: 'bPreferences',
+                                menu: [{
+                                    text: 'Editor settings',
+                                    iconCls: 'bPreferences'
+                                }, {
+                                    text: 'Account settings',
+                                    iconCls: 'bPreferences'
+                                }]
+                            }, {
+                                text: 'Account short',
+                                iconCls: 'bPreferences',
+                                menu: [{
+                                    text: 'Editor settings',
+                                    iconCls: 'bPreferences'
+                                }, {
+                                    text: 'Account settings',
+                                    iconCls: 'bPreferences'
+                                }]
+                            }]
+                        }, {
+                            controlType: 'separator'
+                        }, {
+                            text: 'Sign out',
+                            iconCls: 'bSignOut'
+                        }]
+                    }]
+                }, {
+                    controlType: 'editor',
+                    dock: 'center'
+                } , {
+                    controlType: 'game',
+                    dock: 'right',
+                    split: true,
+                    width: 300
+                }]
+            }, function(err, workbench){
+                editorbehaviour.getUserDetails(function(err, userDetails){
+                    workbench.toolbar.signInButton.setText( userDetails.name );
+                });
+            });
+        }
+    </script>
+</head>
+<body onload="init();">
+</body>
+</html>

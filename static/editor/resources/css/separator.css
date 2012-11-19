@@ -1,0 +1,18 @@
+.controlSeparatorHorizontal {
+    border-width: 1px 0px 0px 0px;
+    border-style: solid;
+    border-color: #c0c0c0;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.controlSeparatorVertical {
+    display: inline-block;
+    border-width: 0px 1px 0px 1px;
+    border-style: solid;
+    border-right-color: #EEE;
+    border-left-color: #AAA;
+    margin-left: 2px;
+    margin-right: 2px;
+    height: 22px;
+}

@@ -58,7 +58,10 @@
 	
 //});
 
-var audioContext = new webkitAudioContext();
+if (! window.AudioContext) {
+    window.AudioContext = window.webkitAudioContext;
+}
+var audioContext = new AudioContext();
 
 function loadSound(url, ctx, onSuccess, onError) {
     // init request

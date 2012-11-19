@@ -1,0 +1,52 @@
+.controlMenu {
+    display: block;
+    z-index: 100;
+    position: absolute;
+    background-color: #ffffff;
+    border: 1px solid rgba(0,0,0,0.3);
+    border-radius: 4px;
+    padding: 5px 0px 5px 0px;
+    -webkit-box-shadow: 0px 5px 15px rgba(0,0,0,0.5);
+}
+
+.controlMenu .controlButton {
+    display: block;
+    border: 1px solid transparent;
+    border-radius: 0px;
+    height: 16px;
+    font-size: 13px;
+    padding: 2px 6px 2px 12px;
+    background: transparent;
+    vertical-align: top;
+    white-space: nowrap;
+    min-width: 0px;
+    text-align: left;
+    margin: 0px 0px 0px 0px;
+}
+
+.controlMenu .controlButton:hover, .controlMenu .controlButtonSelected{
+    border: 1px solid #a0a0a0;
+    color: #ffffff;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#909090), color-stop(100%,#707070))!important;
+    cursor: pointer;
+}
+
+.controlMenu .controlButtonIconIcon, .controlMenu .controlButtonMenuIcon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    background-repeat: no-repeat;
+}
+
+.controlMenu .controlButtonMenuIcon{
+    float: right;
+    margin: 3px 0px 0px 32px;
+    background-image: url(../images/expandmenurightdark.png);
+    width: 10px;
+    background-position: 0px 0px;
+}
+
+.controlMenu .controlButton:hover .controlButtonMenuIcon, .controlMenu .controlButtonSelected .controlButtonMenuIcon{
+    background-image: url(../images/expandmenurightlight.png);
+}

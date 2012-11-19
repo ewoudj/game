@@ -1,0 +1,17 @@
+.controlGridHeader{
+    background-color: #F00;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    height: 22px;
+}
+
+.controlGridBody{
+    background-color: #00F;
+    position: absolute;
+    top: 23px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+}

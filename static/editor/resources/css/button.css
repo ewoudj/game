@@ -1,0 +1,44 @@
+.controlButton {
+    display: inline-block;
+    border-radius: 3px;
+    height: 16px;
+    line-height: 16px;
+    padding: 2px 4px 2px 4px;
+    vertical-align: top;
+    text-align: center;
+    border: 1px solid #a0a0a0;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f0f0f0), color-stop(100%,#d5d5d5));
+    min-width: 48px;
+    margin: 0px 2px 0px 2px;
+}
+
+.controlButton:hover{
+    border: 1px solid #a0a0a0;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f0f0f0), color-stop(100%,#d5d5d5));
+    cursor: pointer;
+}
+
+.controlButton:active, .controlButtonSelected{
+    border: 1px solid #808080;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#d0d0d0), color-stop(100%,#b5b5b5))!important;
+    cursor: pointer;
+}
+
+.controlButtonIconIcon, .controlButtonMenuIcon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 0px;
+    background-repeat: no-repeat;
+}
+
+.controlButtonText {
+    margin-right: 4px;
+}
+
+.controlButtonMenuIcon{
+    margin: 0px 0px 0px 2px;
+    background-image: url(../images/bullet_arrow_down.png);
+    width: 12px;
+    background-position: -2px 0px;
+}
