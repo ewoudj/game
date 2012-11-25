@@ -49,6 +49,10 @@
             border-bottom: 1px solid #a0a0a0;
         }
 
+        .controlTitle.togetherWithToolbar{
+            border-bottom: 0px;
+        }
+
         .controlGame, .controlGame iframe{
             margin: 0px;
             border: 0px;
@@ -112,6 +116,7 @@
     <script src="controls/text.js"></script>
     <script src="controls/dialog.js"></script>
     <script src="controls/grid.js"></script>
+    <script src="controls/store.js"></script>
     <script>
         function init(){
             document.onselectstart = function() {return false;};
@@ -234,20 +239,35 @@
                         title: 'New Game AI',
                         items: [{
                             dock: 'left',
-                            width: 50,
+                            width: 150,
                             cls: 'leftPanel',
                             resizable: true
                         }, {
                             controlType: 'grid',
                             dock: 'center',
-                            cls: 'centerPanel'
-                        }, {
+                            cls: 'centerPanel',
+                            autoLoad: true,
+                            store: new control.registry.store(),
+                            columns: [{
+                                field: 'firstName',
+                                title: 'First name',
+                                width: 80
+                            }, {
+                                field: 'lastName',
+                                title: 'Last name',
+                                width: 150
+                            }, {
+                                field: 'birthDate',
+                                title: 'Birth date',
+                                width: 64
+                            }]
+                        }/*, {
                             dock: 'right',
                             width: 50,
                             cls: 'rightPanel',
                             resizable: true
 
-                        }, {
+                        }*/, {
                             dock: 'bottom',
                             resizable: true,
                             height: 24,

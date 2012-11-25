@@ -18,7 +18,7 @@
         }
         if(config.title){
             config.items.unshift({
-                cls: 'controlTitle',
+                cls: 'controlTitle' + (config.topBar ? ' togetherWithToolbar' : ''),
                 name: 'titleBar',
                 height: 16,
                 dock: 'top',
@@ -36,7 +36,7 @@
 
     panel.prototype.resize = function(){
         if(this.items){
-            var totalTop = 0;//this.el.offsetTop;
+            var totalTop = 0;
             var totalLeft = 0;
             var totalRight = 0;
             var totalBottom = 0;
@@ -66,6 +66,9 @@
                         if(item.split){
                             totalBottom += splitSize;
                         }
+                    }
+                    if(item.resize){
+                        item.resize();
                     }
                 }
                 else if(item.dock === 'center'){
@@ -97,6 +100,9 @@
                             totalRight += splitSize;
                         }
                     }
+                    if(item.resize){
+                        item.resize();
+                    }
                 }
             }
             if(!centerItem && this.items.length === 1 && !this.items[0].dock){
@@ -111,6 +117,9 @@
                 s.bottom = totalBottom + 'px';
                 s.right = totalRight + 'px';
                 s.left = totalLeft + 'px';
+                if(centerItem.resize){
+                    centerItem.resize();
+                }
             }
         }
     }
