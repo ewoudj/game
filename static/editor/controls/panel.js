@@ -16,16 +16,27 @@
                 items: config.topBar
             });
         }
+        var self = this;
         if(config.title){
-            config.items.unshift({
+            var titleBarConfig = {
                 cls: 'controlTitle' + (config.topBar ? ' togetherWithToolbar' : ''),
                 name: 'titleBar',
                 height: 16,
                 dock: 'top',
-                items: [config.title]
-            });
+                items: [
+                    config.title, {
+                    controlType: 'button',
+                    cls: 'controlToolButton',
+                    hidden: config.closable,
+                    listeners: {
+                        'click': function(){
+                            self.hide();
+                        }
+                    }
+                }]
+            };
+            config.items.unshift(titleBarConfig);
         }
-        var self = this;
         control.call(this, config, function(err, constructorResult){
             self.resize();
             callback(err, self);

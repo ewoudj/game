@@ -2,6 +2,8 @@ var connect = require('connect');
 var config = require('./config');
 var ajax = require('./lib/ajax');
 var authentication = require('./lib/authentication');
+var mongojs = require('mongojs');
+var db = mongojs('Framework', ['data']);
 
 try{
     var configLocal = require('./config.local');
@@ -11,6 +13,13 @@ try{
 }
 catch(exc){
     // Ignore missing local config file
+}
+
+function newGuid(){
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+        return v.toString(16);
+    });
 }
 
 var server = connect()
@@ -43,6 +52,31 @@ var server = connect()
     .use(ajax({'/editor/behaviour': {
         getUserDetails: function(callback){
             callback(null, {name: this.session.identity.data.name || this.session.identity.data.screen_name});
+        },
+        getObjects: function(query, callback){
+            db.data.find(function(err, docs) {
+                callback(err, docs);
+            });
+        },
+        setObject: function(object, callback){
+            if(!object){
+                callback('Cannot set set: ' + object, null);
+            }
+            else if(!this.session.hasIndentity){
+                callback('No user identity is associated with the current session.', null);
+            }
+            else {
+                if(!object._id || object._owner != this.session.identity.data.name){
+                    object._id = newGuid();
+                    object._owner = this.session.identity.data.name;
+                }
+                db.data.update({_id: object._id}, object , {upsert:true}, function(err, updatedObject) {
+                    callback(err, updatedObject)
+                });
+            }
+        },
+        deleteObject: function(object,callback){
+
         }
     }}))
 	.use(connect.static(__dirname + '/static')

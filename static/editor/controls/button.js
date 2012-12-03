@@ -46,16 +46,18 @@
 
         function mouseClickHandler(e){
             var evt = e || window.event;
-            self.fire('click', {});
-            if(self.menu){
-                evt.cancelBubble = true;
-                // If the menu is from a button, clicking that button again toggles hidden state.
-                // For buttons on a menu, nothing happens.
-                if(!self.menu.isHidden() && !(self.parentControl instanceof control.registry.menu)){
-                    self.menu.hide();
-                }
-                else{
-                    self.menu.show();
+            if(!self.isDisabled()){
+                self.fire('click', {});
+                if(self.menu){
+                    evt.cancelBubble = true;
+                    // If the menu is from a button, clicking that button again toggles hidden state.
+                    // For buttons on a menu, nothing happens.
+                    if(!self.menu.isHidden() && !(self.parentControl instanceof control.registry.menu)){
+                        self.menu.hide();
+                    }
+                    else{
+                        self.menu.show();
+                    }
                 }
             }
         }
@@ -89,10 +91,6 @@
         if(this.texts && this.texts.length > 0){
             return this.texts[0].getText(text);
         }
-    };
-
-    button.prototype.setDisabled = function(disabled){
-
     };
 
     control.registry.button = button;

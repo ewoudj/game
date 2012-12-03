@@ -6,10 +6,11 @@
             controlValue: config.text,
             id: (Math.random() * Math.pow(2, 53)).toString()
         }, config);
+        var self = this;
         control.call(this, config, function(err, self){
-            var editor = ace.edit(config.id);
-            editor.setTheme("ace/theme/xcode");
-            editor.getSession().setMode("ace/mode/javascript");
+            self.textEditor = ace.edit(config.id);
+            self.textEditor.setTheme("ace/theme/xcode");
+            self.textEditor.getSession().setMode("ace/mode/javascript");
             callback(err, self);
         });
     };

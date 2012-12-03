@@ -16,7 +16,8 @@
   "dependencies": {
   	"socket.io": "*",
   	"connect": "*",
-    "authom": "git://github.com/ewoudj/authom.git#master"
+    "authom": "git://github.com/ewoudj/authom.git#master",
+    "mongojs": "*"
   },
   "licenses" : [ { "type" : "MIT"
     , "url" : "http://github.com/ewoudj/game/raw/master/LICENSE"

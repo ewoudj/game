@@ -36,6 +36,10 @@
             config.cls = config.cls || '';
             config.cls += ' controlHidden';
         }
+        if(config.disabled){
+            config.cls = config.cls || '';
+            config.cls += ' controlDisabled';
+        }
         merge(this, config);
         this.createElement();
         if(this.listeners){
@@ -212,10 +216,23 @@
 
     control.prototype.hide = function(){
         this.addClass('controlHidden');
+        this.fire('hide');
     };
 
     control.prototype.isHidden = function(){
         return this.hasClass('controlHidden');
+    };
+
+    control.prototype.enable = function(){
+        this.removeClass('controlDisabled');
+    };
+
+    control.prototype.disable = function(){
+        this.addClass('controlDisabled');
+    };
+
+    control.prototype.isDisabled = function(){
+        return this.hasClass('controlDisabled');
     };
 
     control.prototype.isChildOf = function(ctrl){
@@ -378,7 +395,7 @@
     };
 
     control.prototype.getHoverEdges = function(evt){
-        var edgeWidth = 4;
+        var edgeWidth = 6;
         var r = this.getRectangle();
         var result = {
             top: (evt.clientY - r.top) < edgeWidth && this.resizeEdges.top,

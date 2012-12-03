@@ -1,0 +1,30 @@
+.controlTitle{
+    text-align: center;
+    padding: 3px 3px 3px 3px;
+    background-color: #f0f0f0;
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-bottom: 1px solid #a0a0a0;
+}
+
+.controlTitle.togetherWithToolbar{
+    border-bottom: 0px;
+}
+
+.controlTitle .controlToolButton{
+    display: inline-block;
+    float: right;
+    width: 16px;
+    height: 16px;
+    margin-left: 2px;
+    background-image: url(../images/titlebarclose.png);
+}
+
+.controlTitle .controlToolButton:hover{
+    background-image: url(../images/titlebarclosehover.png);
+}
+
+.controlTitle .controlToolButton:active{
+    background-image: url(../images/titlebarcloseactive.png);
+}

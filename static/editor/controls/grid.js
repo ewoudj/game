@@ -30,6 +30,18 @@
             self.body.el.addEventListener('scroll', function(e){
                 var evt = window.event || e;
                 self.header.el.scrollLeft = self.body.el.scrollLeft;
+                var difference = self.header.el.scrollLeft - self.body.el.scrollLeft;
+                self.header.el.style.marginLeft = difference + 'px';
+            });
+
+            self.body.el.addEventListener('dblclick', function(e){
+                if(self.selectedRow){
+                    self.fire('doubleClick', {
+                        grid: self,
+                        row: self.selectedRow,
+                        data: self.selectedRow ?  self.selectedRow.data : null
+                    });
+                }
             });
 
             self.body.el.addEventListener('mouseup', function(e){
@@ -46,8 +58,13 @@
                     self.selectedRow.addClass('selected');
                 }
                 else{
-                    this.selectedRow = null;
+                    self.selectedRow = null;
                 }
+                self.fire('select', {
+                    grid: self,
+                    row: self.selectedRow,
+                    data: self.selectedRow ?  self.selectedRow.data : null
+                });
             });
 
             if(self.autoLoad && !err){
@@ -134,7 +151,7 @@
     };
 
     grid.prototype.load = function(callback){
-        var self = this;
+        var self = this, newHeight;
         this.store.get(self.query, function(err, queryResult){
             var fragmentConfig = {
                 tag: 'fragment',
@@ -173,7 +190,15 @@
             var ctrl = new control(fragmentConfig, function(err, fragmentControl){
                 self.body.table.el.appendChild(fragmentControl.el);
                 self.body.table.items = self.body.table.items.concat(fragmentControl.items);
+//                if(self.body.table.items.length > 0){
+//                    self.body.table.el.style.height = self.body.table.items[0].el.offsetHeight * queryResult.total;
+//                }
                 callback(err, queryResult);
+                self.fire('select', {
+                    grid: self,
+                    row: self.selectedRow,
+                    data: self.selectedRow ?  self.selectedRow.data : null
+                });
             });
         });
     };
