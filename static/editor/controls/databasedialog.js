@@ -2,10 +2,10 @@
 
     var dialog = null;
 
-    var createDialog = function(config,callback){
+    var databaseDialog = function(config,callback){
         if(!dialog){
             new control.registry.dialog({
-                title: 'New Game AI',
+                title: config.title || 'Database Management',
                 listeners:{
                     'hide': function(){
                         if(dialog.requestCallback){
@@ -22,78 +22,55 @@
                     dock: 'left',
                     width: 150,
                     cls: 'leftPanel',
+                    name: 'collectionList',
                     resizable: true
                 }, {
                     controlType: 'grid',
                     dock: 'center',
-                    name: 'grid',
                     autoLoad: true,
                     store: new control.registry.store(),
                     listeners: {
                         'select': function(evtSender, evtName, evtData){
                             dialog.selectedItem = evtData.data;
-                            if(evtData.data){
-                                dialog.buttons['OK'].enable();
-                            }
-                            else{
-                                dialog.buttons['OK'].disable();
-                            }
                         },
                         'doubleClick': function(evtSender, evtName, evtData){
                             dialog.selectedItem = evtData.data;
-                            if(evtData.data){
-                                dialog.result = 'OK';
-                                dialog.hide();
-                            }
                         }
                     },
                     columns: [{
-                        field: 'title',
-                        title: 'Name',
+                        field: '_id',
+                        title: 'ID',
                         width: 80
                     }, {
-                        field: 'datetimeCreated',
-                        title: 'Created',
+                        field: '_type',
+                        title: 'Type',
                         width: 150
                     }, {
-                        field: 'datetimeLastChanged',
-                        title: 'Modified',
+                        field: '_owner',
+                        title: 'Owner',
                         width: 64
                     }]
-                }],
-                buttons: {
-                    'OK': function(){
-                        dialog.result = 'OK';
-                        dialog.hide();
-                    },
-                    'Cancel': function(){
-                        dialog.result = 'Cancel';
-                        dialog.hide();
-                    }
-                }
+                }]
             }, function(err, newDialog){
                 dialog = newDialog;
                 callback(err, dialog);
             } );
         }
         else {
-            dialog.grid.refresh(function(refreshError, refreshResult){
-                callback(refreshError, dialog);
-            })
+            callback(null, dialog);
         }
     };
 
     var functions = {
 
         show: function(config, callback){
-            createDialog(config, function(err, newDialog){
+            databaseDialog(config, function(err, newDialog){
                 dialog.requestCallback = callback;
-                dialog.result = null;
                 dialog.show();
             })
         }
 
     };
 
-    control.registry.openDialog = functions;
+    control.registry.databaseDialog = functions;
 }())

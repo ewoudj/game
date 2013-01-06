@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Editor</title>
+        <script src="../lib/require.js"></script>
+        <style>
+            html {
+                height: 100%;
+                overflow: hidden;
+            }
+
+            body{
+                overflow: hidden;
+                margin: 0px;
+                height: 100%;
+                font-size: 12px;
+                font-family: "Lucida Grande";
+            }
+
+            .controlPanel, .controlWorkbench {
+                overflow: hidden;
+                margin: 0px;
+                background-repeat: no-repeat;
+                background-attachment: fixed;
+                background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#c0c0c0), color-stop(100%,#a0a0a0));
+            }
+
+            .controlWorkbench{
+                height: 100%;
+            }
+
+            .controlEditor{
+                background-color: #ffffff;
+            }
+
+            .controlGame, .controlGame iframe{
+                margin: 0px;
+                border: 0px;
+                vertical-align: middle;
+                background-color: #000;
+            }
+
+            .controlGame iframe{
+                height: 100%;
+            }
+
+            .leftPanel{
+                background-color: #d0d0d0;
+                border-right: 1px solid #a0a0a0;
+            }
+
+            .rightPanel{
+                background-color: #f0f0f0;
+                border-left: 1px solid #a0a0a0;
+            }
+
+        </style>
+        <script src="../../behaviour.js"></script>
+        <script>
+            requirejs.config({
+                baseUrl: '../src',
+                paths: {
+                    lib: '../lib',
+                    ace: '../../../resources/script/ace'
+                },
+                map: {
+                    '*': {
+                        'css': '../lib/css'
+                    }
+                }
+            });
+            requirejs(['Control', 'Dialog','dialogs/InputDialog', 'css!../css/editor'],
+                    function(Control, Dialog, OpenDialog, InputDialog) {
+                    // Make it so text selection does not work
+                    document.onselectstart = function() {return false;};
+                    var workbench = null;
+                    new Control.create('Panel' ,{
+                        parentEl: document.body,
+                        cls: 'controlWorkbench',
+                        title: 'untitled.js',
+                        topBar: [{
+                            text: 'Sign in',
+                            name: 'signInButton',
+                            iconCls: 'bSignIn',
+                            align: 'right',
+                            menu: [{
+                                text: 'Preferences',
+                                iconCls: 'bPreferences',
+                                menu: [{
+                                    text: 'Editor settings',
+                                    iconCls: 'bPreferences'
+                                }, {
+                                    text: 'Account very long name',
+                                    iconCls: 'bPreferences',
+                                    menu: [{
+                                        text: 'Editor settings',
+                                        iconCls: 'bPreferences'
+                                    }, {
+                                        text: 'Account settings',
+                                        iconCls: 'bPreferences'
+                                    }]
+                                }, {
+                                    text: 'Account short',
+                                    iconCls: 'bPreferences',
+                                    menu: [{
+                                        text: 'Editor settings',
+                                        iconCls: 'bPreferences'
+                                    }, {
+                                        text: 'Account settings',
+                                        iconCls: 'bPreferences'
+                                    }]
+                                }]
+                            }, {
+                                controlType: 'Separator'
+                            }, {
+                                text: 'Sign out',
+                                iconCls: 'bSignOut'
+                            }]
+                        }],
+                        items: [{
+                            controlType: 'editors.EditorContainer', //'TabPanel',//TextEditor,
+                            dock: 'center',
+                            name: 'editor'/*,
+                            items: [
+                                {title: 'My First Panel', closable: true, style: { backgroundColor: 'Red'}, items: ['First panel']},
+                                {title: 'My Second Panel', closable: true, style: { backgroundColor: 'Green'}, items: ['Second panel']},
+                                {title: 'My Third Panel', closable: true, style: { backgroundColor: 'Yellow'}, items: ['Third panel']},
+                                {title: 'My Fourth Panel', closable: true, style: { backgroundColor: 'Blue'}, items: ['Fourth panel']}
+                            ]*/
+                        }/* , {
+                            controlType: GameViewer,
+                            dock: 'right',
+                            split: true,
+                            width: 300
+                        }*/]
+                    }, function(err, newWorkbench){
+                        workbench = newWorkbench;
+                        editorbehaviour.getUserDetails(function(err, userDetails){
+                            workbench.topBar.signInButton.setText( userDetails.name );
+//                            Control.registry.DatabaseDialog.show({
+//                                title: 'Database Management'
+//                            },function(dbError, dbResult){
+//
+//                            });
+                        });
+                    });
+                });
+        </script>
+    </head>
+    <body></body>
+</html>

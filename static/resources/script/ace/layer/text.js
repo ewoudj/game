@@ -247,8 +247,8 @@ var Text = function(parentEl) {
     this.updateLines = function(config, firstRow, lastRow) {
         // Due to wrap line changes there can be new lines if e.g.
         // the line to updated wrapped in the meantime.
-        if (this.config.lastRow != config.lastRow ||
-            this.config.firstRow != config.firstRow) {
+        if (this.config && (this.config.lastRow != config.lastRow ||
+            this.config.firstRow != config.firstRow)) {
             this.scrollLines(config);
         }
         this.config = config;

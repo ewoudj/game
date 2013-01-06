@@ -1,4 +1,4 @@
-define(['Control'], function(Control){
+define(['Control', 'css!../css/title'], function(Control){
 
     var Text = function(config, callback){
         config.parentControl.texts = config.parentControl.texts || [];
@@ -18,7 +18,7 @@ define(['Control'], function(Control){
         this.el.textContent = text;
     };
 
-    Text.prototype.getText = function(text){
+    Text.prototype.getText = function(){
         return this.el.textContent;
     };
 

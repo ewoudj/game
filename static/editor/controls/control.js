@@ -50,7 +50,6 @@
         this.items = [];
         async.forEach(config.items || [], function(item, iteratorCallback){
             self.addItem(item, function(err, newItem){
-                self.items.push(newItem);
                 iteratorCallback();
             });
         }, function(err){
@@ -117,9 +116,34 @@
         }
     };
 
+    control.prototype.removeAllItems = function(doNotDestroy){
+        for(var i = 0, l = this.items.length; i < l; i++){
+            var item = this.items[i];
+            item.parentControl = null;
+            item.parentEl = null;
+            if(item.destroy && !doNotDestroy){
+                item.destroy();
+            }
+        }
+        this.items = [];
+        this.el.innerHTML = '';
+    };
+
+    control.prototype.removeItem = function(itemToRemove, doNotDestroy){
+        var index = this.items.indexOf(itemToRemove);
+        this.items.splice(index ,1);
+        this.el.removeChild(itemToRemove.el);
+        itemToRemove.parentControl = null;
+        itemToRemove.parentEl = null;
+        if(itemToRemove.destroy && !doNotDestroy){
+            itemToRemove.destroy();
+        }
+    };
+
     control.prototype.addItem = function(itemConfig, callback){
         var self = this;
         var handler = function(err, newItem){
+            self.items.push(newItem);
             if(newItem.name){
                 self[newItem.name] = newItem;
             }
@@ -127,7 +151,7 @@
                 callback(err, newItem);
             }
         }
-        if(!itemConfig){
+        if(!itemConfig && itemConfig !== ''){
             throw 'Error: control.items cannot contain null values';
         }
         if(typeof itemConfig === 'string'){

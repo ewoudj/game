@@ -1,4 +1,9 @@
-define(['../Control', , 'css!../css/InputDialog'], function(Control){
+define(['../Control'], function(Control){
+
+    // If the defines module is in a subdirectory (like dialogs), the loading of css
+    // runs into a issue with require.js / css loading where the path is incorrectly constructed.
+    // To bypass this issue we load the css as in the following line:
+    require(['css!../css/InputDialog']);
 
     var dialog = null;
 
@@ -7,13 +12,14 @@ define(['../Control', , 'css!../css/InputDialog'], function(Control){
             Control.create('Dialog', {
                 title: config.title || "Please enter the required input",
                 width: config.width || 350,
-                height: config.height || 200,
+                height: config.height || 160,
+                cls: 'controlPanel controlDialog controlInputDialog',
                 resizable: false,
                 listeners:{
                     'hide': function(){
                         if(dialog.requestCallback){
                             if(dialog.result === 'OK'){
-                                dialog.requestCallback(null, dialog.selectedItem);
+                                dialog.requestCallback(null, dialog.inputPanel.input.el.value);
                             }
                             else{
                                 dialog.requestCallback(null, null);
@@ -24,11 +30,18 @@ define(['../Control', , 'css!../css/InputDialog'], function(Control){
                 items: [{
                     dock: 'center',
                     cls: 'controlInputDialogItem',
-                    items: ['Description of the required input']
+                    name: 'descriptionPanel',
+                    items: [config.description || 'Please provide the required input']
                 }, {
                     dock: 'bottom',
+                    height: 22,
                     cls: 'controlInputDialogItem',
-                    tag: 'input'
+                    name: 'inputPanel',
+                    items: [{
+                        tag: 'input',
+                        name: 'input'
+                    }]
+
                 }],
                 buttons: {
                     'OK': function(){
@@ -48,8 +61,10 @@ define(['../Control', , 'css!../css/InputDialog'], function(Control){
         else {
             if(config && config.title){
                 dialog.setTitle(config.title);
+                dialog.descriptionPanel.items[0].setText(config.description);
+
             }
-            callback(refreshError, dialog);
+            callback(null, dialog);
         }
     };
 
@@ -60,7 +75,9 @@ define(['../Control', , 'css!../css/InputDialog'], function(Control){
                 dialog.requestCallback = callback;
                 dialog.result = null;
                 dialog.show();
-            })
+                dialog.inputPanel.input.el.focus();
+                dialog.inputPanel.input.el.value = config.value;
+            });
         }
 
     };

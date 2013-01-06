@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Control Example</title>
+        <style>
+            body {
+                padding: 25px;
+                font: 14px/1.6 "Helvetica Neue", Helvetica, sans-serif;
+            }
+            .code{
+                background-color: #f0f0f0;
+                padding: 10px;
+                white-space: pre;
+                font-family: Consolas, 'Liberation Mono', Courier, monospace;
+                font-size: 0.7em;
+            }
+        </style>
+        <script src="../lib/require.js"></script>
+        <script>
+            requirejs.config({
+                baseUrl: '../src',
+                paths: {
+                    lib: '../lib'
+                }
+            });
+            requirejs(['Control'],
+                function(Control) {
+
+                    var exampleA = {
+                        tag: 'div',
+                        style: {
+                            width: '300px',
+                            height: '300px',
+                            lineHeight: '300px',
+                            backgroundColor: '#f0f0ff',
+                            verticalAlign: 'middle',
+                            textAlign: 'center'
+                        },
+                        items: ['Hello world']
+                    };
+
+                    var exampleList = {
+                        items: [{
+                            tag: 'h1',
+                            items: ['Control example']
+                        }, {
+                            tag: 'p',
+                            items: ['Basic control usage:']
+                        }, {
+                            tag: 'div',
+                            cls: 'code',
+                            items: [JSON.stringify(exampleA, true, 4)]
+                        }, exampleA ]
+                    };
+
+                    var c = new Control(exampleList);
+            });
+        </script>
+    </head>
+    <body>
+    </body>
+</html>

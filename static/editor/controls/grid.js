@@ -150,6 +150,15 @@
         control.setCssSelector('.' + this.cssId + ' .filler', 'width:' + fillerWidth + 'px')
     };
 
+    grid.prototype.clear = function(){
+        this.body.table.removeAllItems();
+    };
+
+    grid.prototype.refresh = function(callback){
+        this.clear();
+        this.load(callback);
+    };
+
     grid.prototype.load = function(callback){
         var self = this, newHeight;
         this.store.get(self.query, function(err, queryResult){
@@ -168,12 +177,13 @@
                 fragmentConfig.items.push(row);
                 for(var j = 0, m = self.columns.length; j < m; j++){
                     var fieldName = self.columns[j].field;
+                    var fieldValue = item[fieldName] || '';
                     var col = {
                         tag: 'td',
                         items: [{
                             tag: 'span',
                             cls: 'c' + j,
-                            items: [item[fieldName].toString()]
+                            items: [fieldValue.toString()]
                         }]
                     };
                     row.items.push(col);
@@ -190,9 +200,6 @@
             var ctrl = new control(fragmentConfig, function(err, fragmentControl){
                 self.body.table.el.appendChild(fragmentControl.el);
                 self.body.table.items = self.body.table.items.concat(fragmentControl.items);
-//                if(self.body.table.items.length > 0){
-//                    self.body.table.el.style.height = self.body.table.items[0].el.offsetHeight * queryResult.total;
-//                }
                 callback(err, queryResult);
                 self.fire('select', {
                     grid: self,

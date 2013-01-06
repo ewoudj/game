@@ -16,6 +16,10 @@
     -webkit-box-shadow: 0px 5px 15px rgba(0,0,0,0.5);
 }
 
+.controlDialogActive {
+    z-index: 101;
+}
+
 .controlDialog .bottomPanel{
     background-color: #f0f0f0;
     padding: 10px;

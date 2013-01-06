@@ -18,7 +18,7 @@
     cursor: pointer;
 }
 
-.controlButton:active, .controlButtonSelected{
+.controlButton:active, .controlButtonSelected, .controlButton:focus,{
     border: 1px solid #808080;
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#d0d0d0), color-stop(100%,#b5b5b5))!important;
     cursor: pointer;
@@ -32,9 +32,9 @@
     background-repeat: no-repeat;
 }
 
-.controlButtonText {
-    margin-right: 4px;
-}
+/*.controlButtonText {*/
+    /*margin-right: 4px;*/
+/*}*/
 
 .controlButtonMenuIcon{
     margin: 0px 0px 0px 2px;

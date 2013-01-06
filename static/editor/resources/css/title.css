@@ -12,7 +12,7 @@
     border-bottom: 0px;
 }
 
-.controlTitle .controlToolButton{
+.controlToolButton{
     display: inline-block;
     float: right;
     width: 16px;
@@ -21,10 +21,10 @@
     background-image: url(../images/titlebarclose.png);
 }
 
-.controlTitle .controlToolButton:hover{
-    background-image: url(../images/titlebarclosehover.png);
+.controlToolButton:hover{
+    background-image: url(../images/titlebarclosehovergray.png);
 }
 
-.controlTitle .controlToolButton:active{
-    background-image: url(../images/titlebarcloseactive.png);
+.controlToolButton:active{
+    background-image: url(../images/titlebarcloseactivegray.png);
 }

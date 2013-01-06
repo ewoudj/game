@@ -1,0 +1,76 @@
+.editableElement {
+    cursor: default;
+    lis
+}
+
+.bAddStep {
+    background-image: url(../images/editors/PresentationEditor/picture_add.png);
+}
+
+.bRemoveStep {
+    background-image: url(../images/editors/PresentationEditor/picture_delete.png);
+}
+
+.bUndo {
+    background-image: url(../images/editors/PresentationEditor/arrow_undo.png);
+}
+
+.bRedo {
+    background-image: url(../images/editors/PresentationEditor/arrow_redo.png);
+}
+
+.bCut {
+    background-image: url(../images/editors/PresentationEditor/cut.png);
+}
+
+.bCopy {
+    background-image: url(../images/editors/PresentationEditor/page_copy.png);
+}
+
+.bPaste {
+    background-image: url(../images/editors/PresentationEditor/page_paste.png);
+}
+
+.bBold {
+    background-image: url(../images/editors/PresentationEditor/text_bold.png);
+}
+
+.bItalic {
+    background-image: url(../images/editors/PresentationEditor/text_italic.png);
+}
+
+.bUnderline {
+    background-image: url(../images/editors/PresentationEditor/text_underline.png);
+}
+
+.bJustifyFull {
+    background-image: url(../images/editors/PresentationEditor/text_align_justify.png);
+}
+
+.bJustifyLeft {
+    background-image: url(../images/editors/PresentationEditor/text_align_left.png);
+}
+
+.bJustifyRight {
+    background-image: url(../images/editors/PresentationEditor/text_align_right.png);
+}
+
+.bJustifyCenter {
+    background-image: url(../images/editors/PresentationEditor/text_align_center.png);
+}
+
+.bOrderedList {
+    background-image: url(../images/editors/PresentationEditor/text_list_numbers.png);
+}
+
+.bUnorderedList {
+    background-image: url(../images/editors/PresentationEditor/text_list_bullets.png);
+}
+
+.bIndent {
+    background-image: url(../images/editors/PresentationEditor/text_indent.png);
+}
+
+.bOutdent {
+    background-image: url(../images/editors/PresentationEditor/text_indent_remove.png);
+}

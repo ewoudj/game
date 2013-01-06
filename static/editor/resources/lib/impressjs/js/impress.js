@@ -563,6 +563,36 @@
             
             return goto(next);
         };
+
+        var parent = function (){
+            return canvas;
+        }
+
+        var current = function (){
+            return activeStep;
+        }
+
+        // 'add' API function adds element as step. Make sure the passed in element is child of api.parent
+        var add = function(el){
+            steps.push(el);
+            initStep(el, steps.length - 1);
+        };
+
+        var remove = function(el){
+            var index = steps.indexOf(el);
+            // Try (not possible when no steps remain) to move away to a different step in order to not mess up
+            // the state when deleting the 'activeStep'
+            if(activeStep == el && steps.length > 0){
+                goto( index > 0 ? index - 1 : 0);
+            }
+            // Remove from the steps array: this array is created in the constructor and only modified
+            // by the add API function;
+            steps.splice(index, 1);
+            // Remove the data from the stepsData array, the el gets added to this array in initStep
+            delete stepsData["impress-" + el.id];
+            // Remove the el from the DOM
+            canvas.removeChild(el);
+        };
         
         // Adding some useful classes to step elements.
         //
@@ -635,14 +665,18 @@
             init: init,
             goto: goto,
             next: next,
-            prev: prev
+            prev: prev,
+            add: add,
+            remove: remove,
+            current: current,
+            parent: parent
         });
 
     };
     
     // flag that can be used in JS to check if browser have passed the support test
     impress.supported = impressSupported;
-    
+
 })(document, window);
 
 // NAVIGATION EVENTS
@@ -681,7 +715,7 @@
         
         // Prevent default keydown action when one of supported key is pressed.
         document.addEventListener("keydown", function ( event ) {
-            if ( event.keyCode === 9 || ( event.keyCode >= 32 && event.keyCode <= 34 ) || (event.keyCode >= 37 && event.keyCode <= 40) ) {
+            if (( event.target.contentEditable != "true" ) && ( event.keyCode === 9 || ( event.keyCode >= 32 && event.keyCode <= 34 ) || (event.keyCode >= 37 && event.keyCode <= 40) )) {
                 event.preventDefault();
             }
         }, false);
@@ -702,7 +736,7 @@
         //   as another way to moving to next step... And yes, I know that for the sake of
         //   consistency I should add [shift+tab] as opposite action...
         document.addEventListener("keyup", function ( event ) {
-            if ( event.keyCode === 9 || ( event.keyCode >= 32 && event.keyCode <= 34 ) || (event.keyCode >= 37 && event.keyCode <= 40) ) {
+            if (( event.target.contentEditable != "true" ) && ( event.keyCode === 9 || ( event.keyCode >= 32 && event.keyCode <= 34 ) || (event.keyCode >= 37 && event.keyCode <= 40) )) {
                 switch( event.keyCode ) {
                     case 33: // pg up
                     case 37: // left
@@ -788,7 +822,10 @@
         }, 250), false);
         
     }, false);
-        
+
+    if(window.onImpressReady){
+        window.onImpressReady(impress);
+    }
 })(document, window);
 
 // THAT'S ALL FOLKS!

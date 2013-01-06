@@ -2,6 +2,8 @@
 
     var panel = control.registry.panel;
 
+    var activeDialog = null;
+
     var dialog = function(config, callback){
         config = config || {};
         config.parentEl = document.body;
@@ -40,15 +42,27 @@
         }
         var self = this;
         panel.call(this, config, function(err, newItem){
+            self.el.addEventListener('mousedown', function(){
+                self.activate();
+            });
             callback(err, newItem);
         });
     };
 
     dialog.inheritsFrom(panel);
 
+    dialog.prototype.activate = function(){
+        if(activeDialog){
+            activeDialog.removeClass('controlDialogActive');
+        }
+        activeDialog = this;
+        this.addClass('controlDialogActive');
+    };
+
     dialog.prototype.show = function(){
         panel.prototype.show.call(this);
         panel.prototype.resize.call(this);
+        this.activate();
     };
 
     control.registry.dialog = dialog;

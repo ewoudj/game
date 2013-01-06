@@ -27,7 +27,7 @@
                     config.title, {
                     controlType: 'button',
                     cls: 'controlToolButton',
-                    hidden: config.closable,
+                    hidden: !(config.closable),
                     listeners: {
                         'click': function(){
                             self.hide();

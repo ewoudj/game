@@ -1,0 +1,44 @@
+.controlTabPanel .controlToolbar{
+    padding: 0px 0px 2px 0px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.controlTabPanel .controlButton {
+    border-right: 1px solid #a0a0a0;
+    border-left: 0px solid transparent;
+    border-top: 0px;
+    border-bottom: 1px solid #a0a0a0;
+    background-color: transparent;
+    padding-top: 4px;
+    margin: 0px;
+    -moz-border-radius: 0px;
+    -webkit-border-radius: 0px;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#d5d5d5), color-stop(100%,#c0c0c0));
+    line-height: 16px;
+    vertical-align: top;
+    white-space: nowrap;
+}
+
+.controlTabPanel .controlButton:hover, .controlTabPanel .controlButton:active{
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#dadada), color-stop(100%,#cacaca));
+    border-right: 1px solid #a0a0a0;
+    border-left: 0px solid #c0c0c0;
+    border-top: 0px;
+    border-bottom: 1px solid #a0a0a0;
+}
+
+.controlTabPanel .controlButton.selected, .controlTabPanel .controlButton.selected:active, .controlTabPanel .controlButton.selected:hover{
+    border-bottom: 1px solid transparent;
+    background: transparent;
+}
+
+.controlTabPanel .controlButtonIconIcon {
+    margin-top: -1px;
+    margin-right:  2px;
+}
+
+.controlTabPanel .controlToolButton {
+    display: inline-block;
+}
+

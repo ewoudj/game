@@ -1,6 +1,6 @@
 .controlMenu {
     display: block;
-    z-index: 100;
+    z-index: 200;
     position: absolute;
     background-color: #ffffff;
     border: 1px solid rgba(0,0,0,0.3);
