@@ -1,4 +1,4 @@
-define(['Control'], function(Control){
+define(['Control', 'pickers/Color'], function(Control, ColorPicker){
 
     // If the defines module is in a subdirectory (like dialogs), the loading of css
     // runs into a issue with require.js / css loading where the path is incorrectly constructed.
@@ -211,7 +211,25 @@ define(['Control'], function(Control){
             newCmd('insertOrderedList','bOrderedList', null, 'Create numbered list.'),
             newCmd('insertUnorderedList','bUnorderedList', null, 'Create bulleted list.'),
             newCmd('indent','bIndent', null, 'Indent.'),
-            newCmd('outdent','bOutdent', null, 'Remove indent.')];
+            newCmd('outdent','bOutdent', null, 'Remove indent.'), {
+                iconCls: 'bTextColor',
+                tooltip: 'Select text color.',
+                command: 'foreColor',
+                items: [{
+                    name: 'colorSample',
+                    cls: 'controlButtonColorSample'
+                }],
+                menu: [{
+                    controlType: 'pickers.Color',
+                    handler: function(picker){
+                        var colorButton = picker.parentControl.parentControl;
+                        colorButton.colorSample.el.style.backgroundColor = picker.selectedColor;
+                        colorButton.arguments = picker.selectedColor;
+                        genericHandler(colorButton);
+                    }
+                }]
+            }
+        ];
     };
 
     Control.registry['editors.PresentationEditor'] = PresentationEditor;

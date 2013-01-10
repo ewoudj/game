@@ -50,3 +50,23 @@
 .controlMenu .controlButton:hover .controlButtonMenuIcon, .controlMenu .controlButtonSelected .controlButtonMenuIcon{
     background-image: url(../images/expandmenurightlight.png);
 }
+
+.controlColorPicker table {
+    padding: 0px 4px 0px 4px;
+    border-spacing: 2px;
+    border-collapse: separate;
+}
+
+.controlColorPicker td {
+    width: 15px;
+    height: 15px;
+}
+
+.controlButtonColorSample{
+    display: block;
+    position: absolute;
+    top: 18px;
+    width: 16px;
+    height: 4px;
+    background-color: rgb(0, 255, 0);
+}

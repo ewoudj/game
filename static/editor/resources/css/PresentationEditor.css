@@ -74,3 +74,7 @@
 .bOutdent {
     background-image: url(../images/editors/PresentationEditor/text_indent_remove.png);
 }
+
+.bTextColor {
+    background-image: url(../images/editors/PresentationEditor/text_color.png);
+}
