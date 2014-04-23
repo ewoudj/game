@@ -204,18 +204,18 @@ engine.rendering.webgl.webglRenderer = function(){
 	    var projector = new THREE.Projector();
 	    var norm_pos = new THREE.Vector2((mouse_pos.x / window.innerWidth) * 2 - 1, -(mouse_pos.y / window.innerHeight) * 2 + 1);
 	    var mouse_3d = projector.unprojectVector(new THREE.Vector3(norm_pos.x, norm_pos.y, 1.0), this.camera);
-	    return new THREE.Ray(this.camera.position, mouse_3d.subSelf(this.camera.position).normalize());
+	    return new THREE.Raycaster(this.camera.position, mouse_3d.sub(this.camera.position).normalize());
 	};
 	
-	webglRenderer.prototype.planeIntersect = function(ray, plane /* x, y z*/, planeOffset){
+	webglRenderer.prototype.planeIntersect = function(rayCaster, plane /* x, y z*/, planeOffset){
 		// planeOffset = start[plane] + (vector[plane] * time)
 		// -(vector[plane] * time) = start[plane] - planeOffset
 		// vector[plane] * time = -start[plane] + planeOffset
 		// time = (-start[plane] + planeOffset) / vector[plane]
 		// time = (planeOffset - start[plane]) / vector[plane]
 		var result = null;
-		var start = ray.origin;
-		var vector = ray.direction;
+		var start = rayCaster.ray.origin;
+		var vector = rayCaster.ray.direction;
 		if(vector[plane]){
 			var time = (planeOffset - start[plane]) / vector[plane];
 			result = {
