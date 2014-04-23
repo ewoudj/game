@@ -90,7 +90,7 @@ function playSound(ctx, buffer) {
     // connect it to context destination
     source.connect(ctx.destination);
     // play immediatly
-    source.noteOn(0);
+    source.start(0);
 }
 
 function initSound(url){
