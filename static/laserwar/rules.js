@@ -79,7 +79,6 @@ var settingsMenu = {
     				engine.renderer = 'webgl';
     			}
     			else{
-    				alert('Sorry, 3D is not support by your bowser.');
                     engine.renderer = 'classic';
     			}
         	}
