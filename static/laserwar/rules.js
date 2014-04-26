@@ -68,20 +68,24 @@ var settingsMenu = {
     'VIDEO': {
     	onMousePlaneUp: function (entity, evt) {
     		if(engine.getItem("renderer",'classic') === 'classic'){
-    			var webglAvailable = ( function () { 
-    				try { 
-    					return (!! window.WebGLRenderingContext && !! document.createElement( 'canvas' ).getContext( 'experimental-webgl' )); 
-					} catch( e ) { 
-						return false; 
-					} 
-				} )();
-    			if(webglAvailable){
-    				engine.renderer = 'webgl';
-    			}
-    			else{
-                    engine.renderer = 'classic';
-    			}
-        	}
+                var webglAvailable = false;
+                var iOS = /(iPad|iPhone|iPod)/g.test( navigator.userAgent );
+                if(!iOS){
+                    webglAvailable = ( function () {
+                        try {
+                            return (!! window.WebGLRenderingContext && !! document.createElement( 'canvas' ).getContext( 'experimental-webgl' ));
+                        } catch( e ) {
+                            return false;
+                        }
+                    } )();
+                    if(webglAvailable){
+                        engine.renderer = 'webgl';
+                    }
+                    else{
+                        engine.renderer = 'classic';
+                    }
+                }
+            }
         	else{
         		engine.renderer = 'classic';
         	}
