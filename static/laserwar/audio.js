@@ -22,7 +22,24 @@
 		mute: function(){
 			audio.volume = 0;
 			audio.setVolume(audio.volume);
-		}
+		},
+        firstInput: false,
+        afterInput: function(){
+            // On iOS audio only becomes available after first user input
+            // This method is called from canvas and webgl renders as UI events
+            // originate there
+            if(!audio.firstInput){
+                audio.firstInput = true;
+                var iOS = /(iPad|iPhone|iPod)/g.test( navigator.userAgent );
+                if(iOS){
+                    try {
+                        audio.changeColorAudio.play();
+                    } catch(e) {
+                    }
+                }
+            }
+
+        }
 };
 
 (function(){
@@ -57,15 +74,20 @@
     }
 
     function initSound(url){
+        audioContext = new AudioContext();
         var result = {
+            url: url,
             play: function(){},
-            setVolume: function(){}
+            setVolume: function(){},
+            init: function(){
+                loadSound(result.url, audioContext, function(buffer){
+                    result.play = function(){
+                        playSound(audioContext, buffer);
+                    };
+                });
+            }
         };
-        loadSound(url, audioContext, function(buffer){
-            result.play = function(){
-                playSound(audioContext, buffer);
-            };
-        });
+        result.init();
         return result;
     }
 

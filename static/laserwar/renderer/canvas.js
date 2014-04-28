@@ -137,6 +137,9 @@ engine.rendering.classic.renderer = function(){
 			this.engine.buttonDown = false;
 		}
 		this.notify('onmouseup', this.mouseEntities);
+        // This is a ugly hack to initialize audio on iOS
+        // audio on is enabled after user input
+        audio.afterInput();
 	};
 	
 	renderer.prototype.renderEntity = function(e){
