@@ -18,33 +18,20 @@ var colors = [
    '#AAA' // 'Grey'
 ];
 
-var initAudio = function(){
-    // Used to make sure audio is initialized on iOS (must be triggered by an event)
-    try{
-        if(window.audio){
-            window.audio.appearAudio.play();
-        }
-    }catch(ex){
-    }
-}
-
 var mainMenu = {
     '    SINGLE PLAYER': {
         onMousePlaneUp: function (entity, evt) {
-            initAudio();
             entity.engine.rules.startSinglePlayerGame();
         }
     },
     '    MULTI  PLAYER': {
         onMousePlaneUp: function (entity, evt) {
-            initAudio();
             entity.engine.rules.startMultiPlayerGame();
         }
     },
     '':{},
     '    SETTINGS': {
         onMousePlaneUp: function (entity, evt) {
-            initAudio();
             //entity.engine.rules.toggleSettings();
         	entity.engine.rules.menu.setItems(settingsMenu);
         }
