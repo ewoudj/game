@@ -1,0 +1,31 @@
+CACHE MANIFEST
+# Version 1.0
+
+resources/css/style.css
+resources/script/Three.js
+resources/fonts/cbm-64_normal.typeface.js
+laserwar/audio.js
+laserwar/helpers.js
+laserwar/entity.js
+laserwar/explosion.js
+laserwar/ship.js
+laserwar/ufo.js
+laserwar/star.js
+laserwar/laserbeam.js
+laserwar/scorebar.js
+laserwar/rules.js
+laserwar/engine.js
+laserwar/settings.js
+laserwar/menu.js
+laserwar/ai/prioritizing.js
+laserwar/ai/heuristic.js
+laserwar/ai/ufo.js
+laserwar/renderer/canvas.js
+laserwar/renderer/webgl.js
+laserwar/controller/touch.js
+laserwar/controller/mouse.js
+resources/audio/effects/explosion.mp3
+resources/audio/effects/appear.mp3
+resources/audio/effects/changecolor.mp3
+resources/audio/effects/laser.mp3
+resources/fonts/cbm-64-webfont.woff
