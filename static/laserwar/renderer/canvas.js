@@ -15,6 +15,7 @@ engine.rendering.classic = function(suspend){
 		// Render
 		if(this.mode == 'standalone' || this.mode == 'client'){
 			var topMost = [];
+			this.classicRenderer.ensureSize();
 			for(var i = 0, l = this.entities.length; i < l; i++){
 				var e = this.entities[i];
 				if(e.topMost){
@@ -51,6 +52,13 @@ engine.rendering.classic.renderer = function(){
 		window.onmousemove = this.onmousemove.bind(this);
 		window.onresize = this.resize.bind(this);
 		this.resize();
+	};
+
+	renderer.prototype.ensureSize = function(){
+		if(this.canvas.width != window.innerWidth
+			|| this.canvas.height != window.innerHeight){
+				this.resize();
+			}
 	};
 	
 	renderer.prototype.suspend = function(suspend){
