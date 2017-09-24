@@ -45,6 +45,7 @@ engine.rendering.classic.renderer = function(){
 		helpers.apply(config, this);
 		this.canvas = document.createElement('canvas');
 		document.body.appendChild(this.canvas);
+		document.body.style.backgroundColor = '#000';
 		this.canvas.style.position = 'absolute';
 		this.canvas.style.backgroundColor = '#000';
 		this.canvas.onmousedown = this.onmousedown.bind(this);
